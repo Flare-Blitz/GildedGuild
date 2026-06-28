@@ -143,14 +143,20 @@ class GemPile:
         # Map player count to gem counts to remove repetitive case logic
         counts = {2: 4, 3: 5, 4: 7}
         count = counts.get(playerCount, 7)
-        
-        self.white = self.blue = self.black = self.red = self.green = count
-        self.gold = 5
+
+        self.gems = {
+            "W" : count,
+            "U" : count,
+            "B" : count,
+            "R" : count,
+            "G" : count,
+            "Au" : 5
+        }
 
     def __str__(self):
-        return (f"Bank: \033[97m(W):{self.white}\033[0m  \033[94m(U):{self.blue}\033[0m  "
-                f"\033[92m(G):{self.green}\033[0m  \033[91m(R):{self.red}\033[0m  "
-                f"\033[95m(B):{self.black}\033[0m  \033[93m(Au):{self.gold}\033[0m")
+        return (f"Bank: \033[97m(W):{self.gems["W"]}\033[0m  \033[94m(U):{self.gems["U"]}\033[0m  "
+                f"\033[95m(B):{self.gems["B"]}\033[0m  \033[91m(R):{self.gems["R"]}\033[0m  "
+                f"\033[92m(G):{self.gems["G"]}\033[0m  \033[93m(Au):{self.gems["Au"]}\033[0m")
 
 
 class Board:
@@ -162,7 +168,7 @@ class Board:
         self.playerCount = playerCount
         # Use list comprehension for dynamic player creation
         self.players = [Player() for _ in range(playerCount)]
-        self.turnPlayer = random.randint(0, len(self.playerCount) - 1)
+        self.turnPlayer = random.randint(0, self.playerCount - 1)
 
         self.tiles = TileDeck(playerCount + 1)
         self.gemPile = GemPile(playerCount)
@@ -185,9 +191,27 @@ class Board:
         
         print(" PLAYERS ".center(65, "-"))
         for i, p in enumerate(self.players):
-            print(f"P{i+1}: {p.points}pts | Gems: W{p.whiteGems} U{p.blueGems} G{p.greenGems} R{p.redGems} K{p.blackGems} | "
-                  f"Cards: W{p.whiteCards} U{p.blueCards} G{p.greenCards} R{p.redCards} K{p.blackCards}")
+            print(f"P{i+1}: {p.points}pts | Gems: W:{p.gems["W"]} U:{p.gems["U"]} B{p.gems["B"]} R{p.gems["R"]} G{p.gems["G"]} Au{p.gems["Au"]} | "
+                  f"Cards: W{p.whiteCards} U{p.blueCards} B{p.blackCards} R{p.redCards} G{p.greenCards}")
         print("="*65 + "\n")
+
+    def advanceTurnPlayer(self):
+        self.turnPlayer = (self.turnPlayer + 1) % self.playerCount
+
+    #TODO: Check to see if the gem pile of that color has 4+ gems,
+    # If there is, take 2 gems from that total and add it to the turn player's reserve
+    # If there isn't, return a string outlining the error
+    def take2Gems(self, gemColor):
+        if self.gemPile.gems[gemColor] >= 4:
+            #Transfer 2 gems from the gem pile to the turn player
+            self.gemPile.gems[gemColor] -= 2
+            self.players[self.turnPlayer].gems[gemColor] += 2
+            return True, ""
+        else:
+            return False, "Selected pile has fewer than 4 gems"
+
+    # def take3Gems(self, gem1, gem2, gem3):
+
 
 
 class Player:
@@ -201,22 +225,93 @@ class Player:
         self.blackCards = 0
         self.redCards = 0
         self.greenCards = 0
-        self.whiteGems = 0
-        self.blueGems = 0
-        self.blackGems = 0
-        self.redGems = 0
-        self.greenGems = 0
-        self.gold = 0
 
-#     def takeAction(self):
-#         # TODO Replace this 
-#         if True:
+        self.gems = {
+            "W" : 0,
+            "U" : 0,
+            "B" : 0,
+            "R" : 0,
+            "G" : 0,
+            "Au" : 0
+        }
 
 
-# class Game:
-#     def __init__(self, playerCount):
-#         self.board = Board(playerCount)
 
-#     def play(self):
-#         while True:
+class Game:
+    def __init__(self, playerCount):
+        self.board = Board(playerCount)
+        self.play()
+
+    def play(self):
+        while True:
+            # First, turn player takes an action
+            self.takeAction()
+
+            # Second, advance the turn player
+            self.board.advanceTurnPlayer()
+
+    def takeAction(self):
+        # TODO Replace this with IsHuman when adding bots
+        if True:
+            self.takeHumanAction()
+        else:
+            self.takeBotAction()
+
+    # Provides input for a human to take action
+    def takeHumanAction(self):
+        message = None
+        while True:
+            #1. Display the board so the human can see the current state
+            self.board.display()
+
+            #2. Check to see if their are any existing error messages
+            if message != None:
+                #Print error message
+                print("ERROR: " + message)
+
+            #2. Get their input at a string
+            input = self.getHumanInput()
+
+            #3. Process their input within the game
+            success, message = self.processHumanAction(input)
+
+            if success == True:
+                # The move was valid, return
+                break
             
+
+    def getHumanInput(self):
+        print(f"Player {self.board.turnPlayer + 1}'s Turn")
+        print("Choose an action:")
+        print("1. Take Gems (e.g., 'W U G' or 'RR')")
+        # print("2. Purchase Card (e.g., 'P L1 2' for Level 1, Card 2)")
+        # print("3. Reserve Card (e.g., 'R L2 1')")
+        
+        choice = input("> ").strip().upper()
+        
+        # This returns the raw input for processing by the game engine
+        # Logic for validating and applying these moves will be handled in the game loop
+        return choice
+    
+    # input: string move
+    # This function takes a user action and r
+    # return: string indicating if there is an error
+    def processHumanAction(self, move):
+        match move[0]:
+            #If it starts with a color character, the user is taking gems
+            case 'W' | 'U' | 'B' | 'R' | 'G' :
+                match len(move):
+                    case 2: #Taking 2 of the same gem
+                        if move[0] == move[1]:
+                            return self.board.take2Gems(move[0])
+                        else:
+                            return False, "Taking 2 gems must be the same color"
+                    case _:
+                        return False, "Can only take 2 or 3 gems"
+
+            case _ :
+                return False, "Unknown First Character"
+
+
+            
+
