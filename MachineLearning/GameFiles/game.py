@@ -40,8 +40,8 @@ class Card:
             f"┌──────────┐",
             f"│ {pts:<2}     {color_symbol} │",
             f"│          │",
-            f"│ {w} {u} {g} │",
-            f"│ {r} {b}    │",
+            f"│ {w} {u} {b} │",
+            f"│ {r} {g}    │",
             f"└──────────┘"
         ]
 
@@ -101,9 +101,9 @@ class Tile:
         costs = []
         if self.white: costs.append(f"\033[97m{self.white}\033[0m")
         if self.blue:  costs.append(f"\033[94m{self.blue}\033[0m")
-        if self.green: costs.append(f"\033[92m{self.green}\033[0m")
-        if self.red:   costs.append(f"\033[91m{self.red}\033[0m")
         if self.black: costs.append(f"\033[95m{self.black}\033[0m")
+        if self.red:   costs.append(f"\033[91m{self.red}\033[0m")
+        if self.green: costs.append(f"\033[92m{self.green}\033[0m")
         
         # Calculate visible length to fix padding (ANSI codes are 0-width)
         visible_costs = [str(v) for v in [self.white, self.blue, self.green, self.red, self.black] if v > 0]
