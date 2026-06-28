@@ -198,7 +198,7 @@ class Board:
     def advanceTurnPlayer(self):
         self.turnPlayer = (self.turnPlayer + 1) % self.playerCount
 
-    #TODO: Check to see if the gem pile of that color has 4+ gems,
+    # Check to see if the gem pile of that color has 4+ gems,
     # If there is, take 2 gems from that total and add it to the turn player's reserve
     # If there isn't, return a string outlining the error
     def take2Gems(self, gemColor):
@@ -210,7 +210,22 @@ class Board:
         else:
             return False, "Selected pile has fewer than 4 gems"
 
-    # def take3Gems(self, gem1, gem2, gem3):
+    def take3Gems(self, gem1, gem2, gem3):
+        if (self.gemPile.gems[gem1] > 0 
+            and self.gemPile.gems[gem2] > 0 
+            and self.gemPile.gems[gem3] > 0):
+
+            self.gemPile.gems[gem1] -= 1
+            self.gemPile.gems[gem2] -= 1
+            self.gemPile.gems[gem3] -= 1
+
+            self.players[self.turnPlayer].gems[gem1] += 1
+            self.players[self.turnPlayer].gems[gem2] += 1
+            self.players[self.turnPlayer].gems[gem3] += 1
+
+            return True, ""
+        else:
+            return False, "Each selected pile must have at least one gem"
 
 
 
@@ -306,6 +321,15 @@ class Game:
                             return self.board.take2Gems(move[0])
                         else:
                             return False, "Taking 2 gems must be the same color"
+                    case 3: #Taking 3 different gems
+                        if (move[0] != move[1]
+                            and move[0] != move[2]
+                            and move[1] != move[2]
+                            and move[1] in {'W', 'U', 'B', 'R', 'G'}
+                            and move[2] in {'W', 'U', 'B', 'R', 'G'}):
+                            return self.board.take3Gems(move[0], move[1], move[2])
+                        else:
+                            return False, "When taking 3 gems, they must all be different"
                     case _:
                         return False, "Can only take 2 or 3 gems"
 
