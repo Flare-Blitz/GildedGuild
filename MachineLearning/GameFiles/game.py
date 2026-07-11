@@ -19,8 +19,8 @@ class Card:
     def render(self):
         """Returns a list of strings representing the card visually."""
         c = {
-            "Black": "\033[95m", "Blue": "\033[94m", "Green": "\033[92m",
-            "Red": "\033[91m", "White": "\033[97m", "Reset": "\033[0m"
+            "B": "\033[95m", "U": "\033[94m", "G": "\033[92m",
+            "R": "\033[91m", "W": "\033[97m", "Reset": "\033[0m"
         }
         color_symbol = (c.get(self.color, "") + "■" + c["Reset"]) if self.color else " "
         pts = str(self.points) if self.points > 0 else " "
@@ -72,6 +72,12 @@ class Deck:
         for i in range(6):
             combined.append("  ".join(card[i] for card in rendered_cards))
         return "\n".join(combined)
+    
+    def replaceCard(self, spot):
+        if len(self.cards) > 0:
+            self.field[spot] = self.cards.pop()
+        else:
+            self.field[spot] = None
 
         
 
@@ -161,9 +167,7 @@ class GemPile:
 
 class Board:
     def __init__(self, playerCount):
-        self.level1Deck = Deck(1)
-        self.level2Deck = Deck(2)
-        self.level3Deck = Deck(3)
+        self.decks = [Deck(1), Deck(2), Deck(3)]
 
         self.playerCount = playerCount
         # Use list comprehension for dynamic player creation
@@ -182,17 +186,17 @@ class Board:
         print(self.tiles.render_row())
         
         print(" BOARD ".center(65, "-"))
-        print(f"Level 3:\n{self.level3Deck.render_row()}")
-        print(f"Level 2:\n{self.level2Deck.render_row()}")
-        print(f"Level 1:\n{self.level1Deck.render_row()}")
+        print(f"Level 3:\n{self.decks[2].render_row()}")
+        print(f"Level 2:\n{self.decks[1].render_row()}")
+        print(f"Level 1:\n{self.decks[0].render_row()}")
         
         print(" BANK ".center(65, "-"))
         print(self.gemPile)
         
         print(" PLAYERS ".center(65, "-"))
         for i, p in enumerate(self.players):
-            print(f"P{i+1}: {p.points}pts | Gems: W:{p.gems["W"]} U:{p.gems["U"]} B{p.gems["B"]} R{p.gems["R"]} G{p.gems["G"]} Au{p.gems["Au"]} | "
-                  f"Cards: W{p.whiteCards} U{p.blueCards} B{p.blackCards} R{p.redCards} G{p.greenCards}")
+            print(f"P{i+1}: {p.points}pts | Gems: W:{p.gems["W"]} U:{p.gems["U"]} B:{p.gems["B"]} R:{p.gems["R"]} G:{p.gems["G"]} Au{p.gems["Au"]} | "
+                  f"Cards: W:{p.cards["W"]} U:{p.cards["U"]} B:{p.cards["B"]} R:{p.cards["R"]} G:{p.cards["G"]}")
         print("="*65 + "\n")
 
     def advanceTurnPlayer(self):
@@ -226,6 +230,68 @@ class Board:
             return True, ""
         else:
             return False, "Each selected pile must have at least one gem"
+        
+    def buyCard(self, level, row):
+
+        #level num MUST be 1, 2, or 3
+        if level > 3 or level <= 0:
+            return False, "Level must be 1, 2, or 3"
+        #row num MUST be 1, 2, 3, or 4
+        elif row > 4 or row <= 0:
+            return False, "Row must be 1, 2, 3, or 4"
+        
+        card = self.decks[level-1].field[row-1]
+        player = self.players[self.turnPlayer]
+
+        if card == None:
+            return False, "There is no card there"
+
+        whiteValue = player.cards["W"] + player.gems["W"]
+        blueValue = player.cards["U"] + player.gems["U"]
+        blackValue = player.cards["B"] + player.gems["B"]
+        redValue = player.cards["R"] + player.gems["R"]
+        greenValue = player.cards["G"] + player.gems["G"]
+
+        #Calculates how short the player is to affording the card, to see if they have enough gold
+        costDefecit = ( max(card.white - whiteValue, 0) +
+            max(card.blue - blueValue, 0) +
+            max(card.black - blackValue, 0) +
+            max(card.red - redValue, 0) +
+            max(card.green - greenValue, 0) )
+        
+        if costDefecit > player.gems["Au"]:
+            return False, "Cannot afford card"
+        
+        #Get the cost that the player will pay
+        whiteGemCost = min(card.white - player.cards["W"], player.gems["W"])
+        blueGemCost = min(card.blue - player.cards["U"], player.gems["U"])
+        blackGemCost = min(card.black - player.cards["B"], player.gems["B"])
+        redGemCost = min(card.red - player.cards["R"], player.gems["R"])
+        greenGemCost = min(card.green - player.cards["G"], player.gems["G"])
+        goldCost = costDefecit
+
+        #Add the gems back to the pile and subtract them from the player
+        player.gems["W"] -= whiteGemCost
+        self.gemPile.gems["W"] += whiteGemCost
+        player.gems["U"] -= blueGemCost
+        self.gemPile.gems["U"] += blueGemCost
+        player.gems["B"] -= blackGemCost
+        self.gemPile.gems["B"] += blackGemCost
+        player.gems["R"] -= redGemCost
+        self.gemPile.gems["R"] += redGemCost
+        player.gems["G"] -= greenGemCost
+        self.gemPile.gems["G"] += greenGemCost
+        player.gems["Au"] -= goldCost
+        self.gemPile.gems["Au"] += goldCost
+
+        # Add the card to the player
+        player.cards[card.color] += 1
+
+        # Replace the card with the next one in the deck
+        self.decks[level - 1].replaceCard(row - 1)
+
+        return True, ""
+        
 
 
 
@@ -235,11 +301,6 @@ class Player:
         self.card2 = Card()
         self.card3 = Card()
         self.points = 0
-        self.whiteCards = 0
-        self.blueCards = 0
-        self.blackCards = 0
-        self.redCards = 0
-        self.greenCards = 0
 
         self.gems = {
             "W" : 0,
@@ -248,6 +309,14 @@ class Player:
             "R" : 0,
             "G" : 0,
             "Au" : 0
+        }
+
+        self.cards = {
+            "W" : 0,
+            "U" : 0,
+            "B" : 0,
+            "R" : 0,
+            "G" : 0
         }
 
 
@@ -299,7 +368,7 @@ class Game:
         print(f"Player {self.board.turnPlayer + 1}'s Turn")
         print("Choose an action:")
         print("1. Take Gems (e.g., 'W U G' or 'RR')")
-        # print("2. Purchase Card (e.g., 'P L1 2' for Level 1, Card 2)")
+        print("2. Purchase Card (e.g., 'P L1 2' for Level 1, Card 2)")
         # print("3. Reserve Card (e.g., 'R L2 1')")
         
         choice = input("> ").strip().upper()
@@ -332,6 +401,19 @@ class Game:
                             return False, "When taking 3 gems, they must all be different"
                     case _:
                         return False, "Can only take 2 or 3 gems"
+            #Purchasing a card
+            case 'P':
+                if len(move) == 4 and move[1] == 'L':
+                    try:
+                        #Get the level and row of the card
+                        levelNum = int(move[2])
+                        rowNum = int(move[3])
+
+                        return self.board.buyCard(levelNum, rowNum)
+                    except ValueError:
+                        return False, "Invalid purchase input, please put P -> L -> # #"
+                else:
+                    return False, "P must be followed by L, putting the level of the card"
 
             case _ :
                 return False, "Unknown First Character"

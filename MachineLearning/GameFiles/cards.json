@@ -1,7 +1,7 @@
 [
   {
     "Level": 1,
-    "Color": "Black",
+    "Color": "B",
     "Points": 0,
     "Black": 0,
     "Blue": 1,
@@ -11,7 +11,7 @@
   },
   {
     "Level": 1,
-    "Color": "Black",
+    "Color": "B",
     "Points": 0,
     "Black": 0,
     "Blue": 2,
@@ -21,7 +21,7 @@
   },
   {
     "Level": 1,
-    "Color": "Black",
+    "Color": "B",
     "Points": 0,
     "Black": 0,
     "Blue": 2,
@@ -31,7 +31,7 @@
   },
   {
     "Level": 1,
-    "Color": "Black",
+    "Color": "B",
     "Points": 0,
     "Black": 1,
     "Blue": 0,
@@ -41,7 +41,7 @@
   },
   {
     "Level": 1,
-    "Color": "Black",
+    "Color": "B",
     "Points": 0,
     "Black": 0,
     "Blue": 0,
@@ -51,7 +51,7 @@
   },
   {
     "Level": 1,
-    "Color": "Black",
+    "Color": "B",
     "Points": 0,
     "Black": 0,
     "Blue": 0,
@@ -61,7 +61,7 @@
   },
   {
     "Level": 1,
-    "Color": "Black",
+    "Color": "B",
     "Points": 0,
     "Black": 0,
     "Blue": 0,
@@ -71,7 +71,7 @@
   },
   {
     "Level": 1,
-    "Color": "Black",
+    "Color": "B",
     "Points": 1,
     "Black": 0,
     "Blue": 4,
@@ -81,7 +81,7 @@
   },
   {
     "Level": 1,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 0,
     "Black": 1,
     "Blue": 0,
@@ -91,7 +91,7 @@
   },
   {
     "Level": 1,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 0,
     "Black": 1,
     "Blue": 0,
@@ -101,7 +101,7 @@
   },
   {
     "Level": 1,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 0,
     "Black": 0,
     "Blue": 0,
@@ -111,7 +111,7 @@
   },
   {
     "Level": 1,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 0,
     "Black": 0,
     "Blue": 1,
@@ -121,7 +121,7 @@
   },
   {
     "Level": 1,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 0,
     "Black": 2,
     "Blue": 0,
@@ -131,7 +131,7 @@
   },
   {
     "Level": 1,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 0,
     "Black": 2,
     "Blue": 0,
@@ -141,7 +141,7 @@
   },
   {
     "Level": 1,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 0,
     "Black": 3,
     "Blue": 0,
@@ -151,7 +151,7 @@
   },
   {
     "Level": 1,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 1,
     "Black": 0,
     "Blue": 0,
@@ -161,7 +161,7 @@
   },
   {
     "Level": 1,
-    "Color": "White",
+    "Color": "W",
     "Points": 0,
     "Black": 1,
     "Blue": 1,
@@ -171,7 +171,7 @@
   },
   {
     "Level": 1,
-    "Color": "White",
+    "Color": "W",
     "Points": 0,
     "Black": 1,
     "Blue": 1,
@@ -181,7 +181,7 @@
   },
   {
     "Level": 1,
-    "Color": "White",
+    "Color": "W",
     "Points": 0,
     "Black": 1,
     "Blue": 2,
@@ -191,7 +191,7 @@
   },
   {
     "Level": 1,
-    "Color": "White",
+    "Color": "W",
     "Points": 0,
     "Black": 1,
     "Blue": 1,
@@ -201,7 +201,7 @@
   },
   {
     "Level": 1,
-    "Color": "White",
+    "Color": "W",
     "Points": 0,
     "Black": 1,
     "Blue": 0,
@@ -211,7 +211,7 @@
   },
   {
     "Level": 1,
-    "Color": "White",
+    "Color": "W",
     "Points": 0,
     "Black": 2,
     "Blue": 2,
@@ -221,7 +221,7 @@
   },
   {
     "Level": 1,
-    "Color": "White",
+    "Color": "W",
     "Points": 0,
     "Black": 0,
     "Blue": 3,
@@ -231,7 +231,7 @@
   },
   {
     "Level": 1,
-    "Color": "White",
+    "Color": "W",
     "Points": 1,
     "Black": 0,
     "Blue": 0,
@@ -241,7 +241,7 @@
   },
   {
     "Level": 1,
-    "Color": "Green",
+    "Color": "G",
     "Points": 0,
     "Black": 1,
     "Blue": 1,
@@ -251,7 +251,7 @@
   },
   {
     "Level": 1,
-    "Color": "Green",
+    "Color": "G",
     "Points": 0,
     "Black": 2,
     "Blue": 1,
@@ -261,7 +261,7 @@
   },
   {
     "Level": 1,
-    "Color": "Green",
+    "Color": "G",
     "Points": 0,
     "Black": 2,
     "Blue": 1,
@@ -271,7 +271,7 @@
   },
   {
     "Level": 1,
-    "Color": "Green",
+    "Color": "G",
     "Points": 0,
     "Black": 0,
     "Blue": 3,
@@ -281,7 +281,7 @@
   },
   {
     "Level": 1,
-    "Color": "Green",
+    "Color": "G",
     "Points": 0,
     "Black": 0,
     "Blue": 1,
@@ -291,7 +291,7 @@
   },
   {
     "Level": 1,
-    "Color": "Green",
+    "Color": "G",
     "Points": 0,
     "Black": 0,
     "Blue": 2,
@@ -301,7 +301,7 @@
   },
   {
     "Level": 1,
-    "Color": "Green",
+    "Color": "G",
     "Points": 0,
     "Black": 0,
     "Blue": 0,
@@ -311,7 +311,7 @@
   },
   {
     "Level": 1,
-    "Color": "Green",
+    "Color": "G",
     "Points": 1,
     "Black": 4,
     "Blue": 0,
@@ -321,7 +321,7 @@
   },
   {
     "Level": 1,
-    "Color": "Red",
+    "Color": "R",
     "Points": 0,
     "Black": 1,
     "Blue": 1,
@@ -331,7 +331,7 @@
   },
   {
     "Level": 1,
-    "Color": "Red",
+    "Color": "R",
     "Points": 0,
     "Black": 1,
     "Blue": 1,
@@ -341,7 +341,7 @@
   },
   {
     "Level": 1,
-    "Color": "Red",
+    "Color": "R",
     "Points": 0,
     "Black": 2,
     "Blue": 0,
@@ -351,7 +351,7 @@
   },
   {
     "Level": 1,
-    "Color": "Red",
+    "Color": "R",
     "Points": 0,
     "Black": 3,
     "Blue": 0,
@@ -361,7 +361,7 @@
   },
   {
     "Level": 1,
-    "Color": "Red",
+    "Color": "R",
     "Points": 0,
     "Black": 0,
     "Blue": 2,
@@ -371,7 +371,7 @@
   },
   {
     "Level": 1,
-    "Color": "Red",
+    "Color": "R",
     "Points": 0,
     "Black": 0,
     "Blue": 0,
@@ -381,7 +381,7 @@
   },
   {
     "Level": 1,
-    "Color": "Red",
+    "Color": "R",
     "Points": 0,
     "Black": 0,
     "Blue": 0,
@@ -391,7 +391,7 @@
   },
   {
     "Level": 1,
-    "Color": "Red",
+    "Color": "R",
     "Points": 1,
     "Black": 0,
     "Blue": 0,
@@ -401,7 +401,7 @@
   },
   {
     "Level": 2,
-    "Color": "Black",
+    "Color": "B",
     "Points": 1,
     "Black": 0,
     "Blue": 2,
@@ -411,7 +411,7 @@
   },
   {
     "Level": 2,
-    "Color": "Black",
+    "Color": "B",
     "Points": 1,
     "Black": 2,
     "Blue": 0,
@@ -421,7 +421,7 @@
   },
   {
     "Level": 2,
-    "Color": "Black",
+    "Color": "B",
     "Points": 2,
     "Black": 0,
     "Blue": 1,
@@ -431,7 +431,7 @@
   },
   {
     "Level": 2,
-    "Color": "Black",
+    "Color": "B",
     "Points": 2,
     "Black": 0,
     "Blue": 0,
@@ -441,7 +441,7 @@
   },
   {
     "Level": 2,
-    "Color": "Black",
+    "Color": "B",
     "Points": 2,
     "Black": 0,
     "Blue": 0,
@@ -451,7 +451,7 @@
   },
   {
     "Level": 2,
-    "Color": "Black",
+    "Color": "B",
     "Points": 3,
     "Black": 6,
     "Blue": 0,
@@ -461,7 +461,7 @@
   },
   {
     "Level": 2,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 1,
     "Black": 0,
     "Blue": 2,
@@ -471,7 +471,7 @@
   },
   {
     "Level": 2,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 1,
     "Black": 3,
     "Blue": 2,
@@ -481,7 +481,7 @@
   },
   {
     "Level": 2,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 2,
     "Black": 0,
     "Blue": 3,
@@ -491,7 +491,7 @@
   },
   {
     "Level": 2,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 2,
     "Black": 4,
     "Blue": 0,
@@ -501,7 +501,7 @@
   },
   {
     "Level": 2,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 2,
     "Black": 0,
     "Blue": 5,
@@ -511,7 +511,7 @@
   },
   {
     "Level": 2,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 3,
     "Black": 0,
     "Blue": 6,
@@ -521,7 +521,7 @@
   },
   {
     "Level": 2,
-    "Color": "White",
+    "Color": "W",
     "Points": 1,
     "Black": 2,
     "Blue": 0,
@@ -531,7 +531,7 @@
   },
   {
     "Level": 2,
-    "Color": "White",
+    "Color": "W",
     "Points": 1,
     "Black": 0,
     "Blue": 3,
@@ -541,7 +541,7 @@
   },
   {
     "Level": 2,
-    "Color": "White",
+    "Color": "W",
     "Points": 2,
     "Black": 2,
     "Blue": 0,
@@ -551,7 +551,7 @@
   },
   {
     "Level": 2,
-    "Color": "White",
+    "Color": "W",
     "Points": 2,
     "Black": 3,
     "Blue": 0,
@@ -561,7 +561,7 @@
   },
   {
     "Level": 2,
-    "Color": "White",
+    "Color": "W",
     "Points": 2,
     "Black": 0,
     "Blue": 0,
@@ -571,7 +571,7 @@
   },
   {
     "Level": 2,
-    "Color": "White",
+    "Color": "W",
     "Points": 3,
     "Black": 0,
     "Blue": 0,
@@ -581,7 +581,7 @@
   },
   {
     "Level": 2,
-    "Color": "Green",
+    "Color": "G",
     "Points": 1,
     "Black": 0,
     "Blue": 0,
@@ -591,7 +591,7 @@
   },
   {
     "Level": 2,
-    "Color": "Green",
+    "Color": "G",
     "Points": 1,
     "Black": 2,
     "Blue": 3,
@@ -601,7 +601,7 @@
   },
   {
     "Level": 2,
-    "Color": "Green",
+    "Color": "G",
     "Points": 2,
     "Black": 1,
     "Blue": 2,
@@ -611,7 +611,7 @@
   },
   {
     "Level": 2,
-    "Color": "Green",
+    "Color": "G",
     "Points": 2,
     "Black": 0,
     "Blue": 5,
@@ -621,7 +621,7 @@
   },
   {
     "Level": 2,
-    "Color": "Green",
+    "Color": "G",
     "Points": 2,
     "Black": 0,
     "Blue": 0,
@@ -631,7 +631,7 @@
   },
   {
     "Level": 2,
-    "Color": "Green",
+    "Color": "G",
     "Points": 3,
     "Black": 0,
     "Blue": 0,
@@ -641,7 +641,7 @@
   },
   {
     "Level": 2,
-    "Color": "Red",
+    "Color": "R",
     "Points": 1,
     "Black": 3,
     "Blue": 0,
@@ -651,7 +651,7 @@
   },
   {
     "Level": 2,
-    "Color": "Red",
+    "Color": "R",
     "Points": 1,
     "Black": 3,
     "Blue": 3,
@@ -661,7 +661,7 @@
   },
   {
     "Level": 2,
-    "Color": "Red",
+    "Color": "R",
     "Points": 2,
     "Black": 0,
     "Blue": 4,
@@ -671,7 +671,7 @@
   },
   {
     "Level": 2,
-    "Color": "Red",
+    "Color": "R",
     "Points": 2,
     "Black": 5,
     "Blue": 0,
@@ -681,7 +681,7 @@
   },
   {
     "Level": 2,
-    "Color": "Red",
+    "Color": "R",
     "Points": 2,
     "Black": 5,
     "Blue": 0,
@@ -691,7 +691,7 @@
   },
   {
     "Level": 2,
-    "Color": "Red",
+    "Color": "R",
     "Points": 3,
     "Black": 0,
     "Blue": 0,
@@ -701,7 +701,7 @@
   },
   {
     "Level": 3,
-    "Color": "Black",
+    "Color": "B",
     "Points": 3,
     "Black": 0,
     "Blue": 3,
@@ -711,7 +711,7 @@
   },
   {
     "Level": 3,
-    "Color": "Black",
+    "Color": "B",
     "Points": 4,
     "Black": 0,
     "Blue": 0,
@@ -721,7 +721,7 @@
   },
   {
     "Level": 3,
-    "Color": "Black",
+    "Color": "B",
     "Points": 4,
     "Black": 3,
     "Blue": 0,
@@ -731,7 +731,7 @@
   },
   {
     "Level": 3,
-    "Color": "Black",
+    "Color": "B",
     "Points": 5,
     "Black": 3,
     "Blue": 0,
@@ -741,7 +741,7 @@
   },
   {
     "Level": 3,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 3,
     "Black": 5,
     "Blue": 0,
@@ -751,7 +751,7 @@
   },
   {
     "Level": 3,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 4,
     "Black": 0,
     "Blue": 0,
@@ -761,7 +761,7 @@
   },
   {
     "Level": 3,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 4,
     "Black": 3,
     "Blue": 3,
@@ -771,7 +771,7 @@
   },
   {
     "Level": 3,
-    "Color": "Blue",
+    "Color": "U",
     "Points": 5,
     "Black": 0,
     "Blue": 3,
@@ -781,7 +781,7 @@
   },
   {
     "Level": 3,
-    "Color": "White",
+    "Color": "W",
     "Points": 3,
     "Black": 3,
     "Blue": 3,
@@ -791,7 +791,7 @@
   },
   {
     "Level": 3,
-    "Color": "White",
+    "Color": "W",
     "Points": 4,
     "Black": 7,
     "Blue": 0,
@@ -801,7 +801,7 @@
   },
   {
     "Level": 3,
-    "Color": "White",
+    "Color": "W",
     "Points": 4,
     "Black": 6,
     "Blue": 0,
@@ -811,7 +811,7 @@
   },
   {
     "Level": 3,
-    "Color": "White",
+    "Color": "W",
     "Points": 5,
     "Black": 7,
     "Blue": 0,
@@ -821,7 +821,7 @@
   },
   {
     "Level": 3,
-    "Color": "Green",
+    "Color": "G",
     "Points": 3,
     "Black": 3,
     "Blue": 3,
@@ -831,7 +831,7 @@
   },
   {
     "Level": 3,
-    "Color": "Green",
+    "Color": "G",
     "Points": 4,
     "Black": 0,
     "Blue": 7,
@@ -841,7 +841,7 @@
   },
   {
     "Level": 3,
-    "Color": "Green",
+    "Color": "G",
     "Points": 4,
     "Black": 0,
     "Blue": 6,
@@ -851,7 +851,7 @@
   },
   {
     "Level": 3,
-    "Color": "Green",
+    "Color": "G",
     "Points": 5,
     "Black": 0,
     "Blue": 7,
@@ -861,7 +861,7 @@
   },
   {
     "Level": 3,
-    "Color": "Red",
+    "Color": "R",
     "Points": 3,
     "Black": 3,
     "Blue": 5,
@@ -871,7 +871,7 @@
   },
   {
     "Level": 3,
-    "Color": "Red",
+    "Color": "R",
     "Points": 4,
     "Black": 0,
     "Blue": 0,
@@ -881,7 +881,7 @@
   },
   {
     "Level": 3,
-    "Color": "Red",
+    "Color": "R",
     "Points": 4,
     "Black": 0,
     "Blue": 3,
@@ -891,7 +891,7 @@
   },
   {
     "Level": 3,
-    "Color": "Red",
+    "Color": "R",
     "Points": 5,
     "Black": 0,
     "Blue": 0,
