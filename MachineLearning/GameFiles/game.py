@@ -22,6 +22,7 @@ class Card:
             "B": "\033[95m", "U": "\033[94m", "G": "\033[92m",
             "R": "\033[91m", "W": "\033[97m", "Reset": "\033[0m"
         }
+        level_text = f"L{self.level}" if self.level else " "
         color_symbol = (c.get(self.color, "") + "■" + c["Reset"]) if self.color else " "
         pts = str(self.points) if self.points > 0 else " "
         
@@ -32,13 +33,9 @@ class Card:
         r = self._format_cost(self.red,   "\033[91m", "R")
         b = self._format_cost(self.black, "\033[95m", "B")
 
-        # Internal width is 9. 
-        # Row 1 (W U G): 2+1+2+1+2 = 8. Need 1 more space.
-        # Row 2 (R B): 2+1+2 = 5. Need 4 more spaces.
-
         return [
             f"┌──────────┐",
-            f"│ {pts:<2}     {color_symbol} │",
+            f"│ {level_text:<2}  {pts:<2} {color_symbol} │",
             f"│          │",
             f"│ {w} {u} {b} │",
             f"│ {r} {g}    │",
@@ -195,8 +192,19 @@ class Board:
         
         print(" PLAYERS ".center(65, "-"))
         for i, p in enumerate(self.players):
-            print(f"P{i+1}: {p.points}pts | Gems: W:{p.gems["W"]} U:{p.gems["U"]} B:{p.gems["B"]} R:{p.gems["R"]} G:{p.gems["G"]} Au{p.gems["Au"]} | "
-                  f"Cards: W:{p.cards["W"]} U:{p.cards["U"]} B:{p.cards["B"]} R:{p.cards["R"]} G:{p.cards["G"]}")
+            print(
+                f"P{i+1}: {p.points}pts | Gems: W:{p.gems['W']} U:{p.gems['U']} B:{p.gems['B']} R:{p.gems['R']} G:{p.gems['G']} Au:{p.gems['Au']} | "
+                f"Cards: W:{p.cards['W']} U:{p.cards['U']} B:{p.cards['B']} R:{p.cards['R']} G:{p.cards['G']}"
+            )
+            if i != self.turnPlayer:
+                print(f"  Hand levels: {p.render_hand()}")
+
+        print(" CURRENT TURN HAND ".center(65, "-"))
+        current_player = self.players[self.turnPlayer]
+        hand_display = current_player.render_hand(is_current_player=True)
+        for line in hand_display.splitlines():
+            print(f"  {line}")
+
         print("="*65 + "\n")
 
     def advanceTurnPlayer(self):
@@ -291,15 +299,47 @@ class Board:
         self.decks[level - 1].replaceCard(row - 1)
 
         return True, ""
+    
+    def reserveCard(self, level, row):
         
+        player = self.players[self.turnPlayer]
+
+        if len(player.hand) >= 3:
+            return False, "You already have 3 cards in hand"
+
+
+        #level num MUST be 1, 2, or 3
+        if level > 3 or level <= 0:
+            return False, "Level must be 1, 2, or 3"
+        #row num MUST be 0, 1, 2, 3, or 4
+        elif row > 4 or row < 0:
+            return False, "Row must be 0, 1, 2, 3, or 4"
+
+        #if row is 0, reserve the top card of the deck
+        if row == 0:
+            topCard = self.decks(level-1).cards.pop()
+            if topCard == None:
+                return False, "Deck is empty"
+            
+            player.hand.append()
+        else:
+            card = self.decks[level-1].field[row-1]
+            if card == None:
+                return False, "There is no card there"
+            
+            player.hand.append(card)
+            self.decks[level - 1].replaceCard(row - 1)
+            return True, ""
+
+
+
 
 
 
 class Player:
     def __init__(self):
-        self.card1 = Card()
-        self.card2 = Card()
-        self.card3 = Card()
+
+        self.hand = []
         self.points = 0
 
         self.gems = {
@@ -318,6 +358,25 @@ class Player:
             "R" : 0,
             "G" : 0
         }
+
+    def render_hand(self, is_current_player=False):
+        if not self.hand:
+            return "(empty)"
+
+        if is_current_player:
+            rendered_cards = [card.render() for card in self.hand]
+            card_width = max(len(line) for card in rendered_cards for line in card)
+            padded_cards = [
+                [line.ljust(card_width) for line in card]
+                for card in rendered_cards
+            ]
+
+            return "\n".join(
+                "  ".join(card_lines[i] for card_lines in padded_cards)
+                for i in range(6)
+            )
+
+        return "[" + ", ".join(f"L{card.level}" for card in self.hand) + "]"
 
 
 
@@ -369,7 +428,7 @@ class Game:
         print("Choose an action:")
         print("1. Take Gems (e.g., 'W U G' or 'RR')")
         print("2. Purchase Card (e.g., 'P L1 2' for Level 1, Card 2)")
-        # print("3. Reserve Card (e.g., 'R L2 1')")
+        print("3. Reserve Card (e.g., 'E L2 1')")
         
         choice = input("> ").strip().upper()
         
@@ -414,6 +473,19 @@ class Game:
                         return False, "Invalid purchase input, please put P -> L -> # #"
                 else:
                     return False, "P must be followed by L, putting the level of the card"
+            #Reserving a card
+            case 'E':
+                if len(move) == 4 and move[1] == 'L':
+                    try:
+                        #Get the level and row of the card
+                        levelNum = int(move[2])
+                        rowNum = int(move[3])
+
+                        return self.board.reserveCard(levelNum, rowNum)
+                    except ValueError:
+                        return False, "Invalid reservation input, please put E -> L -> # #"
+                else:
+                    return False, "E must be followed by L, putting the level of the card"
 
             case _ :
                 return False, "Unknown First Character"
