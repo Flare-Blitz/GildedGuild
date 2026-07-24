@@ -239,21 +239,7 @@ class Board:
         else:
             return False, "Each selected pile must have at least one gem"
         
-    def buyCard(self, level, row):
-
-        #level num MUST be 1, 2, or 3
-        if level > 3 or level <= 0:
-            return False, "Level must be 1, 2, or 3"
-        #row num MUST be 1, 2, 3, or 4
-        elif row > 4 or row <= 0:
-            return False, "Row must be 1, 2, 3, or 4"
-        
-        card = self.decks[level-1].field[row-1]
-        player = self.players[self.turnPlayer]
-
-        if card == None:
-            return False, "There is no card there"
-
+    def buyCard(self, player, card):
         whiteValue = player.cards["W"] + player.gems["W"]
         blueValue = player.cards["U"] + player.gems["U"]
         blackValue = player.cards["B"] + player.gems["B"]
@@ -295,11 +281,48 @@ class Board:
         # Add the card to the player
         player.cards[card.color] += 1
 
+        return True, ""
+        
+    def buyBoardCard(self, level, row):
+
+        #level num MUST be 1, 2, or 3
+        if level > 3 or level <= 0:
+            return False, "Level must be 1, 2, or 3"
+        #row num MUST be 1, 2, 3, or 4
+        elif row > 4 or row <= 0:
+            return False, "Row must be 1, 2, 3, or 4"
+        
+        card = self.decks[level-1].field[row-1]
+        player = self.players[self.turnPlayer]
+
+        if card == None:
+            return False, "There is no card there"
+        
+        Success, message = self.buyCard(player, card)
+        if(Success == False):
+            return False, message
+
         # Replace the card with the next one in the deck
         self.decks[level - 1].replaceCard(row - 1)
 
         return True, ""
     
+    def buyHandCard(self, row):
+
+        player = self.players[self.turnPlayer]
+
+        if row > len(player.hand) or row <= 0:
+            return False, "Row must be 1, 2, or 3"
+        
+        card = player.hand[row-1]
+
+        Success, message = self.buyCard(player, card)
+        if(Success == False):
+            return False, message
+        
+        player.hand.pop(row-1)
+        return True, ""
+
     def reserveCard(self, level, row):
         
         player = self.players[self.turnPlayer]
@@ -321,7 +344,7 @@ class Board:
             if topCard == None:
                 return False, "Deck is empty"
             
-            player.hand.append()
+            player.hand.append(topCard)
         else:
             card = self.decks[level-1].field[row-1]
             if card == None:
@@ -329,11 +352,12 @@ class Board:
             
             player.hand.append(card)
             self.decks[level - 1].replaceCard(row - 1)
-            return True, ""
+        
+        if self.gemPile.gems["Au"] > 0:
+            player.gems["Au"] += 1
+            self.gemPile.gems["Au"] -= 1
 
-
-
-
+        return True, ""
 
 
 class Player:
@@ -427,10 +451,11 @@ class Game:
         print(f"Player {self.board.turnPlayer + 1}'s Turn")
         print("Choose an action:")
         print("1. Take Gems (e.g., 'W U G' or 'RR')")
-        print("2. Purchase Card (e.g., 'P L1 2' for Level 1, Card 2)")
-        print("3. Reserve Card (e.g., 'E L2 1')")
+        print("2. Purchase Card on the board (e.g., 'P L1 2' for Level 1, Card 2)")
+        print("3. Purchase Card in your hand (e.g., 'P H 2' for the 2nd card in your hand)")
+        print("4. Reserve Card (e.g., 'E L2 1')")
         
-        choice = input("> ").strip().upper()
+        choice = input("> ").strip().upper().replace(" ", "")
         
         # This returns the raw input for processing by the game engine
         # Logic for validating and applying these moves will be handled in the game loop
@@ -468,11 +493,19 @@ class Game:
                         levelNum = int(move[2])
                         rowNum = int(move[3])
 
-                        return self.board.buyCard(levelNum, rowNum)
+                        return self.board.buyBoardCard(levelNum, rowNum)
                     except ValueError:
                         return False, "Invalid purchase input, please put P -> L -> # #"
+                elif len(move) == 3 and move[1] == 'H':
+                    try:
+                        #Get the row of the card in hand
+                        rowNum = int(move[2])
+
+                        return self.board.buyHandCard(rowNum)
+                    except ValueError:
+                        return False, "Invalid purchase input, please put P -> H -> #"
                 else:
-                    return False, "P must be followed by L, putting the level of the card"
+                    return False, "P must be followed by L or H"
             #Reserving a card
             case 'E':
                 if len(move) == 4 and move[1] == 'L':
