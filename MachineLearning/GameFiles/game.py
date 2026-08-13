@@ -358,6 +358,21 @@ class Board:
             self.gemPile.gems["Au"] -= 1
 
         return True, ""
+    
+    def checkNobles(self):
+        player = self.players[self.turnPlayer]
+        for tile in self.tiles.tiles:
+            if (player.cards["W"] >= tile.white and
+                player.cards["U"] >= tile.blue and
+                player.cards["B"] >= tile.black and
+                player.cards["R"] >= tile.red and
+                player.cards["G"] >= tile.green):
+                
+                player.points += tile.points
+                player.tiles.append(tile)
+                self.tiles.tiles.remove(tile)
+                
+                break  # Assuming a player can claim only one noble per turn
 
 
 class Player:
@@ -365,6 +380,7 @@ class Player:
 
         self.hand = []
         self.points = 0
+        self.tiles = []
 
         self.gems = {
             "W" : 0,
@@ -413,6 +429,8 @@ class Game:
         while True:
             # First, turn player takes an action
             self.takeAction()
+
+            self.board.checkNobles()
 
             # Second, advance the turn player
             self.board.advanceTurnPlayer()
