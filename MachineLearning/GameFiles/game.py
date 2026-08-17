@@ -76,11 +76,6 @@ class Deck:
         else:
             self.field[spot] = None
 
-        
-
-
-
-
 
 @dataclass
 class Tile:
@@ -169,7 +164,11 @@ class Board:
         self.playerCount = playerCount
         # Use list comprehension for dynamic player creation
         self.players = [Player() for _ in range(playerCount)]
-        self.turnPlayer = random.randint(0, self.playerCount - 1)
+        self.startingPlater = random.randint(0, self.playerCount - 1)
+        self.turnPlayer = self.startingPlater
+
+        for i, player in enumerate(self.players):
+            player.name = f"Player {i + 1}"
 
         self.tiles = TileDeck(playerCount + 1)
         self.gemPile = GemPile(playerCount)
@@ -374,9 +373,21 @@ class Board:
                 
                 break  # Assuming a player can claim only one noble per turn
 
+    def checkVictory(self):
+        if self.turnPlayer == self.turnPlayer:
+            maxPoints = 0
+            winner = None
+            for player in self.players:
+                if player.points >= 15 and player.points > maxPoints:
+                    winner = player
+                    maxPoints = player.points
+
+            return winner
 
 class Player:
     def __init__(self):
+
+        self.name = ""
 
         self.hand = []
         self.points = 0
@@ -431,6 +442,11 @@ class Game:
             self.takeAction()
 
             self.board.checkNobles()
+
+            winner = self.board.checkVictory()
+            if winner:
+                print(f"Player {winner.name} has won the game!")
+                break
 
             # Second, advance the turn player
             self.board.advanceTurnPlayer()
