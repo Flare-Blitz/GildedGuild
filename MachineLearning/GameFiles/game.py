@@ -405,7 +405,7 @@ class Player:
 
         if is_current_player:
             rendered_cards = [card.render() for card in self.hand]
-            card_width = max(len(line) for card in rendered_cards for line in card)
+            card_width = 12
             padded_cards = [
                 [line.ljust(card_width) for line in card]
                 for card in rendered_cards
