@@ -1,3 +1,4 @@
+from enum import Enum
 import json
 from dataclasses import dataclass
 import random
@@ -385,6 +386,19 @@ class Board:
 
             return winner
 
+class ActionType(Enum):
+    TAKE_GEMS = "take_gems"
+    BUY_BOARD_CARD = "buy_board_card"
+    BUY_HAND_CARD = "buy_hand_card"
+    RESERVE_CARD = "reserve_card"
+
+@dataclass(frozen=True)
+class Action:
+    action_type: ActionType
+    colors: tuple[str, ...] = ()
+    level: int | None = None
+    row: int | None = None
+
 class Player:
     def __init__(self):
 
@@ -480,9 +494,12 @@ class Game:
             if success == True:
                 # The move was valid, return
                 break
+
+    # def takeRandomAction(self):
+        
             
 
-    def getHumanInput(self):
+    def getHumanInput(self) -> Action:
         print(f"Player {self.board.turnPlayer + 1}'s Turn")
         print("Choose an action:")
         print("1. Take Gems (e.g., 'W U G' or 'RR')")
@@ -492,14 +509,48 @@ class Game:
         
         choice = input("> ").strip().upper().replace(" ", "")
         
-        # This returns the raw input for processing by the game engine
-        # Logic for validating and applying these moves will be handled in the game loop
-        return choice
+        if (choice.startswith('W') or 
+            choice.startswith('U') or 
+            choice.startswith('B') or 
+            choice.startswith('R') or 
+            choice.startswith('G')):
+            return Action(action_type=ActionType.TAKE_GEMS, colors=tuple(choice))
+        elif choice.startswith('P'):
+            parts = choice.split()
+            if len(parts) == 4 and parts[1] == 'L':
+                try:
+                    level = int(parts[2])
+                    row = int(parts[3])
+                    return Action(action_type=ActionType.BUY_BOARD_CARD, level=level, row=row)
+                except ValueError:
+                    print("Invalid input for board card purchase. Please use 'P L# #' format.")
+            elif len(parts) == 3 and parts[1] == 'H':
+                try:
+                    row = int(parts[2])
+                    return Action(action_type=ActionType.BUY_HAND_CARD, row=row)
+                except ValueError:
+                    print("Invalid input for hand card purchase. Please use 'P H #' format.")
+        elif choice.startswith('E'):
+            parts = choice.split()
+            if len(parts) == 4 and parts[1] == 'L':
+                try:
+                    level = int(parts[2])
+                    row = int(parts[3])
+                    return Action(action_type=ActionType.RESERVE_CARD, level=level, row=row)
+                except ValueError:
+                    print("Invalid input for reserving a card. Please use 'E L# #' format.")
+        else:
+            print("Invalid action. Please try again.")
+        
+        return None
     
     # input: string move
-    # This function takes a user action and r
+    # This function takes a user action and returns an Action object
     # return: string indicating if there is an error
     def processHumanAction(self, move):
+        if not move:
+            return False, "Action cannot be empty"
+    
         match move[0]:
             #If it starts with a color character, the user is taking gems
             case 'W' | 'U' | 'B' | 'R' | 'G' :
@@ -557,6 +608,32 @@ class Game:
 
             case _ :
                 return False, "Unknown First Character"
+
+    def executeAction(self, action: Action):
+        if action.action_type == ActionType.TAKE_GEMS:
+            if len(action.colors) == 2 and action.colors[0] == action.colors[1]:
+                return self.board.take2Gems(action.colors[0])
+            elif len(action.colors) == 3 and len(set(action.colors)) == 3:
+                return self.board.take3Gems(*action.colors)
+            else:
+                return False, "Invalid gem selection"
+        elif action.action_type == ActionType.BUY_BOARD_CARD:
+            if action.level is not None and action.row is not None:
+                return self.board.buyBoardCard(action.level, action.row)
+            else:
+                return False, "Level and row must be specified for buying a board card"
+        elif action.action_type == ActionType.BUY_HAND_CARD:
+            if action.row is not None:
+                return self.board.buyHandCard(action.row)
+            else:
+                return False, "Row must be specified for buying a hand card"
+        elif action.action_type == ActionType.RESERVE_CARD:
+            if action.level is not None and action.row is not None:
+                return self.board.reserveCard(action.level, action.row)
+            else:
+                return False, "Level and row must be specified for reserving a card"
+        else:
+            return False, "Unknown action type"
 
 
             
