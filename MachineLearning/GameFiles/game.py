@@ -152,9 +152,9 @@ class GemPile:
         }
 
     def __str__(self):
-        return (f"Bank: \033[97m(W):{self.gems["W"]}\033[0m  \033[94m(U):{self.gems["U"]}\033[0m  "
-                f"\033[95m(B):{self.gems["B"]}\033[0m  \033[91m(R):{self.gems["R"]}\033[0m  "
-                f"\033[92m(G):{self.gems["G"]}\033[0m  \033[93m(Au):{self.gems["Au"]}\033[0m")
+        return (f"Bank: \033[97m(W):{self.gems['W']}\033[0m  \033[94m(U):{self.gems['U']}\033[0m  "
+                f"\033[95m(B):{self.gems['B']}\033[0m  \033[91m(R):{self.gems['R']}\033[0m  "
+                f"\033[92m(G):{self.gems['G']}\033[0m  \033[93m(Au):{self.gems['Au']}\033[0m")
 
 
 class Board:
@@ -164,8 +164,8 @@ class Board:
         self.playerCount = playerCount
         # Use list comprehension for dynamic player creation
         self.players = [Player() for _ in range(playerCount)]
-        self.startingPlater = random.randint(0, self.playerCount - 1)
-        self.turnPlayer = self.startingPlater
+        self.startingPlayer = random.randint(0, self.playerCount - 1)
+        self.turnPlayer = self.startingPlayer
 
         for i, player in enumerate(self.players):
             player.name = f"Player {i + 1}"
@@ -339,10 +339,11 @@ class Board:
 
         #if row is 0, reserve the top card of the deck
         if row == 0:
-            topCard = self.decks(level-1).cards.pop()
-            if topCard == None:
+            deck = self.decks[level-1]
+            if not deck.cards:
                 return False, "Deck is empty"
             
+            topCard = deck.cards.pop()
             player.hand.append(topCard)
         else:
             card = self.decks[level-1].field[row-1]
@@ -374,7 +375,7 @@ class Board:
                 break  # Assuming a player can claim only one noble per turn
 
     def checkVictory(self):
-        if self.turnPlayer == self.turnPlayer:
+        if self.turnPlayer == self.startingPlayer:
             maxPoints = 0
             winner = None
             for player in self.players:
