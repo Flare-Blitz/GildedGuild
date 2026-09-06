@@ -1,3 +1,9 @@
+"""
+This module contains a gymnasium for simulating the game Gilded Guild.
+It contains classes for every object used in the game, including cards, tiles, 
+players, and the board itself.
+"""
+
 from enum import Enum
 import json
 from dataclasses import dataclass
@@ -5,6 +11,8 @@ import random
 
 @dataclass
 class Card:
+    """Represents a card in the game."""
+
     level: int = 0
     color: str = ""
     points: int = 0
@@ -26,7 +34,7 @@ class Card:
         level_text = f"L{self.level}" if self.level else " "
         color_symbol = (c.get(self.color, "") + "■" + c["Reset"]) if self.color else " "
         pts = str(self.points) if self.points > 0 else " "
-        
+
         # Define fixed slots for costs to ensure consistent line length
         w = self._format_cost(self.white, "\033[97m", "W")
         u = self._format_cost(self.blue,  "\033[94m", "U")
@@ -35,20 +43,22 @@ class Card:
         b = self._format_cost(self.black, "\033[95m", "B")
 
         return [
-            f"┌──────────┐",
+            "┌──────────┐",
             f"│ {level_text:<2}  {pts:<2} {color_symbol} │",
-            f"│          │",
+            "│          │",
             f"│ {w} {u} {b} │",
             f"│ {r} {g}    │",
-            f"└──────────┘"
+            "└──────────┘"
         ]
 
 
 class Deck:
+    """Represents a deck of cards for a specific level in the game."""
+
     def __init__(self, level):
         self.field = [None] * 4
 
-        with open('MachineLearning/GameFiles/cards.json', 'r') as file:
+        with open('MachineLearning/GameFiles/cards.json', 'r', encoding="utf-8") as file:
             data = json.load(file)
             self.cards = []
             for card_data in data:
@@ -70,16 +80,19 @@ class Deck:
         for i in range(6):
             combined.append("  ".join(card[i] for card in rendered_cards))
         return "\n".join(combined)
-    
-    def replaceCard(self, spot):
+
+    def replace_card(self, spot):
+        """Replaces the card at the specified spot with a new card from the deck."""
         if len(self.cards) > 0:
             self.field[spot] = self.cards.pop()
         else:
             self.field[spot] = None
 
-
 @dataclass
 class Tile:
+    """Defines a tile in the game, 
+    which represents a noble with specific requirements and points."""
+
     def __init__(self, points, white, blue, black, red, green):
         self.points = points
         self.white = white
@@ -98,16 +111,29 @@ class Tile:
         """Returns a list of strings representing the tile."""
         pts = str(self.points)
         costs = []
-        if self.white: costs.append(f"\033[97m{self.white}\033[0m")
-        if self.blue:  costs.append(f"\033[94m{self.blue}\033[0m")
-        if self.black: costs.append(f"\033[95m{self.black}\033[0m")
-        if self.red:   costs.append(f"\033[91m{self.red}\033[0m")
-        if self.green: costs.append(f"\033[92m{self.green}\033[0m")
-        
+        if self.white:
+            costs.append(f"\033[97m{self.white}\033[0m")
+        if self.blue:
+            costs.append(f"\033[94m{self.blue}\033[0m")
+        if self.black:
+            costs.append(f"\033[95m{self.black}\033[0m")
+        if self.red:
+            costs.append(f"\033[91m{self.red}\033[0m")
+        if self.green:
+            costs.append(f"\033[92m{self.green}\033[0m")
+
         # Calculate visible length to fix padding (ANSI codes are 0-width)
-        visible_costs = [str(v) for v in [self.white, self.blue, self.green, self.red, self.black] if v > 0]
-        actual_len = sum(len(s) for s in visible_costs) + (len(visible_costs) - 1 if visible_costs else 0)
-        
+        visible_costs = [
+            str(v) for v in [
+                self.white,
+                self.blue,
+                self.green,
+                self.red,
+                self.black] if v > 0]
+
+        actual_len = ( sum(len(s) for s in visible_costs) +
+            (len(visible_costs) - 1 if visible_costs else 0) )
+
         # Interior width is 7
         padding = max(0, 7 - actual_len)
         left_pad = " " * (padding // 2)
@@ -115,33 +141,38 @@ class Tile:
         cost_line = f"{left_pad}{' '.join(costs)}{right_pad}"
 
         return [
-            f"╔═════════╗",
+            "╔═════════╗",
             f"║  {pts.center(5)}  ║",
             f"║ {cost_line} ║",
-            f"╚═════════╝"
+            "╚═════════╝"
         ]
 
 class TileDeck:
+    """Represents the collection of noble tiles in the game."""
+
     def __init__(self, cards):
         self.tiles = []
-        with open('MachineLearning/GameFiles/tiles.json', 'r') as file:
+        with open('MachineLearning/GameFiles/tiles.json', 'r', encoding="utf-8") as file:
             data = json.load(file)
-            for i in range(cards):
-                tileData = data.pop(random.randint(0, len(data) - 1))
+            for _ in range(cards):
+                tile_data = data.pop(random.randint(0, len(data) - 1))
                 # Mapping logic if tiles.json uses uppercase keys
-                normalized = {k.lower(): v for k, v in tileData.items()}
+                normalized = {k.lower(): v for k, v in tile_data.items()}
                 self.tiles.append(Tile(**normalized))
 
     def render_row(self):
+        """Renders the tiles side-by-side."""
         rendered = [t.render() for t in self.tiles]
         return "\n".join("  ".join(row) for row in zip(*rendered))
 
 
 class GemPile:
-    def __init__(self, playerCount):
+    """Represents the pile of gems available in the game."""
+
+    def __init__(self, player_count):
         # Map player count to gem counts to remove repetitive case logic
         counts = {2: 4, 3: 5, 4: 7}
-        count = counts.get(playerCount, 7)
+        count = counts.get(player_count, 7)
 
         self.gems = {
             "W" : count,
@@ -159,131 +190,166 @@ class GemPile:
 
 
 class Board:
-    def __init__(self, playerCount):
+    """Represents the game board, including decks, players, tiles, and gem piles.
+    Also manages the game state, player turns, and actions."""
+
+    def __init__(self, player_count):
         self.decks = [Deck(1), Deck(2), Deck(3)]
 
-        self.playerCount = playerCount
+        self.player_count = player_count
         # Use list comprehension for dynamic player creation
-        self.players = [Player() for _ in range(playerCount)]
-        self.startingPlayer = random.randint(0, self.playerCount - 1)
-        self.turnPlayer = self.startingPlayer
+        self.players = [Player() for _ in range(player_count)]
+        self.starting_player = random.randint(0, self.player_count - 1)
+        self.turn_player = self.starting_player
 
         for i, player in enumerate(self.players):
             player.name = f"Player {i + 1}"
 
-        self.tiles = TileDeck(playerCount + 1)
-        self.gemPile = GemPile(playerCount)
+        self.tiles = TileDeck(player_count + 1)
+        self.gem_pile = GemPile(player_count)
 
-        
-    # This function displays the current board state
-    # This is used when a player is playing
     def display(self):
+        """This function displays the current board state
+        This is used when a player is playing"""
+
         print("\n" + "="*65)
         print(" NOBLES ".center(65, "-"))
         print(self.tiles.render_row())
-        
+
         print(" BOARD ".center(65, "-"))
         print(f"Level 3:\n{self.decks[2].render_row()}")
         print(f"Level 2:\n{self.decks[1].render_row()}")
         print(f"Level 1:\n{self.decks[0].render_row()}")
-        
+
         print(" BANK ".center(65, "-"))
-        print(self.gemPile)
-        
+        print(self.gem_pile)
+
         print(" PLAYERS ".center(65, "-"))
         for i, p in enumerate(self.players):
             print(
-                f"P{i+1}: {p.points}pts | Gems: W:{p.gems['W']} U:{p.gems['U']} B:{p.gems['B']} R:{p.gems['R']} G:{p.gems['G']} Au:{p.gems['Au']} | "
-                f"Cards: W:{p.cards['W']} U:{p.cards['U']} B:{p.cards['B']} R:{p.cards['R']} G:{p.cards['G']}"
+                f"P{i+1}: {p.points}pts"
+                f" | Gems: W:{p.gems['W']} "
+                f"U:{p.gems['U']} "
+                f"B:{p.gems['B']} "
+                f"R:{p.gems['R']} "
+                f"G:{p.gems['G']} "
+                f"Au:{p.gems['Au']} | "
+                f"Cards: W:{p.cards['W']} "
+                f"U:{p.cards['U']} "
+                f"B:{p.cards['B']} "
+                f"R:{p.cards['R']} "
+                f"G:{p.cards['G']}"
             )
-            if i != self.turnPlayer:
+            if i != self.turn_player:
                 print(f"  Hand levels: {p.render_hand()}")
 
         print(" CURRENT TURN HAND ".center(65, "-"))
-        current_player = self.players[self.turnPlayer]
+        current_player = self.players[self.turn_player]
         hand_display = current_player.render_hand(is_current_player=True)
         for line in hand_display.splitlines():
             print(f"  {line}")
 
         print("="*65 + "\n")
 
-    def advanceTurnPlayer(self):
-        self.turnPlayer = (self.turnPlayer + 1) % self.playerCount
+    def advance_turn_player(self):
+        """This function advances the turn to the next 
+        player in a round-robin fashion."""
+        self.turn_player = (self.turn_player + 1) % self.player_count
 
-    # Check to see if the gem pile of that color has 4+ gems,
-    # If there is, take 2 gems from that total and add it to the turn player's reserve
-    # If there isn't, return a string outlining the error
-    def take2Gems(self, gemColor):
-        if self.gemPile.gems[gemColor] >= 4:
+    def take_2_gems(self, gem_color):
+        """ gem_color: str
+            Check to see if the gem pile of that color has 4+ gems,
+            If there is, take 2 gems from that total and add it to the turn player's reserve
+            If there isn't, return a string outlining the error"""
+        if self.gem_pile.gems[gem_color] >= 4:
             #Transfer 2 gems from the gem pile to the turn player
-            self.gemPile.gems[gemColor] -= 2
-            self.players[self.turnPlayer].gems[gemColor] += 2
+            self.gem_pile.gems[gem_color] -= 2
+            self.players[self.turn_player].gems[gem_color] += 2
             return True, ""
         else:
             return False, "Selected pile has fewer than 4 gems"
 
-    def take3Gems(self, gem1, gem2, gem3):
-        if (self.gemPile.gems[gem1] > 0 
-            and self.gemPile.gems[gem2] > 0 
-            and self.gemPile.gems[gem3] > 0):
+    def take_3_gems(self, gem1, gem2, gem3):
+        """ gem1, gem2, gem3: str
+            Check to see if the gem piles of the specified colors have at least one gem each,
+            If they do, take 1 gem from each and add it to the turn player's reserve
+            If not, return a string outlining the error"""
+        if (self.gem_pile.gems[gem1] > 0
+            and self.gem_pile.gems[gem2] > 0
+            and self.gem_pile.gems[gem3] > 0):
 
-            self.gemPile.gems[gem1] -= 1
-            self.gemPile.gems[gem2] -= 1
-            self.gemPile.gems[gem3] -= 1
+            self.gem_pile.gems[gem1] -= 1
+            self.gem_pile.gems[gem2] -= 1
+            self.gem_pile.gems[gem3] -= 1
 
-            self.players[self.turnPlayer].gems[gem1] += 1
-            self.players[self.turnPlayer].gems[gem2] += 1
-            self.players[self.turnPlayer].gems[gem3] += 1
+            self.players[self.turn_player].gems[gem1] += 1
+            self.players[self.turn_player].gems[gem2] += 1
+            self.players[self.turn_player].gems[gem3] += 1
 
             return True, ""
         else:
             return False, "Each selected pile must have at least one gem"
-        
-    def buyCard(self, player, card):
-        whiteValue = player.cards["W"] + player.gems["W"]
-        blueValue = player.cards["U"] + player.gems["U"]
-        blackValue = player.cards["B"] + player.gems["B"]
-        redValue = player.cards["R"] + player.gems["R"]
-        greenValue = player.cards["G"] + player.gems["G"]
+
+    def buy_card(self, player, card):
+        """
+        player: Player
+        card: Card
+        This function checks if the player can afford the card, 
+        and if they can, it deducts the appropriate gems and adds the card
+        to the player's collection.
+        """
+        white_value = player.cards["W"] + player.gems["W"]
+        blue_value = player.cards["U"] + player.gems["U"]
+        black_value = player.cards["B"] + player.gems["B"]
+        red_value = player.cards["R"] + player.gems["R"]
+        green_value = player.cards["G"] + player.gems["G"]
 
         #Calculates how short the player is to affording the card, to see if they have enough gold
-        costDefecit = ( max(card.white - whiteValue, 0) +
-            max(card.blue - blueValue, 0) +
-            max(card.black - blackValue, 0) +
-            max(card.red - redValue, 0) +
-            max(card.green - greenValue, 0) )
-        
-        if costDefecit > player.gems["Au"]:
+        cost_defecit = ( max(card.white - white_value, 0) +
+            max(card.blue - blue_value, 0) +
+            max(card.black - black_value, 0) +
+            max(card.red - red_value, 0) +
+            max(card.green - green_value, 0) )
+
+        if cost_defecit > player.gems["Au"]:
             return False, "Cannot afford card"
-        
+
         #Get the cost that the player will pay
-        whiteGemCost = min(card.white - player.cards["W"], player.gems["W"])
-        blueGemCost = min(card.blue - player.cards["U"], player.gems["U"])
-        blackGemCost = min(card.black - player.cards["B"], player.gems["B"])
-        redGemCost = min(card.red - player.cards["R"], player.gems["R"])
-        greenGemCost = min(card.green - player.cards["G"], player.gems["G"])
-        goldCost = costDefecit
+        white_gem_cost = min(card.white - player.cards["W"], player.gems["W"])
+        blue_gem_cost = min(card.blue - player.cards["U"], player.gems["U"])
+        black_gem_cost = min(card.black - player.cards["B"], player.gems["B"])
+        red_gem_cost = min(card.red - player.cards["R"], player.gems["R"])
+        green_gem_cost = min(card.green - player.cards["G"], player.gems["G"])
+        gold_cost = cost_defecit
 
         #Add the gems back to the pile and subtract them from the player
-        player.gems["W"] -= whiteGemCost
-        self.gemPile.gems["W"] += whiteGemCost
-        player.gems["U"] -= blueGemCost
-        self.gemPile.gems["U"] += blueGemCost
-        player.gems["B"] -= blackGemCost
-        self.gemPile.gems["B"] += blackGemCost
-        player.gems["R"] -= redGemCost
-        self.gemPile.gems["R"] += redGemCost
-        player.gems["G"] -= greenGemCost
-        self.gemPile.gems["G"] += greenGemCost
-        player.gems["Au"] -= goldCost
-        self.gemPile.gems["Au"] += goldCost
+        player.gems["W"] -= white_gem_cost
+        self.gem_pile.gems["W"] += white_gem_cost
+        player.gems["U"] -= blue_gem_cost
+        self.gem_pile.gems["U"] += blue_gem_cost
+        player.gems["B"] -= black_gem_cost
+        self.gem_pile.gems["B"] += black_gem_cost
+        player.gems["R"] -= red_gem_cost
+        self.gem_pile.gems["R"] += red_gem_cost
+        player.gems["G"] -= green_gem_cost
+        self.gem_pile.gems["G"] += green_gem_cost
+        player.gems["Au"] -= gold_cost
+        self.gem_pile.gems["Au"] += gold_cost
 
         # Add the card to the player
         player.cards[card.color] += 1
 
         return True, ""
-        
-    def buyBoardCard(self, level, row):
+
+    def buy_board_card(self, level, row):
+        """
+        level: int
+        row: int
+        This function checks if the player can afford the card on the board,
+        and if they can, it deducts the appropriate gems and adds the card
+        to the player's collection. It also replaces the card on the board 
+        with a new one from the deck.
+        """
 
         #level num MUST be 1, 2, or 3
         if level > 3 or level <= 0:
@@ -291,41 +357,53 @@ class Board:
         #row num MUST be 1, 2, 3, or 4
         elif row > 4 or row <= 0:
             return False, "Row must be 1, 2, 3, or 4"
-        
-        card = self.decks[level-1].field[row-1]
-        player = self.players[self.turnPlayer]
 
-        if card == None:
+        card = self.decks[level-1].field[row-1]
+        player = self.players[self.turn_player]
+
+        if card is None:
             return False, "There is no card there"
-        
-        Success, message = self.buyCard(player, card)
-        if(Success == False):
+
+        success, message = self.buy_card(player, card)
+        if not success:
             return False, message
 
         # Replace the card with the next one in the deck
-        self.decks[level - 1].replaceCard(row - 1)
+        self.decks[level - 1].replace_card(row - 1)
 
         return True, ""
-    
-    def buyHandCard(self, row):
 
-        player = self.players[self.turnPlayer]
+    def buy_hand_card(self, row):
+        """
+        row: int
+        This function checks if the player can afford the card in their hand,
+        and if they can, it deducts the appropriate gems and adds the card
+        to the player's collection. It also removes the card from the player's hand."""
+
+        player = self.players[self.turn_player]
 
         if row > len(player.hand) or row <= 0:
             return False, "Row must be 1, 2, or 3"
-        
+
         card = player.hand[row-1]
 
-        Success, message = self.buyCard(player, card)
-        if(Success == False):
+        success, message = self.buy_card(player, card)
+        if not success:
             return False, message
-        
+
         player.hand.pop(row-1)
         return True, ""
 
-    def reserveCard(self, level, row):
-        
-        player = self.players[self.turnPlayer]
+    def reserve_card(self, level, row):
+        """
+        level: int
+        row: int
+        This function allows the player to reserve a card from the board or the deck.
+        The reserved card is added to the player's hand, and if possible, 
+        the player also receives a gold gem from the gem pile.
+        """
+
+        player = self.players[self.turn_player]
 
         if len(player.hand) >= 3:
             return False, "You already have 3 cards in hand"
@@ -343,50 +421,60 @@ class Board:
             deck = self.decks[level-1]
             if not deck.cards:
                 return False, "Deck is empty"
-            
-            topCard = deck.cards.pop()
-            player.hand.append(topCard)
+
+            top_card = deck.cards.pop()
+            player.hand.append(top_card)
         else:
             card = self.decks[level-1].field[row-1]
-            if card == None:
+            if card is None:
                 return False, "There is no card there"
-            
+
             player.hand.append(card)
-            self.decks[level - 1].replaceCard(row - 1)
-        
-        if self.gemPile.gems["Au"] > 0:
+            self.decks[level - 1].replace_card(row - 1)
+
+        if self.gem_pile.gems["Au"] > 0:
             player.gems["Au"] += 1
-            self.gemPile.gems["Au"] -= 1
+            self.gem_pile.gems["Au"] -= 1
 
         return True, ""
-    
-    def checkNobles(self):
-        player = self.players[self.turnPlayer]
+
+    def check_nobles(self):
+        """
+        This function checks if the current player meets the requirements to claim a noble tile.
+        If they do, the tile is added to their collection and removed from the board."""
+
+        player = self.players[self.turn_player]
         for tile in self.tiles.tiles:
             if (player.cards["W"] >= tile.white and
                 player.cards["U"] >= tile.blue and
                 player.cards["B"] >= tile.black and
                 player.cards["R"] >= tile.red and
                 player.cards["G"] >= tile.green):
-                
+
                 player.points += tile.points
                 player.tiles.append(tile)
                 self.tiles.tiles.remove(tile)
-                
+
                 break  # Assuming a player can claim only one noble per turn
 
-    def checkVictory(self):
-        if self.turnPlayer == self.startingPlayer:
-            maxPoints = 0
+    def check_victory(self):
+        """
+        This function checks to see if a player has won by reaching 15 points or more.
+        It only checks at the end of each turn cycle. 
+        Returns the winning player if there is one, otherwise returns None."""
+        if self.turn_player == self.starting_player:
+            max_points = 0
             winner = None
             for player in self.players:
-                if player.points >= 15 and player.points > maxPoints:
+                if player.points >= 15 and player.points > max_points:
                     winner = player
-                    maxPoints = player.points
+                    max_points = player.points
 
             return winner
 
 class ActionType(Enum):
+    """Defines the types of actions a player can take in the game."""
+
     TAKE_GEMS = "take_gems"
     BUY_BOARD_CARD = "buy_board_card"
     BUY_HAND_CARD = "buy_hand_card"
@@ -394,12 +482,18 @@ class ActionType(Enum):
 
 @dataclass(frozen=True)
 class Action:
+    """Represents an action taken by a player in the game."""
     action_type: ActionType
     colors: tuple[str, ...] = ()
     level: int | None = None
     row: int | None = None
 
 class Player:
+    """
+    Represents a player in the game, 
+    including their name, hand, points, tiles, gems, and cards.
+    """
+
     def __init__(self):
 
         self.name = ""
@@ -426,6 +520,10 @@ class Player:
         }
 
     def render_hand(self, is_current_player=False):
+        """Renders the player's hand of cards.
+        If is_current_player is True, it renders the full card details.
+        Otherwise, it only shows the levels of the cards in hand."""
+
         if not self.hand:
             return "(empty)"
 
@@ -445,74 +543,86 @@ class Player:
         return "[" + ", ".join(f"L{card.level}" for card in self.hand) + "]"
 
 
-
 class Game:
-    def __init__(self, playerCount):
-        self.board = Board(playerCount)
+    """Represents the overall game, managing the game state.
+    It takes and processes user actions"""
+    def __init__(self, player_count):
+        self.board = Board(player_count)
         self.play()
 
     def play(self):
+        """
+        This function runs the main game loop, alternating turns between players
+        until a player wins. It handles action-taking and victory checking.
+        """
         while True:
             # First, turn player takes an action
-            self.takeAction()
+            self.take_action()
 
-            self.board.checkNobles()
+            self.board.check_nobles()
 
-            winner = self.board.checkVictory()
+            winner = self.board.check_victory()
             if winner:
                 print(f"Player {winner.name} has won the game!")
                 break
 
             # Second, advance the turn player
-            self.board.advanceTurnPlayer()
+            self.board.advance_turn_player()
 
-    def takeAction(self):
-        # TODO Replace this with IsHuman when adding bots
-        if True:
-            self.takeHumanAction()
-        else:
-            self.takeBotAction()
+    def take_action(self):
+        """
+        This function takes an action from the current player.
+        It can be either a human player or an AI agent.
+        Currently only handles human players
+        """
+        # For now, we will assume all players are human
+        self.take_human_action()
 
     # Provides input for a human to take action
-    def takeHumanAction(self):
+    def take_human_action(self):
+        """
+        This function handles the action-taking process for a human player.
+        It displays the board, prompts for input, and processes the action.
+        If the action is invalid, it displays an error message and prompts again."""
         message = None
         while True:
             #1. Display the board so the human can see the current state
             self.board.display()
 
             #2. Check to see if their are any existing error messages
-            if message != None:
+            if message is not None:
                 #Print error message
                 print("ERROR: " + message)
 
             #2. Get their input at a string
-            input = self.getHumanInput()
+            user_input = self.get_human_input()
 
             #3. Process their input within the game
-            success, message = self.processHumanAction(input)
+            success, message = self.process_human_action(user_input)
 
-            if success == True:
+            if success is True:
                 # The move was valid, return
                 break
 
-    # def takeRandomAction(self):
-        
-            
-
-    def getHumanInput(self) -> Action:
-        print(f"Player {self.board.turnPlayer + 1}'s Turn")
+    def get_human_input(self) -> Action:
+        """
+        This function prompts the human player for input and returns an Action object.
+        It handles different types of actions, including taking gems, 
+        purchasing cards, and reserving cards.
+        """
+        print(f"Player {self.board.turn_player + 1}'s Turn")
         print("Choose an action:")
         print("1. Take Gems (e.g., 'W U G' or 'RR')")
         print("2. Purchase Card on the board (e.g., 'P L1 2' for Level 1, Card 2)")
         print("3. Purchase Card in your hand (e.g., 'P H 2' for the 2nd card in your hand)")
         print("4. Reserve Card (e.g., 'E L2 1')")
-        
+
         choice = input("> ").strip().upper().replace(" ", "")
-        
-        if (choice.startswith('W') or 
-            choice.startswith('U') or 
-            choice.startswith('B') or 
-            choice.startswith('R') or 
+
+        if (choice.startswith('W') or
+            choice.startswith('U') or
+            choice.startswith('B') or
+            choice.startswith('R') or
             choice.startswith('G')):
             return Action(action_type=ActionType.TAKE_GEMS, colors=tuple(choice))
         elif choice.startswith('P'):
@@ -541,23 +651,26 @@ class Game:
                     print("Invalid input for reserving a card. Please use 'E L# #' format.")
         else:
             print("Invalid action. Please try again.")
-        
+
         return None
-    
-    # input: string move
-    # This function takes a user action and returns an Action object
-    # return: string indicating if there is an error
-    def processHumanAction(self, move):
+
+    def process_human_action(self, move):
+        """
+        move: str
+        This function processes the human player's action based on their input.
+        It validates the action and executes it on the game board.
+        Returns a tuple (success: bool, message: str) indicating whether the action was successful
+        and any error message if applicable."""
         if not move:
             return False, "Action cannot be empty"
-    
+
         match move[0]:
             #If it starts with a color character, the user is taking gems
             case 'W' | 'U' | 'B' | 'R' | 'G' :
                 match len(move):
                     case 2: #Taking 2 of the same gem
                         if move[0] == move[1]:
-                            return self.board.take2Gems(move[0])
+                            return self.board.take_2_gems(move[0])
                         else:
                             return False, "Taking 2 gems must be the same color"
                     case 3: #Taking 3 different gems
@@ -566,7 +679,7 @@ class Game:
                             and move[1] != move[2]
                             and move[1] in {'W', 'U', 'B', 'R', 'G'}
                             and move[2] in {'W', 'U', 'B', 'R', 'G'}):
-                            return self.board.take3Gems(move[0], move[1], move[2])
+                            return self.board.take_3_gems(move[0], move[1], move[2])
                         else:
                             return False, "When taking 3 gems, they must all be different"
                     case _:
@@ -576,18 +689,18 @@ class Game:
                 if len(move) == 4 and move[1] == 'L':
                     try:
                         #Get the level and row of the card
-                        levelNum = int(move[2])
-                        rowNum = int(move[3])
+                        level_num = int(move[2])
+                        row_num = int(move[3])
 
-                        return self.board.buyBoardCard(levelNum, rowNum)
+                        return self.board.buy_board_card(level_num, row_num)
                     except ValueError:
                         return False, "Invalid purchase input, please put P -> L -> # #"
                 elif len(move) == 3 and move[1] == 'H':
                     try:
                         #Get the row of the card in hand
-                        rowNum = int(move[2])
+                        row_num = int(move[2])
 
-                        return self.board.buyHandCard(rowNum)
+                        return self.board.buy_hand_card(row_num)
                     except ValueError:
                         return False, "Invalid purchase input, please put P -> H -> #"
                 else:
@@ -597,10 +710,10 @@ class Game:
                 if len(move) == 4 and move[1] == 'L':
                     try:
                         #Get the level and row of the card
-                        levelNum = int(move[2])
-                        rowNum = int(move[3])
+                        level_num = int(move[2])
+                        row_num = int(move[3])
 
-                        return self.board.reserveCard(levelNum, rowNum)
+                        return self.board.reserve_card(level_num, row_num)
                     except ValueError:
                         return False, "Invalid reservation input, please put E -> L -> # #"
                 else:
@@ -609,32 +722,35 @@ class Game:
             case _ :
                 return False, "Unknown First Character"
 
-    def executeAction(self, action: Action):
+    def execute_action(self, action: Action):
+        """
+        action: Action
+        This function executes the given action on the game board.
+        It validates the action type and parameters, and calls the appropriate method on the board.
+        Returns a tuple (success: bool, message: str) indicating whether the action was successful
+        and any error message if applicable.
+        """
         if action.action_type == ActionType.TAKE_GEMS:
             if len(action.colors) == 2 and action.colors[0] == action.colors[1]:
-                return self.board.take2Gems(action.colors[0])
+                return self.board.take_2_gems(action.colors[0])
             elif len(action.colors) == 3 and len(set(action.colors)) == 3:
-                return self.board.take3Gems(*action.colors)
+                return self.board.take_3_gems(*action.colors)
             else:
                 return False, "Invalid gem selection"
         elif action.action_type == ActionType.BUY_BOARD_CARD:
             if action.level is not None and action.row is not None:
-                return self.board.buyBoardCard(action.level, action.row)
+                return self.board.buy_board_card(action.level, action.row)
             else:
                 return False, "Level and row must be specified for buying a board card"
         elif action.action_type == ActionType.BUY_HAND_CARD:
             if action.row is not None:
-                return self.board.buyHandCard(action.row)
+                return self.board.buy_hand_card(action.row)
             else:
                 return False, "Row must be specified for buying a hand card"
         elif action.action_type == ActionType.RESERVE_CARD:
             if action.level is not None and action.row is not None:
-                return self.board.reserveCard(action.level, action.row)
+                return self.board.reserve_card(action.level, action.row)
             else:
                 return False, "Level and row must be specified for reserving a card"
         else:
             return False, "Unknown action type"
-
-
-            
-
