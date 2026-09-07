@@ -628,26 +628,24 @@ class Game:
             choice.startswith('G')):
             return Action(action_type=ActionType.TAKE_GEMS, colors=tuple(choice))
         elif choice.startswith('P'):
-            parts = choice.split()
-            if len(parts) == 4 and parts[1] == 'L':
+            if len(choice) == 4 and choice[1] == 'L':
                 try:
-                    level = int(parts[2])
-                    row = int(parts[3])
+                    level = int(choice[2])
+                    row = int(choice[3])
                     return Action(action_type=ActionType.BUY_BOARD_CARD, level=level, row=row)
                 except ValueError:
                     print("Invalid input for board card purchase. Please use 'P L# #' format.")
-            elif len(parts) == 3 and parts[1] == 'H':
+            elif len(choice) == 3 and choice[1] == 'H':
                 try:
-                    row = int(parts[2])
+                    row = int(choice[2])
                     return Action(action_type=ActionType.BUY_HAND_CARD, row=row)
                 except ValueError:
                     print("Invalid input for hand card purchase. Please use 'P H #' format.")
         elif choice.startswith('E'):
-            parts = choice.split()
-            if len(parts) == 4 and parts[1] == 'L':
+            if len(choice) == 4 and choice[1] == 'L':
                 try:
-                    level = int(parts[2])
-                    row = int(parts[3])
+                    level = int(choice[2])
+                    row = int(choice[3])
                     return Action(action_type=ActionType.RESERVE_CARD, level=level, row=row)
                 except ValueError:
                     print("Invalid input for reserving a card. Please use 'E L# #' format.")
@@ -656,9 +654,9 @@ class Game:
 
         return None
 
-    def process_human_action(self, move):
+    def process_human_action(self, move: Action):
         """
-        move: str
+        move: Action
         This function processes the human player's action based on their input.
         It validates the action and executes it on the game board.
         Returns a tuple (success: bool, message: str) indicating whether the action was successful
@@ -666,63 +664,45 @@ class Game:
         if not move:
             return False, "Action cannot be empty"
 
-        match move[0]:
+        match move.action_type:
             #If it starts with a color character, the user is taking gems
-            case 'W' | 'U' | 'B' | 'R' | 'G' :
-                match len(move):
+            case ActionType.TAKE_GEMS:
+                match len(move.colors):
                     case 2: #Taking 2 of the same gem
-                        if move[0] == move[1]:
-                            return self.board.take_2_gems(move[0])
+                        if move.colors[0] == move.colors[1]:
+                            return self.board.take_2_gems(move.colors[0])
                         else:
                             return False, "Taking 2 gems must be the same color"
                     case 3: #Taking 3 different gems
-                        if (move[0] != move[1]
-                            and move[0] != move[2]
-                            and move[1] != move[2]
-                            and move[1] in {'W', 'U', 'B', 'R', 'G'}
-                            and move[2] in {'W', 'U', 'B', 'R', 'G'}):
-                            return self.board.take_3_gems(move[0], move[1], move[2])
+                        if (move.colors[0] != move.colors[1]
+                            and move.colors[0] != move.colors[2]
+                            and move.colors[1] != move.colors[2]
+                            and all(color in {'W', 'U', 'B', 'R', 'G'} for color in move.colors)):
+                            return self.board.take_3_gems(*move.colors)
                         else:
                             return False, "When taking 3 gems, they must all be different"
                     case _:
                         return False, "Can only take 2 or 3 gems"
-            #Purchasing a card
-            case 'P':
-                if len(move) == 4 and move[1] == 'L':
-                    try:
-                        #Get the level and row of the card
-                        level_num = int(move[2])
-                        row_num = int(move[3])
-
-                        return self.board.buy_board_card(level_num, row_num)
-                    except ValueError:
-                        return False, "Invalid purchase input, please put P -> L -> # #"
-                elif len(move) == 3 and move[1] == 'H':
-                    try:
-                        #Get the row of the card in hand
-                        row_num = int(move[2])
-
-                        return self.board.buy_hand_card(row_num)
-                    except ValueError:
-                        return False, "Invalid purchase input, please put P -> H -> #"
+            #Purchasing a card from the board
+            case ActionType.BUY_BOARD_CARD:
+                if move.level is not None and move.row is not None:
+                    return self.board.buy_board_card(move.level, move.row)
                 else:
-                    return False, "P must be followed by L or H"
+                    return False, "Level and row must be specified for buying a board card"
+            #Purchasing a card from the hand
+            case ActionType.BUY_HAND_CARD:
+                if move.row is not None:
+                    return self.board.buy_hand_card(move.row)
+                else:
+                    return False, "Row must be specified for buying a hand card"
             #Reserving a card
-            case 'E':
-                if len(move) == 4 and move[1] == 'L':
-                    try:
-                        #Get the level and row of the card
-                        level_num = int(move[2])
-                        row_num = int(move[3])
-
-                        return self.board.reserve_card(level_num, row_num)
-                    except ValueError:
-                        return False, "Invalid reservation input, please put E -> L -> # #"
+            case ActionType.RESERVE_CARD:
+                if move.level is not None and move.row is not None:
+                    return self.board.reserve_card(move.level, move.row)
                 else:
-                    return False, "E must be followed by L, putting the level of the card"
+                    return False, "Level and row must be specified for reserving a card"
 
-            case _ :
-                return False, "Unknown First Character"
+        return False, "Unknown action type"
 
     def execute_action(self, action: Action):
         """
