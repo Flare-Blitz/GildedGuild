@@ -667,45 +667,52 @@ class Game:
         if not move:
             return False, "Action cannot be empty"
 
-        match move.action_type:
-            #If it starts with a color character, the user is taking gems
-            case ActionType.TAKE_GEMS:
-                match len(move.colors):
-                    case 2: #Taking 2 of the same gem
-                        if move.colors[0] == move.colors[1]:
-                            return self.board.take_2_gems(move.colors[0])
-                        else:
-                            return False, "Taking 2 gems must be the same color"
-                    case 3: #Taking 3 different gems
-                        if (move.colors[0] != move.colors[1]
-                            and move.colors[0] != move.colors[2]
-                            and move.colors[1] != move.colors[2]
-                            and all(color in {'W', 'U', 'B', 'R', 'G'} for color in move.colors)):
-                            return self.board.take_3_gems(*move.colors)
-                        else:
-                            return False, "When taking 3 gems, they must all be different"
-                    case _:
-                        return False, "Can only take 2 or 3 gems"
-            #Purchasing a card from the board
-            case ActionType.BUY_BOARD_CARD:
-                if move.level is not None and move.row is not None:
-                    return self.board.buy_board_card(move.level, move.row)
-                else:
-                    return False, "Level and row must be specified for buying a board card"
-            #Purchasing a card from the hand
-            case ActionType.BUY_HAND_CARD:
-                if move.row is not None:
-                    return self.board.buy_hand_card(move.row)
-                else:
-                    return False, "Row must be specified for buying a hand card"
-            #Reserving a card
-            case ActionType.RESERVE_CARD:
-                if move.level is not None and move.row is not None:
-                    return self.board.reserve_card(move.level, move.row)
-                else:
-                    return False, "Level and row must be specified for reserving a card"
+        handlers = {
+            ActionType.TAKE_GEMS: self._process_take_gems,
+            ActionType.BUY_BOARD_CARD: self._process_buy_board_card,
+            ActionType.BUY_HAND_CARD: self._process_buy_hand_card,
+            ActionType.RESERVE_CARD: self._process_reserve_card,
+        }
+        handler = handlers.get(move.action_type)
+        if handler is None:
+            return False, "Unknown action type"
+        return handler(move)
 
-        return False, "Unknown action type"
+    def _process_take_gems(self, move: Action):
+        """Validate and execute a gem-taking action."""
+        if len(move.colors) == 2:
+            if move.colors[0] == move.colors[1]:
+                return self.board.take_2_gems(move.colors[0])
+            return False, "Taking 2 gems must be the same color"
+
+        if len(move.colors) == 3:
+            valid_colors = all(color in {'W', 'U', 'B', 'R', 'G'}
+                               for color in move.colors)
+            if len(set(move.colors)) == 3 and valid_colors:
+                return self.board.take_3_gems(*move.colors)
+            return False, "When taking 3 gems, they must all be different"
+
+        return False, "Can only take 2 or 3 gems"
+
+    def _process_buy_board_card(self, move: Action):
+        """Validate and execute a board-card purchase."""
+        if move.level is None or move.row is None:
+            return False, "Level and row must be specified for buying a board card"
+        return self.board.buy_board_card(move.level, move.row)
+
+    def _process_buy_hand_card(self, move: Action):
+        """Validate and execute a hand-card purchase."""
+        if move.row is None:
+            return False, "Row must be specified for buying a hand card"
+        return self.board.buy_hand_card(move.row)
+
+    def _process_reserve_card(self, move: Action):
+        """Validate and execute a card reservation."""
+        if move.level is None or move.row is None:
+            return False, "Level and row must be specified for reserving a card"
+        return self.board.reserve_card(move.level, move.row)
+
+
 
     def execute_action(self, action: Action):
         """
