@@ -88,3 +88,31 @@
     Prompt: Should the action be unstructured, or should I create a new class for it?
     AI Output: Recommended creating a structured immutable `Action` dataclass with an action type and optional fields for colors, level, and row. This provides a consistent interface for human parsing, random bots, and future machine-learning agents.
     My Modifications: I have not started implementing the random move feature. I focused on refactoring the move-processing design around a structured action class and a universal action executor.
+
+- Date: 2026-09-07
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: I'm learning how to use PyLint, can you show me how I can view the Pylint github action workflow errors in VsCode?
+    AI Output: Explained how to use the GitHub Actions extension and the Problems panel in VS Code to view workflow logs and local Pylint diagnostics. Clarified that the current workflow reports errors in the GitHub Actions log rather than directly in the Problems panel.
+    My Modifications: I reviewed the workflow and learned how to inspect Pylint results locally and through GitHub Actions.
+
+- Date: 2026-09-07
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: How can I configure pylint to change numbers, such as the number of attributes alloted for a class?
+    AI Output: Explained that Pylint design limits such as `max-attributes` can be configured in `.pylintrc` under `[DESIGN]` or in `pyproject.toml` under `[tool.pylint.design]`. Also explained how to override a setting temporarily from the command line.
+    My Modifications: I learned how to configure Pylint design thresholds for the project.
+
+- Date: 2026-09-07
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: What is the best practice location to place the file in my current directory, it seems weird to me for it to be its own dedicated file in the root folder
+    AI Output: Recommended keeping a root-level `.pylintrc` because it applies consistently to the repository and GitHub Actions. Also described using a root-level `pyproject.toml` as a modern alternative.
+    My Modifications: I considered where shared Pylint configuration should live in the repository.
+
+- Date: 2026-09-07
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Is it good practice to have three different pylints running, on three different versions?
+    AI Output: Explained that running the same lint command across multiple Python versions is usually unnecessary because linting and runtime compatibility testing serve different purposes. Recommended running Pylint once with a pinned version and using a matrix for tests.
+    My Modifications: Removed version 3.8, as some of the code I used was depreciated, and it was no longer supported.
