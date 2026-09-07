@@ -463,7 +463,8 @@ class Board:
         """
         This function checks to see if a player has won by reaching 15 points or more.
         It only checks at the end of each turn cycle. 
-        Returns the winning player if there is one, otherwise returns None."""
+        Returns the winning player if there is one, otherwise returns None.
+        """
         if self.turn_player == self.starting_player:
             max_points = 0
             winner = None
@@ -473,6 +474,8 @@ class Board:
                     max_points = player.points
 
             return winner
+
+        return None
 
 class ActionType(Enum):
     """Defines the types of actions a player can take in the game."""
@@ -490,7 +493,7 @@ class Action:
     level: int | None = None
     row: int | None = None
 
-class Player:
+class Player: # pylint: disable=too-few-public-methods
     """
     Represents a player in the game, 
     including their name, hand, points, tiles, gems, and cards.
@@ -627,7 +630,7 @@ class Game:
             choice.startswith('R') or
             choice.startswith('G')):
             return Action(action_type=ActionType.TAKE_GEMS, colors=tuple(choice))
-        elif choice.startswith('P'):
+        if choice.startswith('P'):
             if len(choice) == 4 and choice[1] == 'L':
                 try:
                     level = int(choice[2])
@@ -641,7 +644,7 @@ class Game:
                     return Action(action_type=ActionType.BUY_HAND_CARD, row=row)
                 except ValueError:
                     print("Invalid input for hand card purchase. Please use 'P H #' format.")
-        elif choice.startswith('E'):
+        if choice.startswith('E'):
             if len(choice) == 4 and choice[1] == 'L':
                 try:
                     level = int(choice[2])
@@ -712,27 +715,26 @@ class Game:
         Returns a tuple (success: bool, message: str) indicating whether the action was successful
         and any error message if applicable.
         """
+
+        error = "Unknown action type"
+
         if action.action_type == ActionType.TAKE_GEMS:
             if len(action.colors) == 2 and action.colors[0] == action.colors[1]:
                 return self.board.take_2_gems(action.colors[0])
-            elif len(action.colors) == 3 and len(set(action.colors)) == 3:
+            if len(action.colors) == 3 and len(set(action.colors)) == 3:
                 return self.board.take_3_gems(*action.colors)
-            else:
-                return False, "Invalid gem selection"
+            error = "Invalid gem selection"
         elif action.action_type == ActionType.BUY_BOARD_CARD:
             if action.level is not None and action.row is not None:
                 return self.board.buy_board_card(action.level, action.row)
-            else:
-                return False, "Level and row must be specified for buying a board card"
+            error = "Level and row must be specified for buying a board card"
         elif action.action_type == ActionType.BUY_HAND_CARD:
             if action.row is not None:
                 return self.board.buy_hand_card(action.row)
-            else:
-                return False, "Row must be specified for buying a hand card"
+            error = "Row must be specified for buying a hand card"
         elif action.action_type == ActionType.RESERVE_CARD:
             if action.level is not None and action.row is not None:
                 return self.board.reserve_card(action.level, action.row)
-            else:
-                return False, "Level and row must be specified for reserving a card"
-        else:
-            return False, "Unknown action type"
+            error = "Level and row must be specified for reserving a card"
+
+        return False, error
