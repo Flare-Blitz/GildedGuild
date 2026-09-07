@@ -1,9 +1,9 @@
-name: Pylint
+name: linter
 
 on: [push]
 
 jobs:
-  build:
+  pylint:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -21,3 +21,17 @@ jobs:
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files '*.py')
+
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+    - name: Install dependencies
+      run: |
+        npm install -g eslint
+    - name: Analysing the code with eslint
+      run: |
+        eslint $(git ls-files '*.js')
