@@ -145,7 +145,7 @@ class Tile:
             "╚═════════╝"
         ]
 
-class TileDeck:
+class TileDeck: # pylint: disable=too-few-public-methods
     """Represents the collection of noble tiles in the game."""
 
     def __init__(self, cards):
@@ -168,7 +168,7 @@ class TileDeck:
         return "\n".join("  ".join(row) for row in zip(*rendered))
 
 
-class GemPile:
+class GemPile: # pylint: disable=too-few-public-methods
     """Represents the pile of gems available in the game."""
 
     def __init__(self, player_count):
@@ -268,8 +268,8 @@ class Board:
             self.gem_pile.gems[gem_color] -= 2
             self.players[self.turn_player].gems[gem_color] += 2
             return True, ""
-        else:
-            return False, "Selected pile has fewer than 4 gems"
+
+        return False, "Selected pile has fewer than 4 gems"
 
     def take_3_gems(self, gem1, gem2, gem3):
         """ gem1, gem2, gem3: str
@@ -289,8 +289,8 @@ class Board:
             self.players[self.turn_player].gems[gem3] += 1
 
             return True, ""
-        else:
-            return False, "Each selected pile must have at least one gem"
+
+        return False, "Each selected pile must have at least one gem"
 
     def buy_card(self, player, card):
         """
@@ -357,7 +357,7 @@ class Board:
         if level > 3 or level <= 0:
             return False, "Level must be 1, 2, or 3"
         #row num MUST be 1, 2, 3, or 4
-        elif row > 4 or row <= 0:
+        if row > 4 or row <= 0:
             return False, "Row must be 1, 2, 3, or 4"
 
         card = self.decks[level-1].field[row-1]
@@ -415,7 +415,7 @@ class Board:
         if level > 3 or level <= 0:
             return False, "Level must be 1, 2, or 3"
         #row num MUST be 0, 1, 2, 3, or 4
-        elif row > 4 or row < 0:
+        if row > 4 or row < 0:
             return False, "Row must be 0, 1, 2, 3, or 4"
 
         #if row is 0, reserve the top card of the deck
