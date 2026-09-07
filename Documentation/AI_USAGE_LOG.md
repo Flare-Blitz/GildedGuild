@@ -116,3 +116,10 @@
     Prompt: Is it good practice to have three different pylints running, on three different versions?
     AI Output: Explained that running the same lint command across multiple Python versions is usually unnecessary because linting and runtime compatibility testing serve different purposes. Recommended running Pylint once with a pinned version and using a matrix for tests.
     My Modifications: Removed version 3.8, as some of the code I used was depreciated, and it was no longer supported.
+
+- Date: 2026-09-07
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Python 3.9 doesn't support the level and row declaration of the Action object, should I refactor my code to work with 3.9, and how difficult of a fix would it be? I currently check version 3.9 for pylint.
+    AI Output: Explained that `int | None` requires Python 3.10, while `tuple[str, ...]` is supported in Python 3.9. Recommended using `Optional[int]` and keeping Python 3.9 support because the GitHub Actions workflow tests Python 3.9.
+    My Modifications: Updated the Action annotations to use `Optional[int]`.
