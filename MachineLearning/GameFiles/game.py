@@ -8,6 +8,7 @@ from enum import Enum
 import json
 from dataclasses import dataclass
 import random
+from typing import Optional
 
 @dataclass
 class Cost:
@@ -490,8 +491,8 @@ class Action:
     """Represents an action taken by a player in the game."""
     action_type: ActionType
     colors: tuple[str, ...] = ()
-    level: int | None = None
-    row: int | None = None
+    level: Optional[int] = None
+    row: Optional[int] = None
 
 class Player: # pylint: disable=too-few-public-methods
     """
