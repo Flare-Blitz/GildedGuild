@@ -9,14 +9,14 @@ import json
 from dataclasses import dataclass
 import random
 
+@dataclass
 class Cost:
-    """Represents the cost of a tile in terms of gems."""
-    def __init__(self, white=0, blue=0, black=0, red=0, green=0):
-        self.white = white
-        self.blue = blue
-        self.black = black
-        self.red = red
-        self.green = green
+    """Represents the cost of a tile in terms of different colored gems."""
+    white: int = 0
+    blue: int = 0
+    black: int = 0
+    red: int = 0
+    green: int = 0
 
 @dataclass
 class Card:
