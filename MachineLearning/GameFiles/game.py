@@ -9,6 +9,15 @@ import json
 from dataclasses import dataclass
 import random
 
+class Cost:
+    """Represents the cost of a tile in terms of gems."""
+    def __init__(self, white=0, blue=0, black=0, red=0, green=0):
+        self.white = white
+        self.blue = blue
+        self.black = black
+        self.red = red
+        self.green = green
+
 @dataclass
 class Card:
     """Represents a card in the game."""
@@ -93,43 +102,32 @@ class Tile:
     """Defines a tile in the game, 
     which represents a noble with specific requirements and points."""
 
-    def __init__(self, points, white, blue, black, red, green):
-        self.points = points
-        self.white = white
-        self.blue = blue
-        self.black = black
-        self.red = red
-        self.green = green
-    points: int = 0
-    white: int = 0
-    blue: int = 0
-    black: int = 0
-    red: int = 0
-    green: int = 0
+    points: int
+    cost: Cost
 
     def render(self):
         """Returns a list of strings representing the tile."""
         pts = str(self.points)
         costs = []
-        if self.white:
-            costs.append(f"\033[97m{self.white}\033[0m")
-        if self.blue:
-            costs.append(f"\033[94m{self.blue}\033[0m")
-        if self.black:
-            costs.append(f"\033[95m{self.black}\033[0m")
-        if self.red:
-            costs.append(f"\033[91m{self.red}\033[0m")
-        if self.green:
-            costs.append(f"\033[92m{self.green}\033[0m")
+        if self.cost.white:
+            costs.append(f"\033[97m{self.cost.white}\033[0m")
+        if self.cost.blue:
+            costs.append(f"\033[94m{self.cost.blue}\033[0m")
+        if self.cost.black:
+            costs.append(f"\033[95m{self.cost.black}\033[0m")
+        if self.cost.red:
+            costs.append(f"\033[91m{self.cost.red}\033[0m")
+        if self.cost.green:
+            costs.append(f"\033[92m{self.cost.green}\033[0m")
 
         # Calculate visible length to fix padding (ANSI codes are 0-width)
         visible_costs = [
             str(v) for v in [
-                self.white,
-                self.blue,
-                self.green,
-                self.red,
-                self.black] if v > 0]
+                self.cost.white,
+                self.cost.blue,
+                self.cost.green,
+                self.cost.red,
+                self.cost.black] if v > 0]
 
         actual_len = ( sum(len(s) for s in visible_costs) +
             (len(visible_costs) - 1 if visible_costs else 0) )
@@ -158,7 +156,11 @@ class TileDeck:
                 tile_data = data.pop(random.randint(0, len(data) - 1))
                 # Mapping logic if tiles.json uses uppercase keys
                 normalized = {k.lower(): v for k, v in tile_data.items()}
-                self.tiles.append(Tile(**normalized))
+                cost = Cost(**{
+                    color: normalized[color]
+                    for color in ("white", "blue", "black", "red", "green")
+                })
+                self.tiles.append(Tile(points=normalized["points"], cost=cost))
 
     def render_row(self):
         """Renders the tiles side-by-side."""
@@ -445,11 +447,11 @@ class Board:
 
         player = self.players[self.turn_player]
         for tile in self.tiles.tiles:
-            if (player.cards["W"] >= tile.white and
-                player.cards["U"] >= tile.blue and
-                player.cards["B"] >= tile.black and
-                player.cards["R"] >= tile.red and
-                player.cards["G"] >= tile.green):
+            if (player.cards["W"] >= tile.cost.white and
+                player.cards["U"] >= tile.cost.blue and
+                player.cards["B"] >= tile.cost.black and
+                player.cards["R"] >= tile.cost.red and
+                player.cards["G"] >= tile.cost.green):
 
                 player.points += tile.points
                 player.tiles.append(tile)
