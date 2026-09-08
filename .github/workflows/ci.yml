@@ -32,7 +32,7 @@ jobs:
     - name: Install dependencies
       working-directory: frontend
       run: |
-        npm install -g eslint
+        npm ci
     - name: Analysing the code with eslint
       working-directory: frontend
       run: |
