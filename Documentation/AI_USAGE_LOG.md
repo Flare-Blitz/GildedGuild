@@ -123,3 +123,24 @@
     Prompt: Python 3.9 doesn't support the level and row declaration of the Action object, should I refactor my code to work with 3.9, and how difficult of a fix would it be? I currently check version 3.9 for pylint.
     AI Output: Explained that `int | None` requires Python 3.10, while `tuple[str, ...]` is supported in Python 3.9. Recommended using `Optional[int]` and keeping Python 3.9 support because the GitHub Actions workflow tests Python 3.9.
     My Modifications: Updated the Action annotations to use `Optional[int]`.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Should my ESLint configuration be in a different workflow file from Pylint? Insert this prompt into my AI_Usage_Log.md file, outline how I modified the Pylint linter to be a more generic ci.yml, and added ESLint to the flow.
+    AI Output: Recommended keeping ESLint and Pylint in the same CI workflow when they are both used for pull-request validation. Suggested organizing them as separate jobs in a shared `ci.yml`, while reserving separate workflow files for tasks with different triggers, permissions, or lifecycles.
+    My Modifications: I updated the Pylint workflow into a more generic `ci.yml` workflow and added ESLint as a separate linting job within the same CI pipeline.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: I'm setting up a linter for github: eslint $(git ls-files '*.js'), what is my solution to get around this issue, do I need to update my linter?
+    AI Output: Explained that the workflow was installing the latest global ESLint, which could be ESLint 10, while the project dependencies use ESLint 9 and `eslint-plugin-react@7.37.5`. Recommended changing to the `frontend` working directory, running `npm ci` to install the lockfile-pinned dependencies, and running `npm run lint` so the local ESLint executable is used.
+    My Modifications: I followed the commands by navigating to `frontend` and running `npm ci`, installing the proper project dependencies. I updated the GitHub Actions ESLint job to use `npm ci` and `npm run lint` instead of installing ESLint globally and calling `eslint $(git ls-files '*.js')`.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: How can I verify that the linter is working?
+    AI Output: Recommended running `npm run lint` from the `frontend` directory, checking the installed versions with `npx --no-install eslint --version` and `npm ls eslint eslint-plugin-react`, and verifying that an intentionally invalid stdin example produces a nonzero exit code.
+    My Modifications: I ran `npm ci` from the `frontend` directory to install the correct dependencies. I can verify the linter with `npm run lint` and confirm that the local ESLint version is being used with `npx --no-install eslint --version`.
