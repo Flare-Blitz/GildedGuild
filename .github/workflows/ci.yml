@@ -30,8 +30,10 @@ jobs:
       with:
         node-version: '20'
     - name: Install dependencies
+      working-directory: frontend
       run: |
         npm install -g eslint
     - name: Analysing the code with eslint
+      working-directory: frontend
       run: |
-        eslint $(git ls-files '*.js')
+        npm run lint
