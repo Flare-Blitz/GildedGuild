@@ -9,3 +9,8 @@ run:
 cd frontend
 npm run dev
 
+## Test Python Game Gymnasium:
+run:
+cd MachineLearning
+python3 main.py
+

@@ -1,0 +1,5 @@
+[DESIGN]
+
+# Maximum number of instance attributes allowed in a class
+max-attributes=10
+max-returns=8
