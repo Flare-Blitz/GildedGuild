@@ -2,6 +2,7 @@
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=redefined-outer-name
+# pylint: disable=unused-argument
 # pylance: reportUnusedParameter=false
 
 from pathlib import Path
@@ -142,4 +143,3 @@ def buy_hand_card_action():
 def reserve_card_action():
     """Provide an action for reserving level two, row one."""
     return Action(action_type=ActionType.RESERVE_CARD, level=2, row=1)
-
