@@ -4,3 +4,5 @@ It will start a game of Gilded Guild between 2 players."""
 from GameFiles.game import Game
 
 game = Game(2)
+
+game.play()

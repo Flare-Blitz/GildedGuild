@@ -554,7 +554,6 @@ class Game:
     It takes and processes user actions"""
     def __init__(self, player_count):
         self.board = Board(player_count)
-        self.play()
 
     def play(self):
         """
