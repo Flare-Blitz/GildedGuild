@@ -1,0 +1,11 @@
+# Python bytecode cache
+__pycache__/
+*.py[cod]
+
+# Python virtual environments
+.venv/
+venv/
+ENV/
+
+# OS/editor noise
+.DS_Store
