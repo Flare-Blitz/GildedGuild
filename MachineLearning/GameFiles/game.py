@@ -318,11 +318,11 @@ class Board:
             return False, "Cannot afford card"
 
         #Get the cost that the player will pay
-        white_gem_cost = min(card.white - player.cards["W"], player.gems["W"])
-        blue_gem_cost = min(card.blue - player.cards["U"], player.gems["U"])
-        black_gem_cost = min(card.black - player.cards["B"], player.gems["B"])
-        red_gem_cost = min(card.red - player.cards["R"], player.gems["R"])
-        green_gem_cost = min(card.green - player.cards["G"], player.gems["G"])
+        white_gem_cost = min(max(card.white - player.cards["W"], 0), player.gems["W"])
+        blue_gem_cost = min(max(card.blue - player.cards["U"], 0), player.gems["U"])
+        black_gem_cost = min(max(card.black - player.cards["B"], 0), player.gems["B"])
+        red_gem_cost = min(max(card.red - player.cards["R"], 0), player.gems["R"])
+        green_gem_cost = min(max(card.green - player.cards["G"], 0), player.gems["G"])
         gold_cost = cost_defecit
 
         #Add the gems back to the pile and subtract them from the player
