@@ -144,3 +144,52 @@
     Prompt: How can I verify that the linter is working?
     AI Output: Recommended running `npm run lint` from the `frontend` directory, checking the installed versions with `npx --no-install eslint --version` and `npm ls eslint eslint-plugin-react`, and verifying that an intentionally invalid stdin example produces a nonzero exit code.
     My Modifications: I ran `npm ci` from the `frontend` directory to install the correct dependencies. I can verify the linter with `npm run lint` and confirm that the local ESLint version is being used with `npx --no-install eslint --version`.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: How would I go about adding TruffleHog to my repo? I need it to be an automatic GitHub Action, as well as being able to test it locally.
+    AI Output: Recommended adding a dedicated TruffleHog workflow for pull requests, pushes to the default branch, and manual runs, along with a reproducible local scanning command. Recommended pinning the GitHub Action and scanner version, scanning for verified and unknown findings, and failing CI when findings are detected.
+    My Modifications: I decided to use a dedicated `.github/workflows/secrets.yml` workflow and planned to use Docker or a native CLI for local scans.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Is there anything I would need to install beforehand, such as Docker or TruffleHog?
+    AI Output: Explained that GitHub Actions does not require a local Docker or TruffleHog installation. For local scanning, Docker Desktop or a native TruffleHog installation through Homebrew can be used.
+    My Modifications: I chose Docker as the preferred local option while keeping native TruffleHog installation as an alternative. I plan on using Docker later, so its fine to start using it now.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: What is Docker, and why do we need it?
+    AI Output: Explained that Docker runs software in standardized containers and can provide a consistent TruffleHog environment across different operating systems. Clarified that Docker is optional and that TruffleHog can also be installed directly.
+    My Modifications: I learned why Docker was recommended for reproducible local secret scanning and that it is not required for GitHub Actions.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Implement TruffleHog into my created `secrets.yml`, and let me know if there is anything in addition I need to do.
+    AI Output: Added a dedicated workflow that runs TruffleHog on pull requests, pushes to `main`, and manual dispatches. The workflow uses read-only repository permissions, checks out full history, pins the TruffleHog action to a commit, uses TruffleHog v3.97.4, and fails on verified or unknown findings.
+    My Modifications: I created `.github/workflows/secrets.yml` and validated its YAML syntax. I still need to commit and push the workflow to GitHub, then verify its run in the Actions tab.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: What is the string of characters in the `uses` section that you are trying to add?
+    AI Output: Explained that `080c22fb8ea3107163b9dbcc33396a41c518b990` is a Git commit SHA that identifies the exact TruffleHog action revision. Clarified that it is not a password, API key, or secret.
+    My Modifications: I kept the commit SHA in the workflow to pin the action to a specific revision.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Is this needed?
+    AI Output: Explained that the commit SHA after `trufflesecurity/trufflehog@` is not strictly required, but is recommended because it prevents the action from changing unexpectedly. Using `@main` would be simpler but less reproducible.
+    My Modifications: I kept the immutable commit reference in `secrets.yml`.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Is TruffleHog all set up, and how can I verify that it works?
+    AI Output: Explained how to verify the GitHub Actions workflow from the repository's Actions tab and how to run a local scan with `trufflehog git file://. --results=verified,unknown --fail`. Documented the expected exit codes for clean scans, findings, and scan errors.
+    My Modifications: I ran the local TruffleHog scan from the repository root and confirmed the workflow YAML parsed successfully. I still need to push the workflow and verify its GitHub Actions run.
