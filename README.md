@@ -11,3 +11,17 @@ Moving on to Scenes where the different screens come into play. Here is how we w
 Next is the Scripts folder which houses all the coding we have done for the project. Here is currently some scripts to complete certain actions in the game.
 Afterwards is settings, however we haven't done anything with this folder as it is just for Unity's use.
 Lastly we have TextMesh Pro, which is a package offered by Unity for all UI text editing. Since this is a package that we use we haven't edited anything in here. 
+
+# Getting Started:
+
+## Open React application
+- run:
+    cd frontend
+    npm install
+    npm run dev
+
+## Test Python Game Gymnasium:
+run:
+cd MachineLearning
+python3 main.py
+
