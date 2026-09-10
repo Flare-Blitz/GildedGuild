@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from MachineLearning.GameFiles.game import (
+from machine_learning.game_files.game import (
     Action,
     ActionType,
     Board,
