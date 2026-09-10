@@ -68,7 +68,7 @@ class Deck:
     def __init__(self, level):
         self.field = [None] * 4
 
-        with open('MachineLearning/GameFiles/cards.json', 'r', encoding="utf-8") as file:
+        with open('machine_learning/game_files/cards.json', 'r', encoding="utf-8") as file:
             data = json.load(file)
             self.cards = []
             for card_data in data:
@@ -151,7 +151,7 @@ class TileDeck: # pylint: disable=too-few-public-methods
 
     def __init__(self, cards):
         self.tiles = []
-        with open('MachineLearning/GameFiles/tiles.json', 'r', encoding="utf-8") as file:
+        with open('machine_learning/game_files/tiles.json', 'r', encoding="utf-8") as file:
             data = json.load(file)
             for _ in range(cards):
                 tile_data = data.pop(random.randint(0, len(data) - 1))
@@ -318,11 +318,11 @@ class Board:
             return False, "Cannot afford card"
 
         #Get the cost that the player will pay
-        white_gem_cost = min(card.white - player.cards["W"], player.gems["W"])
-        blue_gem_cost = min(card.blue - player.cards["U"], player.gems["U"])
-        black_gem_cost = min(card.black - player.cards["B"], player.gems["B"])
-        red_gem_cost = min(card.red - player.cards["R"], player.gems["R"])
-        green_gem_cost = min(card.green - player.cards["G"], player.gems["G"])
+        white_gem_cost = min(max(card.white - player.cards["W"], 0), player.gems["W"])
+        blue_gem_cost = min(max(card.blue - player.cards["U"], 0), player.gems["U"])
+        black_gem_cost = min(max(card.black - player.cards["B"], 0), player.gems["B"])
+        red_gem_cost = min(max(card.red - player.cards["R"], 0), player.gems["R"])
+        green_gem_cost = min(max(card.green - player.cards["G"], 0), player.gems["G"])
         gold_cost = cost_defecit
 
         #Add the gems back to the pile and subtract them from the player
@@ -554,7 +554,6 @@ class Game:
     It takes and processes user actions"""
     def __init__(self, player_count):
         self.board = Board(player_count)
-        self.play()
 
     def play(self):
         """

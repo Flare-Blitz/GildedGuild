@@ -148,6 +148,139 @@
 - Date: 2026-09-08
     Prompter: Jackson Keeler
     Model Used: GitHub Copilot
+    Prompt: I want to create unit tests for the game.py file, using pytest
+    AI Output: Recommended building focused pytest coverage for value objects, decks, board state transitions, and action processing. Identified that `Game()` originally entered an interactive loop and that deck loaders depended on the repository root as the working directory.
+    My Modifications: I started setting up pytest for `MachineLearning/GameFiles/game.py` and created an initial test fixture file.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: how would I organize the tests, within the game_test file?
+    AI Output: Suggested organizing tests by implementation layer: value objects, rendering, resources and decks, board setup, board actions, game rules, and action processing.
+    My Modifications: I planned the test file around the classes and methods in `game.py`, using descriptive test names and section comments.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Why does import pytest not work?
+    AI Output: Explained that Pylance could not resolve `pytest` because it was not installed in the workspace's `.venv`, and recommended selecting the virtual environment in VS Code and installing pytest there.
+    My Modifications: I installed pytest with `./.venv/bin/python -m pip install pytest` and selected the local virtual environment for the project.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Do I need docstrings for test functions, if so, how would I write a good docstring?
+    AI Output: Explained that pytest does not require test docstrings, but concise docstrings are useful for tests involving non-obvious rules or setup. Recommended prioritizing descriptive test names.
+    My Modifications: I kept docstrings for fixtures and planned to use them selectively for tests with complex behavior.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: What about pylint, it is creating warnings due to no docstrings
+    AI Output: Explained the `missing-function-docstring` warning and recommended either adding concise docstrings or disabling that warning for the test module.
+    My Modifications: I added a module docstring and disabled `missing-function-docstring` in the test file.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: What would a helper to create a non-interactive game instance look like. elaborate what that would do.
+    AI Output: Recommended temporarily replacing `Game.play()` with a no-op using pytest's `monkeypatch` fixture while constructing `Game`, so the constructor would not start the interactive loop.
+    My Modifications: I changed `Game.__init__()` in `game.py` so it creates the board without automatically calling `play()`, making normal test construction non-interactive.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Create all necessary fixtures for the classes. Dont create any tests yet, just design the fixtures and elaborate on any complexity the fixtures hold.
+    AI Output: Designed reusable fixtures for costs, cards, tiles, players, resources, gem piles, decks, boards, games, and structured actions. Recommended controlling randomness and the working directory for JSON fixture loading.
+    My Modifications: I added reusable fixtures to `game_test.py`, including `repository_root`, `deterministic_random`, `game_files_cwd`, model objects, resource variants, deterministic decks and boards, a non-interactive game, and action objects.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Why are you formatting it like it is just fixtures, when I plan on adding tests to the file
+    AI Output: Clarified that the fixture-only wording reflected the immediate request, and recommended the future-oriented module docstring `Unit tests and shared fixtures for the game module`.
+    My Modifications: I changed the module docstring to `Unit tests for the game module` to reflect the file's eventual purpose.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: explain to me what mokeypatch is
+    AI Output: Explained that pytest's `monkeypatch` fixture temporarily changes attributes, functions, or the working directory and automatically restores them after the test.
+    My Modifications: I used `monkeypatch` to make random deck setup deterministic and to change to the repository root while loading JSON data.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Since I modified Game to not run play, would that fixture be unnecesary?
+    AI Output: Confirmed that the `monkeypatch` dependency in the `game` fixture was no longer necessary once `Game.__init__()` stopped calling `play()`.
+    My Modifications: I removed `monkeypatch` from the `game` fixture while retaining `game_files_cwd` and `deterministic_random`.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: why is monkeypatch being declared in function declarations
+    AI Output: Explained pytest fixture dependency injection: declaring `monkeypatch` as a parameter asks pytest to provide its temporary patching tools. Also clarified that unused fixture parameters can still be intentional dependencies when they provide setup side effects.
+    My Modifications: I retained `monkeypatch` only in fixtures that directly use it and removed it from the `game` fixture after the constructor change.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: what about some of these fixtures that are being declared in functions but never used? I'm getting pylance warnings, are these function parameters like game_files_cwd actually doing something?
+    AI Output: Explained that pytest fixture parameters such as `game_files_cwd` and `deterministic_random` are dependencies used for their setup side effects, even when their names do not appear in the function body. Pylance does not fully understand this pytest pattern.
+    My Modifications: I kept those fixture parameters because they configure the working directory and randomness required by the game loaders.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: how can I remove the warnings then?
+    AI Output: Recommended suppressing `reportUnusedParameter` for the test module with a Pyright directive and disabling Pylint's unused-argument warning only where needed, while keeping meaningful pytest fixture dependencies.
+    My Modifications: I added `# pylance: reportUnusedParameter=false` and retained the fixture dependency names so pytest can inject them.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Why redefining name 'repository_root' from outer scope (line 26)\n\nWhy is this happening, and should I be concerned
+    AI Output: Explained Pylint warning `redefined-outer-name` as a false positive caused by pytest injecting a fixture named `repository_root` into another fixture with the same name.
+    My Modifications: I added `# pylint: disable=redefined-outer-name` to the test module because the repeated name is intentional pytest fixture injection.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: These fixtures are taking up a lot of space, should I have a separate file for the actual tests?
+    AI Output: Recommended moving shared fixtures to pytest's `conftest.py` and keeping behavior-focused tests in `game_test.py`, with the option to split models, board, and action tests into separate files as the suite grows.
+    My Modifications: I creates a conftest.py file, and moved all the fixtures there
+
+- Date: 2026-09-09
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: what are these .pyc files? for my project?
+    AI Output: Explained that `.pyc` files are Python bytecode cache files generated when a module is imported. They live in `__pycache__` folders, are specific to the Python version, and are safe to ignore in Git.
+    My Modifications: I verified the project had `.pyc` files in `MachineLearning/GameFiles/__pycache__` and `MachineLearning/Tests/__pycache__`, and I added ignore rules to prevent them from being pushed.
+
+- Date: 2026-09-09
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Fill out this gitignore to not push any of these __pychache__ files
+    AI Output: Recommended adding standard Python ignores for `__pycache__/` and `*.py[cod]`, plus common virtual-environment folders and editor noise.
+    My Modifications: I updated [.gitignore](.gitignore) with Python cache and virtual environment ignore entries so generated bytecode files will not be tracked.
+
+- Date: 2026-09-09
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Create test cases for each of the 3 categories outlined in the test section, and comment which parts are Arrange, Act, and Assert.
+    AI Output: Created initial pytest cases for taking gems, buying cards, and reserving cards, with comments identifying the Arrange, Act, and Assert sections.
+    My Modifications: I reviewed the generated tests and kept the three basic game-action categories as the initial testing scope.
+
+- Date: 2026-09-09
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Why are you removing the pytest extension, don't I need it to make assertions?
+    AI Output: Explained that Python's built-in assert statement handles assertions, while pytest is still required to run tests and provide fixtures. The import is only needed for pytest-specific features.
+    My Modifications: I clarified that removing `import pytest` from the test file does not remove pytest from the project or test runner.
+
+- Date: 2026-09-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
     Prompt: How would I go about adding TruffleHog to my repo? I need it to be an automatic GitHub Action, as well as being able to test it locally.
     AI Output: Recommended adding a dedicated TruffleHog workflow for pull requests, pushes to the default branch, and manual runs, along with a reproducible local scanning command. Recommended pinning the GitHub Action and scanner version, scanning for verified and unknown findings, and failing CI when findings are detected.
     My Modifications: I decided to use a dedicated `.github/workflows/secrets.yml` workflow and planned to use Docker or a native CLI for local scans.
