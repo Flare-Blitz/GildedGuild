@@ -68,7 +68,7 @@ class Deck:
     def __init__(self, level):
         self.field = [None] * 4
 
-        with open('MachineLearning/GameFiles/cards.json', 'r', encoding="utf-8") as file:
+        with open('machine_learning/game_files/cards.json', 'r', encoding="utf-8") as file:
             data = json.load(file)
             self.cards = []
             for card_data in data:
@@ -151,7 +151,7 @@ class TileDeck: # pylint: disable=too-few-public-methods
 
     def __init__(self, cards):
         self.tiles = []
-        with open('MachineLearning/GameFiles/tiles.json', 'r', encoding="utf-8") as file:
+        with open('machine_learning/game_files/tiles.json', 'r', encoding="utf-8") as file:
             data = json.load(file)
             for _ in range(cards):
                 tile_data = data.pop(random.randint(0, len(data) - 1))
