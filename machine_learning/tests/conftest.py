@@ -33,8 +33,8 @@ def repository_root():
 @pytest.fixture
 def deterministic_random(monkeypatch):
     """Make deck order and starting-player selection predictable."""
-    monkeypatch.setattr("MachineLearning.GameFiles.game.random.shuffle", lambda items: None)
-    monkeypatch.setattr("MachineLearning.GameFiles.game.random.randint", lambda start, end: start)
+    monkeypatch.setattr("machine_learning.game_files.game.random.shuffle", lambda items: None)
+    monkeypatch.setattr("machine_learning.game_files.game.random.randint", lambda start, end: start)
 
 
 @pytest.fixture
