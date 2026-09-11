@@ -12,15 +12,14 @@ Next is the Scripts folder which houses all the coding we have done for the proj
 Afterwards is settings, however we haven't done anything with this folder as it is just for Unity's use.
 Lastly we have TextMesh Pro, which is a package offered by Unity for all UI text editing. Since this is a package that we use we haven't edited anything in here. 
 
-# Getting Started:
 
-## Open React application
-- run:
-    cd frontend
-    npm install
-    npm run dev
+## Getting Started:
 
-## Test Python Game Gymnasium:
+### Open React application
+run:
+docker compose up
+
+### Run Python Game Simulation:
 run:
 cd MachineLearning
 python3 main.py
