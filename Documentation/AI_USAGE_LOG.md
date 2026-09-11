@@ -326,3 +326,10 @@
     Prompt: Is TruffleHog all set up, and how can I verify that it works?
     AI Output: Explained how to verify the GitHub Actions workflow from the repository's Actions tab and how to run a local scan with `trufflehog git file://. --results=verified,unknown --fail`. Documented the expected exit codes for clean scans, findings, and scan errors.
     My Modifications: I ran the local TruffleHog scan from the repository root and confirmed the workflow YAML parsed successfully. I still need to push the workflow and verify its GitHub Actions run.
+
+- Date: 2026-09-10
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: What is a comprehensive list of requirements that are needed to utilize my repo. Include any installations required to run the python files, react files, or the database
+    AI Output: Listed the system requirements and setup commands for the Python game, pytest tests, Next.js frontend, Docker alternative, database prototype, and Unity project. Clarified that the Python game uses only the standard library, pytest is required for tests, Node.js 20 is required for the frontend, Docker Desktop can run the frontend, and Unity 6000.1.12f1 is required for the Unity project. Also identified that the SQL script mixes MySQL/MariaDB, SQL Server, and PostgreSQL conventions and needs database-engine-specific corrections before use.
+    My Modifications: I documented the repository's current installation requirements and run commands, corrected the outdated Python directory command, and noted that the frontend and database are not currently connected.
