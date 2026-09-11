@@ -326,3 +326,17 @@
     Prompt: Is TruffleHog all set up, and how can I verify that it works?
     AI Output: Explained how to verify the GitHub Actions workflow from the repository's Actions tab and how to run a local scan with `trufflehog git file://. --results=verified,unknown --fail`. Documented the expected exit codes for clean scans, findings, and scan errors.
     My Modifications: I ran the local TruffleHog scan from the repository root and confirmed the workflow YAML parsed successfully. I still need to push the workflow and verify its GitHub Actions run.
+
+- Date: 2026-09-10
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: How do I run the SQL file in the database backend and connect it to the frontend Next.js application?
+    AI Output: Explained how to run the SQL initialization script with MySQL and Docker Compose, configure database environment variables, connect Next.js to MySQL using mysql2, and expose database queries through a server-side API route.
+    My Modifications: I configured Docker Compose, MySQL, mysql2, and environment files for database connectivity.
+
+- Date: 2026-09-10
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: How do I set a MySQL password, and does putting it in docker-compose create security concerns?
+    AI Output: Explained using environment variables for the MySQL password, keeping local credentials in ignored `.env` files, and avoiding committed secrets. Also recommended using a dedicated application database user instead of root.
+    My Modifications: I configured local database environment variables and added local environment files to `.gitignore`.
