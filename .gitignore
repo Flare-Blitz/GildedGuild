@@ -118,3 +118,10 @@ ENV/
 
 # OS/editor noise
 .DS_Store
+
+# Local environment variables
+*.env.local
+
+.env
+.env.*
+!.env.example

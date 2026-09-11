@@ -1,4 +1,14 @@
 services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./Database Backend/test_SQL_Database.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+  
   frontend:
     image: node:20-alpine
     working_dir: /app
@@ -13,5 +23,6 @@ services:
     command: sh -c "npm ci && npm run dev -- --hostname 0.0.0.0"
 
 volumes:
+  mysql_data:
   frontend_node_modules:
   frontend_next:
