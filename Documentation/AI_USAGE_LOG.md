@@ -347,3 +347,17 @@
     Prompt: How do I set a MySQL password, and does putting it in docker-compose create security concerns?
     AI Output: Explained using environment variables for the MySQL password, keeping local credentials in ignored `.env` files, and avoiding committed secrets. Also recommended using a dedicated application database user instead of root.
     My Modifications: I configured local database environment variables and added local environment files to `.gitignore`.
+
+- Date: 2026-09-10
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Update the README file to show the new SQL requirement, the connection between the frontend and backend, and how to run the updated frontend.
+    AI Output: Provided README sections documenting Docker and Docker Compose requirements, root and frontend environment files, MySQL SQL initialization, the server-side Next.js-to-MySQL connection flow, and commands for starting, stopping, and resetting the development database.
+    My Modifications: I updated `README.md` to document the new MySQL setup and corrected the environment template location and usage instructions.
+
+- Date: 2026-09-10
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Make the README changes and fix the environment template.
+    AI Output: Applied the database and frontend setup documentation to the README and corrected the `DDB_HOST` typo in `frontend/.env.example`.
+    My Modifications: I added the MySQL requirements, SQL initialization details, frontend/database architecture, Docker commands, and corrected `DB_HOST=mysql` in the environment example.
