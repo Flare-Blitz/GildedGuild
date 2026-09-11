@@ -5,11 +5,12 @@ This is a repository housing the code for the GildedGuild Senior Design Project.
 
 ### Requirements
 - Git
+- Docker
+- Docker Compose
 
 #### Frontend Requirements
 - Node.js 20
 - npm
-- Docker
 
 #### Machine Learning Python File Requirements
 - Python 3.10 or 3.9
@@ -18,8 +19,81 @@ This is a repository housing the code for the GildedGuild Senior Design Project.
 - Unity Hub
 - Unity 6000.1.12f1
 
-### Open React application
-- docker compose up
+### Open the Frontend and MySQL Database
+
+The frontend runs in Next.js and connects to a MySQL database through a
+server-side API route. Docker Compose starts both services.
+
+#### Environment Setup
+
+Create a root `.env` file beside `docker-compose.yml`:
+
+```env
+MYSQL_ROOT_PASSWORD=your_mysql_password
+```
+
+Create the frontend environment file from the committed template:
+
+```bash
+cp frontend/.env.example frontend/.env.local
+```
+
+Verify `frontend/.env.local` contains:
+
+```env
+DB_HOST=mysql
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_NAME=mydb
+DB_PORT=3306
+```
+
+The two password values must match. Do not commit either `.env` or
+`frontend/.env.local`.
+
+#### SQL Database Initialization
+
+The file `Database Backend/test_SQL_Database.sql` creates the `mydb` database,
+creates the `users` table, and inserts sample users using MySQL-compatible
+`SHA2` hashing. Docker mounts this file into MySQL's initialization directory,
+so it runs automatically when the MySQL volume is created for the first time.
+
+#### Frontend and Database Connection
+
+The Next.js route in `frontend/app/mysql/users/route.ts` uses `mysql2` and the
+database values from `frontend/.env.local`. The connection flow is:
+
+```text
+Browser -> Next.js page -> /mysql/users -> mysql2 -> MySQL container
+```
+
+The browser does not connect directly to MySQL. The server-side route queries
+the database and returns user records as JSON.
+
+#### Run the Updated Frontend
+
+From the repository root, run:
+
+```bash
+docker compose up
+```
+
+Open the frontend at [http://localhost:3000](http://localhost:3000).
+
+Stop the services with:
+
+```bash
+docker compose down
+```
+
+To recreate the development database and rerun the SQL initialization script:
+
+```bash
+docker compose down -v
+docker compose up
+```
+
+The `-v` option deletes the existing MySQL data volume.
 
 ### Run Python Game Simulation:
 - python3 -m venv .venv
@@ -40,14 +114,14 @@ The frontend is a Next.js application using the App Router and TypeScript.
 
 - Framework: Next.js 16 with React 19 and React DOM.
 - Styling and tooling: Tailwind CSS 4 through the PostCSS plugin, ESLint 9, and TypeScript 5.
-- structure: `frontend/app/` contains the root layout, page, global styles, and the placeholder API route directory.
-- How it functions: Next.js serves the pages and handles the application runtime. `app/page.tsx` is currently the generated starter page, so the frontend does not yet render the game or call the backend/database.
+- Structure: `frontend/app/` contains the root layout, page, global styles, and the MySQL users route.
+- How it functions: Next.js serves the page and handles the server-side database request through the `/mysql/users` route.
 
 ### Database Backend
 
-The database backend will store the necessary files required to initialize the database.
-- .env.example: A environment file filled with dummy data
-- test_SQL_Database.sql: an SQL file to create an initial database
+The database backend stores the files required to initialize MySQL.
+- `frontend/.env.example`: An environment template with placeholder database values.
+- `Database Backend/test_SQL_Database.sql`: A MySQL script that creates the initial database, table, and sample users.
 
 ### Gilded_Guild_Alpha
 

@@ -333,3 +333,24 @@
     Prompt: What is a comprehensive list of requirements that are needed to utilize my repo. Include any installations required to run the python files, react files, or the database
     AI Output: Listed the system requirements and setup commands for the Python game, pytest tests, Next.js frontend, Docker alternative, database prototype, and Unity project. Clarified that the Python game uses only the standard library, pytest is required for tests, Node.js 20 is required for the frontend, Docker Desktop can run the frontend, and Unity 6000.1.12f1 is required for the Unity project. Also identified that the SQL script mixes MySQL/MariaDB, SQL Server, and PostgreSQL conventions and needs database-engine-specific corrections before use.
     My Modifications: I documented the repository's current installation requirements and run commands, corrected the outdated Python directory command, and noted that the frontend and database are not currently connected.
+
+- Date: 2026-09-10
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: How do I run the SQL file in the database backend and connect it to the frontend Next.js application?
+    AI Output: Explained how to run the SQL initialization script with MySQL and Docker Compose, configure database environment variables, connect Next.js to MySQL using mysql2, and expose database queries through a server-side API route.
+    My Modifications: I configured Docker Compose, MySQL, mysql2, and environment files for database connectivity.
+
+- Date: 2026-09-10
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: How do I set a MySQL password, and does putting it in docker-compose create security concerns?
+    AI Output: Explained using environment variables for the MySQL password, keeping local credentials in ignored `.env` files, and avoiding committed secrets. Also recommended using a dedicated application database user instead of root.
+    My Modifications: I configured local database environment variables and added local environment files to `.gitignore`.
+
+- Date: 2026-09-10
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Update the README file to show the new SQL requirement, the connection between the frontend and backend, and how to run the updated frontend.
+    AI Output: Provided README sections documenting Docker and Docker Compose requirements, root and frontend environment files, MySQL SQL initialization, the server-side Next.js-to-MySQL connection flow, and commands for starting, stopping, and resetting the development database.
+    My Modifications: I updated `README.md` to document the new MySQL setup and corrected the environment template location and usage instructions.
