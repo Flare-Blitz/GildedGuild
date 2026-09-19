@@ -196,20 +196,20 @@ class Board:
     """Represents the game board, including decks, players, tiles, and gem piles.
     Also manages the game state, player turns, and actions."""
 
-    def __init__(self, player_count):
+    def __init__(self, players: list[Player]):
         self.decks = [Deck(1), Deck(2), Deck(3)]
 
-        self.player_count = player_count
-        # Use list comprehension for dynamic player creation
-        self.players = [Player() for _ in range(player_count)]
+        self.player_count = len(players)
+        self.players = players
         self.starting_player = random.randint(0, self.player_count - 1)
         self.turn_player = self.starting_player
 
         for i, player in enumerate(self.players):
-            player.name = f"Player {i + 1}"
+            if not player.name:
+                player.name = f"Player {i + 1}"
 
-        self.tiles = TileDeck(player_count + 1)
-        self.gem_pile = GemPile(player_count)
+        self.tiles = TileDeck(self.player_count + 1)
+        self.gem_pile = GemPile(self.player_count)
 
     def display(self):
         """This function displays the current board state
@@ -500,9 +500,10 @@ class Player: # pylint: disable=too-few-public-methods
     including their name, hand, points, tiles, gems, and cards.
     """
 
-    def __init__(self):
+    def __init__(self, name="", is_human=True):
 
-        self.name = ""
+        self.name = name
+        self.is_human = is_human
 
         self.hand = []
         self.points = 0
@@ -552,8 +553,8 @@ class Player: # pylint: disable=too-few-public-methods
 class Game:
     """Represents the overall game, managing the game state.
     It takes and processes user actions"""
-    def __init__(self, player_count):
-        self.board = Board(player_count)
+    def __init__(self, players: list[Player]):
+        self.board = Board(players)
 
     def play(self):
         """
@@ -581,7 +582,8 @@ class Game:
         Currently only handles human players
         """
         # For now, we will assume all players are human
-        self.take_human_action()
+        if self.board.players[self.board.turn_player].is_human:
+            self.take_human_action()
 
     # Provides input for a human to take action
     def take_human_action(self):
@@ -615,7 +617,7 @@ class Game:
         It handles different types of actions, including taking gems, 
         purchasing cards, and reserving cards.
         """
-        print(f"Player {self.board.turn_player + 1}'s Turn")
+        print(f"{self.board.players[self.board.turn_player].name}'s Turn")
         print("Choose an action:")
         print("1. Take Gems (e.g., 'W U G' or 'RR')")
         print("2. Purchase Card on the board (e.g., 'P L1 2' for Level 1, Card 2)")
