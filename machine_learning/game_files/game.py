@@ -268,6 +268,9 @@ class Board:
             #Transfer 2 gems from the gem pile to the turn player
             self.gem_pile.gems[gem_color] -= 2
             self.players[self.turn_player].gems[gem_color] += 2
+
+            self.remove_gems(self.players[self.turn_player])
+            
             return True, ""
 
         return False, "Selected pile has fewer than 4 gems"
@@ -289,9 +292,26 @@ class Board:
             self.players[self.turn_player].gems[gem2] += 1
             self.players[self.turn_player].gems[gem3] += 1
 
+            self.remove_gems(self.players[self.turn_player])
+
             return True, ""
 
         return False, "Each selected pile must have at least one gem"
+
+    def remove_gems(self, player):
+        """This function checks if the player has more than 10 gems.
+        If they do, it removes gems at random until they have 10 or fewer."""
+        total_gems = sum(player.gems.values())
+        while total_gems > 10:
+            # Create a list of gem colors that the player has
+            available_colors = [color for color, count in player.gems.items() if count > 0]
+
+            random_color = random.choice(available_colors)
+            player.gems[random_color] -= 1
+            self.gem_pile.gems[random_color] += 1
+            total_gems -= 1
+
+            
 
     def buy_card(self, player, card):
         """
@@ -341,6 +361,7 @@ class Board:
 
         # Add the card to the player
         player.cards[card.color] += 1
+        player.points += card.points
 
         return True, ""
 
@@ -578,12 +599,14 @@ class Game:
     def take_action(self):
         """
         This function takes an action from the current player.
-        It can be either a human player or an AI agent.
+        It can be either a human player or an ML Model.
         Currently only handles human players
         """
         # For now, we will assume all players are human
         if self.board.players[self.board.turn_player].is_human:
             self.take_human_action()
+        else:
+            self.take_random_action()
 
     # Provides input for a human to take action
     def take_human_action(self):
@@ -605,7 +628,7 @@ class Game:
             user_input = self.get_human_input()
 
             #3. Process their input within the game
-            success, message = self.process_human_action(user_input)
+            success, message = self.process_action(user_input)
 
             if success is True:
                 # The move was valid, return
@@ -659,7 +682,39 @@ class Game:
 
         return None
 
-    def process_human_action(self, move: Action):
+    def take_random_action(self):
+        """Take a random action for the bot."""
+
+        while True:
+            action_type = random.choice(list(ActionType))
+            if action_type == ActionType.TAKE_GEMS:
+                if random.choice([True, False]):
+                    # Take 2 gems of the same color
+                    color = random.choice(['W', 'U', 'B', 'R', 'G'])
+                    move = Action(action_type=action_type, colors=(color, color))
+                else:
+                    # Take 3 gems of the different colors
+                    colors = random.sample(['W', 'U', 'B', 'R', 'G'], 3)
+                    move = Action(action_type=action_type, colors=tuple(colors))
+            elif action_type == ActionType.BUY_BOARD_CARD:
+                level = random.randint(1, 3)
+                row = random.randint(1, 4)
+                move = Action(action_type=action_type, level=level, row=row)
+            elif action_type == ActionType.BUY_HAND_CARD:
+                row = random.randint(1, 3)
+                move = Action(action_type=action_type, row=row)
+            else: # action_type == ActionType.RESERVE_CARD:
+                level = random.randint(1, 3)
+                row = random.randint(0, 4)  # Allow reserving from deck (row 0)
+                move = Action(action_type=action_type, level=level, row=row)
+
+            success, _ = self.process_action(move)
+            if success:
+                break
+
+        print(f"Bot {self.board.players[self.board.turn_player].name} took action: {move}")
+
+    def process_action(self, move: Action):
         """
         move: Action
         This function processes the human player's action based on their input.
