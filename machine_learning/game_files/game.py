@@ -733,7 +733,7 @@ class Game:
                 return
 
         # If there are NO valid actions, return without taking any action.
-        print(f"Bot {self.board.players[self.board.turn_player].name} has no legal moves available.")
+        print(f"Bot {self.board.players[self.board.turn_player].name} has no legal moves.")
         return
 
     def process_action(self, move: Action):
