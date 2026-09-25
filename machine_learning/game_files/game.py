@@ -270,7 +270,7 @@ class Board:
             self.players[self.turn_player].gems[gem_color] += 2
 
             self.remove_gems(self.players[self.turn_player])
-            
+
             return True, ""
 
         return False, "Selected pile has fewer than 4 gems"
@@ -310,8 +310,6 @@ class Board:
             player.gems[random_color] -= 1
             self.gem_pile.gems[random_color] += 1
             total_gems -= 1
-
-            
 
     def buy_card(self, player, card):
         """
@@ -576,6 +574,7 @@ class Game:
     It takes and processes user actions"""
     def __init__(self, players: list[Player]):
         self.board = Board(players)
+        self.all_actions = self._generate_all_actions()
 
     def play(self):
         """
@@ -595,6 +594,44 @@ class Game:
 
             # Second, advance the turn player
             self.board.advance_turn_player()
+
+    def _generate_all_actions(self):
+        """Generates a list of all possible actions in the game."""
+        actions = []
+        colors = ("W", "U", "B", "R", "G")
+
+        for color in colors:
+            actions.append(Action(ActionType.TAKE_GEMS, colors=(color, color)))
+
+        for i, color1 in enumerate(colors):
+            for j, color2 in enumerate(colors[i + 1:], i + 1):
+                for color3 in colors[j + 1:]:
+                    actions.append(Action(ActionType.TAKE_GEMS, colors=(color1, color2, color3)))
+
+        for level in range(1, 4):
+            for row in range(1, 5):
+                actions.append(Action(
+                    ActionType.BUY_BOARD_CARD,
+                    level=level,
+                    row=row
+                ))
+
+        for row in range(1, 4):
+            actions.append(Action(
+                ActionType.BUY_HAND_CARD,
+                row=row
+            ))
+
+        for level in range(1, 4):
+            for row in range(0, 5):
+                actions.append(Action(
+                    ActionType.RESERVE_CARD,
+                    level=level,
+                    row=row
+                ))
+
+        return tuple(actions)
+
 
     def take_action(self):
         """
@@ -683,36 +720,21 @@ class Game:
         return None
 
     def take_random_action(self):
-        """Take a random action for the bot."""
+        """Randomize the order of actions, then take the first valid one."""
+        moves = random.sample(self.all_actions, len(self.all_actions))
 
-        while True:
-            action_type = random.choice(list(ActionType))
-            if action_type == ActionType.TAKE_GEMS:
-                if random.choice([True, False]):
-                    # Take 2 gems of the same color
-                    color = random.choice(['W', 'U', 'B', 'R', 'G'])
-                    move = Action(action_type=action_type, colors=(color, color))
-                else:
-                    # Take 3 gems of the different colors
-                    colors = random.sample(['W', 'U', 'B', 'R', 'G'], 3)
-                    move = Action(action_type=action_type, colors=tuple(colors))
-            elif action_type == ActionType.BUY_BOARD_CARD:
-                level = random.randint(1, 3)
-                row = random.randint(1, 4)
-                move = Action(action_type=action_type, level=level, row=row)
-            elif action_type == ActionType.BUY_HAND_CARD:
-                row = random.randint(1, 3)
-                move = Action(action_type=action_type, row=row)
-            else: # action_type == ActionType.RESERVE_CARD:
-                level = random.randint(1, 3)
-                row = random.randint(0, 4)  # Allow reserving from deck (row 0)
-                move = Action(action_type=action_type, level=level, row=row)
+        for move in moves:
+            print(move)
 
+        for move in moves:
             success, _ = self.process_action(move)
             if success:
-                break
+                print(f"Bot {self.board.players[self.board.turn_player].name} took action: {move}")
+                return
 
-        print(f"Bot {self.board.players[self.board.turn_player].name} took action: {move}")
+        # If there are NO valid actions, return without taking any action.
+        print(f"Bot {self.board.players[self.board.turn_player].name} has no legal moves available.")
+        return
 
     def process_action(self, move: Action):
         """

@@ -202,3 +202,14 @@ def test_reserve_card_fails_for_empty_board_slot(board):
     # Assert: the action reports the empty slot and leaves the hand empty.
     assert result == (False, "There is no card there")
     assert current_player.hand == []
+
+# Random Action Generation
+
+def test_all_actions_return_all_45_actions(game):
+    # Arrange: Handled by conftest, initialize game
+
+    # Act: Get all_actions
+    all_actions = game.all_actions
+
+    # Assert: all 45 actions are returned.
+    assert len(all_actions) == 45
