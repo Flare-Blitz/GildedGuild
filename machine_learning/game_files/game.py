@@ -191,6 +191,60 @@ class GemPile: # pylint: disable=too-few-public-methods
                 f"\033[95m(B):{self.gems['B']}\033[0m  \033[91m(R):{self.gems['R']}\033[0m  "
                 f"\033[92m(G):{self.gems['G']}\033[0m  \033[93m(Au):{self.gems['Au']}\033[0m")
 
+class Player: # pylint: disable=too-few-public-methods
+    """
+    Represents a player in the game, 
+    including their name, hand, points, tiles, gems, and cards.
+    """
+
+    def __init__(self, name="", is_human=True):
+
+        self.name = name
+        self.is_human = is_human
+
+        self.hand = []
+        self.points = 0
+        self.tiles = []
+
+        self.gems = {
+            "W" : 0,
+            "U" : 0,
+            "B" : 0,
+            "R" : 0,
+            "G" : 0,
+            "Au" : 0
+        }
+
+        self.cards = {
+            "W" : 0,
+            "U" : 0,
+            "B" : 0,
+            "R" : 0,
+            "G" : 0
+        }
+
+    def render_hand(self, is_current_player=False):
+        """Renders the player's hand of cards.
+        If is_current_player is True, it renders the full card details.
+        Otherwise, it only shows the levels of the cards in hand."""
+
+        if not self.hand:
+            return "(empty)"
+
+        if is_current_player:
+            rendered_cards = [card.render() for card in self.hand]
+            card_width = 12
+            padded_cards = [
+                [line.ljust(card_width) for line in card]
+                for card in rendered_cards
+            ]
+
+            return "\n".join(
+                "  ".join(card_lines[i] for card_lines in padded_cards)
+                for i in range(6)
+            )
+
+        return "[" + ", ".join(f"L{card.level}" for card in self.hand) + "]"
 
 class Board:
     """Represents the game board, including decks, players, tiles, and gem piles.
@@ -512,61 +566,6 @@ class Action:
     colors: tuple[str, ...] = ()
     level: Optional[int] = None
     row: Optional[int] = None
-
-class Player: # pylint: disable=too-few-public-methods
-    """
-    Represents a player in the game, 
-    including their name, hand, points, tiles, gems, and cards.
-    """
-
-    def __init__(self, name="", is_human=True):
-
-        self.name = name
-        self.is_human = is_human
-
-        self.hand = []
-        self.points = 0
-        self.tiles = []
-
-        self.gems = {
-            "W" : 0,
-            "U" : 0,
-            "B" : 0,
-            "R" : 0,
-            "G" : 0,
-            "Au" : 0
-        }
-
-        self.cards = {
-            "W" : 0,
-            "U" : 0,
-            "B" : 0,
-            "R" : 0,
-            "G" : 0
-        }
-
-    def render_hand(self, is_current_player=False):
-        """Renders the player's hand of cards.
-        If is_current_player is True, it renders the full card details.
-        Otherwise, it only shows the levels of the cards in hand."""
-
-        if not self.hand:
-            return "(empty)"
-
-        if is_current_player:
-            rendered_cards = [card.render() for card in self.hand]
-            card_width = 12
-            padded_cards = [
-                [line.ljust(card_width) for line in card]
-                for card in rendered_cards
-            ]
-
-            return "\n".join(
-                "  ".join(card_lines[i] for card_lines in padded_cards)
-                for i in range(6)
-            )
-
-        return "[" + ", ".join(f"L{card.level}" for card in self.hand) + "]"
 
 
 class Game:
