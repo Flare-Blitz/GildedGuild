@@ -3,7 +3,7 @@ It will start a game of Gilded Guild between 2 players."""
 
 from machine_learning.game_files.game import Game, Player
 
-players = [Player(name="Average Andy", is_human=True), 
+players = [Player(name="Average Andy", is_human=True),
            Player(name="Ben Bot", is_human=False),
            Player(name="Carl Computer", is_human=False),
            Player(name="Digital Doug", is_human=False)]
