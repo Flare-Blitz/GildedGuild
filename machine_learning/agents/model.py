@@ -37,6 +37,14 @@ class LinearQNet(nn.Module):
         file_name = os.path.join(model_folder_path, file_name)
         torch.save(self.state_dict(), file_name)
 
+    def load(self, file_name):
+        model_folder_path = Path(__file__).parent / "model"
+        file_path = model_folder_path / file_name
+
+        if file_path.is_file():
+            state_dict = torch.load(file_path, weights_only=True)
+            self.load_state_dict(state_dict)
+
 
 class QTrainer: #pylint: disable=too-few-public-methods
     """Trainer for the Q-Network."""
