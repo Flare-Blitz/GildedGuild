@@ -25,18 +25,77 @@ class Game:
         until a player wins. It handles action-taking and victory checking.
         """
         while True:
-            # First, turn player takes an action
-            self.take_action()
-
-            self.board.check_nobles()
-
-            winner = self.board.check_victory()
+            winner, _ = self.take_turn()
             if winner:
                 print(f"Player {winner.name} has won the game!")
-                break
+                return winner
 
-            # Second, advance the turn player
-            self.board.advance_turn_player()
+        return None
+
+    def take_turn(self, action: Action = None):
+        """
+        This function goes through a single turn of the game.
+        Contains an optional action input, in case the user has
+        already provided an action, such as when a model is being trained.
+        Returns the winner of the game, or None if no player has won.
+        Additionally, it returns a boolean indicating whether the action was 
+        successfully performed.
+        """
+
+        success = True
+
+        # First, turn player takes an action
+        if action:
+            # If action is provided, process it
+            success, _ = self.process_action(action)
+            if not success:
+                # Action was not valid, take a random action instead and return false.
+                self.take_action()
+        else:
+            # Otherwise, let the player take an action
+            success = self.take_action()
+
+        # Second, check to see if turn player earned any noble tiles
+        self.board.check_nobles()
+
+        # Third, check to see if the game has been won
+        winner = self.board.check_victory()
+        if winner:
+            return winner, success
+
+        # Fourth, advance the turn player
+        self.board.advance_turn_player()
+        return None, success
+
+
+    def training_game(self, players: list[Player]):
+        """Runs a training game with the specified players.
+        This is used to train the ML model, and it is expected that the
+        first player in the list is the ML model."""
+
+        self.board = Board(players)
+        for player in self.board.players:
+            player.reset()
+        return self.play_training_round()
+
+    def play_training_round(self):
+        """Plays a single round of the training game, until it is the agent's turn.
+        This is used to train the ML model, and it is expected that the
+        first player in the list is the ML model.
+
+        Returns: The player who won, or none if no player has won.
+        Additionally, returns a boolean indicating if all of the bots skipped their turns."""
+
+        all_turns_skipped = True
+
+        while self.board.turn_player != 0:
+            winner, valid_move = self.take_turn()
+            if valid_move:
+                all_turns_skipped = False
+            if winner:
+                return winner, all_turns_skipped
+            
+        return None, all_turns_skipped
 
     def _generate_all_actions(self):
         """Generates a list of all possible actions in the game."""
@@ -80,13 +139,16 @@ class Game:
         """
         This function takes an action from the current player.
         It can be either a human player or an ML Model.
-        Currently only handles human players
+        Currently only handles human players. If an ML model
+        is the current player, it will perform a random action.
+
+        Returns true if the action was performed, returns false if the action was skipped.
         """
         # For now, we will assume all players are human
         if self.board.players[self.board.turn_player].is_human:
-            self.take_human_action()
+            return self.take_human_action()
         else:
-            self.take_random_action()
+            return self.take_random_action()
 
     # Provides input for a human to take action
     def take_human_action(self):
@@ -112,7 +174,7 @@ class Game:
 
             if success is True:
                 # The move was valid, return
-                break
+                return True
 
     def get_human_input(self) -> Action:
         """
@@ -167,17 +229,33 @@ class Game:
         moves = random.sample(self.all_actions, len(self.all_actions))
 
         for move in moves:
-            print(move)
-
-        for move in moves:
             success, _ = self.process_action(move)
             if success:
-                print(f"Bot {self.board.players[self.board.turn_player].name} took action: {move}")
-                return
+                return True
 
         # If there are NO valid actions, return without taking any action.
-        print(f"Bot {self.board.players[self.board.turn_player].name} has no legal moves.")
-        return
+        return False
+
+    def take_agent_action(self, move_index: int):
+        """
+        Take an action as the agent. This should only be called during a training game by the agent.
+        move_index: int - The index of the action to take.
+        Returns a tuple (winner: Player, valid_move: bool) 
+        indicating the winner of the turn and whether the move was valid.
+        """
+        action = self.all_actions[move_index]
+
+        winner, valid_move = self.take_turn(action)
+
+        if not winner:
+            # Take the opponents turns
+            winner, all_turns_skipped = self.play_training_round()
+
+            if all_turns_skipped and not valid_move:
+                # Nobody provided a valid move, so return default "Nobody" winner to end the game
+                return Player("Nobody"), valid_move
+
+        return winner, valid_move
 
     def process_action(self, move: Action):
         """
