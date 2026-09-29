@@ -237,6 +237,29 @@ class Player: # pylint: disable=too-few-public-methods
             "G" : 0
         }
 
+    def reset(self):
+        """Reset the player's state for a new game."""
+        self.hand = []
+        self.points = 0
+        self.tiles = []
+
+        self.gems = {
+            "W" : 0,
+            "U" : 0,
+            "B" : 0,
+            "R" : 0,
+            "G" : 0,
+            "Au" : 0
+        }
+
+        self.cards = {
+            "W" : 0,
+            "U" : 0,
+            "B" : 0,
+            "R" : 0,
+            "G" : 0
+        }
+
     def render_hand(self, is_current_player=False):
         """Renders the player's hand of cards.
         If is_current_player is True, it renders the full card details.
@@ -271,6 +294,7 @@ class Board:
         self.players = players
         self.starting_player = random.randint(0, self.player_count - 1)
         self.turn_player = self.starting_player
+        self.turn_count = 0
 
         for i, player in enumerate(self.players):
             if not player.name:
@@ -555,6 +579,7 @@ class Board:
         """
         if self.turn_player == self.starting_player:
             max_points = 0
+            self.turn_count += 1
             winner = None
             for player in self.players:
                 if player.points >= 15 and player.points > max_points:
