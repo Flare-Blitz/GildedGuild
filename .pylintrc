@@ -4,3 +4,4 @@
 max-attributes=10
 max-returns=8
 max-args=6
+max-positional-args=6
