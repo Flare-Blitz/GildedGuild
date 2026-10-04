@@ -59,21 +59,12 @@ class Timmy(Agent):
             self.n_games += 1
             win_rates.append(wins / self.n_games)
 
-        self.model.save("timmy_model_v2.pth")
-
-        plt.figure(figsize=(10, 5))
-        plt.plot(range(1, num_games + 1), win_rates, label="Win rate")
-        plt.xlabel("Training game")
-        plt.ylabel("Average win rate")
-        plt.title("Timmy Average Win Rate During Training")
-        plt.ylim(0, 1)
-        plt.grid(True, alpha=0.3)
-        plt.legend()
-        plt.tight_layout()
-        plt.show()
+        self.model.save("timmy_model")
 
         print(f"Timmy won {wins} out of {num_games} games.")
         print(f"Timmy drew {draws} out of {num_games} games.")
+
+        self.save_graph(win_rates, num_games)
 
 
     def evaluateBoard(self, board, result, move_valid):
@@ -120,6 +111,31 @@ class Timmy(Agent):
 
         points = points / math.exp(board.turn_count * k)
         return points
+
+    def save_graph(self, win_rates, num_games):
+        """Display the training results graph to the user.
+        Then save it to a timmy folder"""
+        plt.figure(figsize=(10, 5))
+        plt.plot(range(1, num_games + 1), win_rates, label="Win rate")
+        plt.xlabel("Training game")
+        plt.ylabel("Average win rate")
+        plt.title("Timmy Average Win Rate During Training")
+        plt.ylim(0, 1)
+        plt.grid(True, alpha=0.3)
+        plt.legend()
+        plt.tight_layout()
+
+        folder_path = Path(__file__).parent / 'Graphs/Timmy'
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
+        file_name = ("timmy_training_graph" +
+            datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") +
+            ".png")
+        file_name = os.path.join(folder_path, file_name)
+
+        plt.savefig(file_name)
+        plt.show()
 
 
 if __name__ == "__main__":
