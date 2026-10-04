@@ -10,6 +10,8 @@ from torch import optim
 import torch.nn.functional as F
 import numpy as np
 
+from machine_learning.agents.state_encoder import INPUT_SIZE
+
 class LinearQNet(nn.Module):
     """Simple feedforward neural network for Q-learning."""
 
@@ -28,14 +30,26 @@ class LinearQNet(nn.Module):
         x = self.linear4(x)
         return x
 
-    def save(self, file_name='model.pth'):
-        """Save the model's state dictionary to a file."""
+    def save(self, file_name='model'):
+        """Save the model's state dictionary to a file.
+        Also upload the model as an ONNX file, for use in the Unity game engine."""
         model_folder_path = Path(__file__).parent / 'model'
         if not os.path.exists(model_folder_path):
             os.makedirs(model_folder_path)
 
-        file_name = os.path.join(model_folder_path, file_name)
-        torch.save(self.state_dict(), file_name)
+        self.eval()
+
+        model_file_name = os.path.join(model_folder_path, file_name)
+        torch.save(self.state_dict(), model_file_name)
+
+        onnx_folder_path = Path(__file__).parent / 'onnx_model'
+        if not os.path.exists(onnx_folder_path):
+            os.makedirs(onnx_folder_path)
+
+        onnx_file_name = os.path.join(onnx_folder_path, file_name)
+
+        onnx_program = torch.onnx.export(self, torch.randn(1, INPUT_SIZE), dynamo=True)
+        onnx_program.save(f"{onnx_file_name}.onnx")
 
     def load(self, file_name):
         model_folder_path = Path(__file__).parent / "model"
