@@ -191,25 +191,79 @@ class GemPile: # pylint: disable=too-few-public-methods
                 f"\033[95m(B):{self.gems['B']}\033[0m  \033[91m(R):{self.gems['R']}\033[0m  "
                 f"\033[92m(G):{self.gems['G']}\033[0m  \033[93m(Au):{self.gems['Au']}\033[0m")
 
+class Player: # pylint: disable=too-few-public-methods
+    """
+    Represents a player in the game, 
+    including their name, hand, points, tiles, gems, and cards.
+    """
+
+    def __init__(self, name="", is_human=True):
+
+        self.name = name
+        self.is_human = is_human
+
+        self.hand = []
+        self.points = 0
+        self.tiles = []
+
+        self.gems = {
+            "W" : 0,
+            "U" : 0,
+            "B" : 0,
+            "R" : 0,
+            "G" : 0,
+            "Au" : 0
+        }
+
+        self.cards = {
+            "W" : 0,
+            "U" : 0,
+            "B" : 0,
+            "R" : 0,
+            "G" : 0
+        }
+
+    def render_hand(self, is_current_player=False):
+        """Renders the player's hand of cards.
+        If is_current_player is True, it renders the full card details.
+        Otherwise, it only shows the levels of the cards in hand."""
+
+        if not self.hand:
+            return "(empty)"
+
+        if is_current_player:
+            rendered_cards = [card.render() for card in self.hand]
+            card_width = 12
+            padded_cards = [
+                [line.ljust(card_width) for line in card]
+                for card in rendered_cards
+            ]
+
+            return "\n".join(
+                "  ".join(card_lines[i] for card_lines in padded_cards)
+                for i in range(6)
+            )
+
+        return "[" + ", ".join(f"L{card.level}" for card in self.hand) + "]"
 
 class Board:
     """Represents the game board, including decks, players, tiles, and gem piles.
     Also manages the game state, player turns, and actions."""
 
-    def __init__(self, player_count):
+    def __init__(self, players: list[Player]):
         self.decks = [Deck(1), Deck(2), Deck(3)]
 
-        self.player_count = player_count
-        # Use list comprehension for dynamic player creation
-        self.players = [Player() for _ in range(player_count)]
+        self.player_count = len(players)
+        self.players = players
         self.starting_player = random.randint(0, self.player_count - 1)
         self.turn_player = self.starting_player
 
         for i, player in enumerate(self.players):
-            player.name = f"Player {i + 1}"
+            if not player.name:
+                player.name = f"Player {i + 1}"
 
-        self.tiles = TileDeck(player_count + 1)
-        self.gem_pile = GemPile(player_count)
+        self.tiles = TileDeck(self.player_count + 1)
+        self.gem_pile = GemPile(self.player_count)
 
     def display(self):
         """This function displays the current board state
@@ -268,6 +322,9 @@ class Board:
             #Transfer 2 gems from the gem pile to the turn player
             self.gem_pile.gems[gem_color] -= 2
             self.players[self.turn_player].gems[gem_color] += 2
+
+            self.remove_gems(self.players[self.turn_player])
+
             return True, ""
 
         return False, "Selected pile has fewer than 4 gems"
@@ -289,9 +346,24 @@ class Board:
             self.players[self.turn_player].gems[gem2] += 1
             self.players[self.turn_player].gems[gem3] += 1
 
+            self.remove_gems(self.players[self.turn_player])
+
             return True, ""
 
         return False, "Each selected pile must have at least one gem"
+
+    def remove_gems(self, player):
+        """This function checks if the player has more than 10 gems.
+        If they do, it removes gems at random until they have 10 or fewer."""
+        total_gems = sum(player.gems.values())
+        while total_gems > 10:
+            # Create a list of gem colors that the player has
+            available_colors = [color for color, count in player.gems.items() if count > 0]
+
+            random_color = random.choice(available_colors)
+            player.gems[random_color] -= 1
+            self.gem_pile.gems[random_color] += 1
+            total_gems -= 1
 
     def buy_card(self, player, card):
         """
@@ -341,6 +413,7 @@ class Board:
 
         # Add the card to the player
         player.cards[card.color] += 1
+        player.points += card.points
 
         return True, ""
 
@@ -494,66 +567,13 @@ class Action:
     level: Optional[int] = None
     row: Optional[int] = None
 
-class Player: # pylint: disable=too-few-public-methods
-    """
-    Represents a player in the game, 
-    including their name, hand, points, tiles, gems, and cards.
-    """
-
-    def __init__(self):
-
-        self.name = ""
-
-        self.hand = []
-        self.points = 0
-        self.tiles = []
-
-        self.gems = {
-            "W" : 0,
-            "U" : 0,
-            "B" : 0,
-            "R" : 0,
-            "G" : 0,
-            "Au" : 0
-        }
-
-        self.cards = {
-            "W" : 0,
-            "U" : 0,
-            "B" : 0,
-            "R" : 0,
-            "G" : 0
-        }
-
-    def render_hand(self, is_current_player=False):
-        """Renders the player's hand of cards.
-        If is_current_player is True, it renders the full card details.
-        Otherwise, it only shows the levels of the cards in hand."""
-
-        if not self.hand:
-            return "(empty)"
-
-        if is_current_player:
-            rendered_cards = [card.render() for card in self.hand]
-            card_width = 12
-            padded_cards = [
-                [line.ljust(card_width) for line in card]
-                for card in rendered_cards
-            ]
-
-            return "\n".join(
-                "  ".join(card_lines[i] for card_lines in padded_cards)
-                for i in range(6)
-            )
-
-        return "[" + ", ".join(f"L{card.level}" for card in self.hand) + "]"
-
 
 class Game:
     """Represents the overall game, managing the game state.
     It takes and processes user actions"""
-    def __init__(self, player_count):
-        self.board = Board(player_count)
+    def __init__(self, players: list[Player]):
+        self.board = Board(players)
+        self.all_actions = self._generate_all_actions()
 
     def play(self):
         """
@@ -574,14 +594,55 @@ class Game:
             # Second, advance the turn player
             self.board.advance_turn_player()
 
+    def _generate_all_actions(self):
+        """Generates a list of all possible actions in the game."""
+        actions = []
+        colors = ("W", "U", "B", "R", "G")
+
+        for color in colors:
+            actions.append(Action(ActionType.TAKE_GEMS, colors=(color, color)))
+
+        for i, color1 in enumerate(colors):
+            for j, color2 in enumerate(colors[i + 1:], i + 1):
+                for color3 in colors[j + 1:]:
+                    actions.append(Action(ActionType.TAKE_GEMS, colors=(color1, color2, color3)))
+
+        for level in range(1, 4):
+            for row in range(1, 5):
+                actions.append(Action(
+                    ActionType.BUY_BOARD_CARD,
+                    level=level,
+                    row=row
+                ))
+
+        for row in range(1, 4):
+            actions.append(Action(
+                ActionType.BUY_HAND_CARD,
+                row=row
+            ))
+
+        for level in range(1, 4):
+            for row in range(0, 5):
+                actions.append(Action(
+                    ActionType.RESERVE_CARD,
+                    level=level,
+                    row=row
+                ))
+
+        return tuple(actions)
+
+
     def take_action(self):
         """
         This function takes an action from the current player.
-        It can be either a human player or an AI agent.
+        It can be either a human player or an ML Model.
         Currently only handles human players
         """
         # For now, we will assume all players are human
-        self.take_human_action()
+        if self.board.players[self.board.turn_player].is_human:
+            self.take_human_action()
+        else:
+            self.take_random_action()
 
     # Provides input for a human to take action
     def take_human_action(self):
@@ -603,7 +664,7 @@ class Game:
             user_input = self.get_human_input()
 
             #3. Process their input within the game
-            success, message = self.process_human_action(user_input)
+            success, message = self.process_action(user_input)
 
             if success is True:
                 # The move was valid, return
@@ -615,7 +676,7 @@ class Game:
         It handles different types of actions, including taking gems, 
         purchasing cards, and reserving cards.
         """
-        print(f"Player {self.board.turn_player + 1}'s Turn")
+        print(f"{self.board.players[self.board.turn_player].name}'s Turn")
         print("Choose an action:")
         print("1. Take Gems (e.g., 'W U G' or 'RR')")
         print("2. Purchase Card on the board (e.g., 'P L1 2' for Level 1, Card 2)")
@@ -657,7 +718,24 @@ class Game:
 
         return None
 
-    def process_human_action(self, move: Action):
+    def take_random_action(self):
+        """Randomize the order of actions, then take the first valid one."""
+        moves = random.sample(self.all_actions, len(self.all_actions))
+
+        for move in moves:
+            print(move)
+
+        for move in moves:
+            success, _ = self.process_action(move)
+            if success:
+                print(f"Bot {self.board.players[self.board.turn_player].name} took action: {move}")
+                return
+
+        # If there are NO valid actions, return without taking any action.
+        print(f"Bot {self.board.players[self.board.turn_player].name} has no legal moves.")
+        return
+
+    def process_action(self, move: Action):
         """
         move: Action
         This function processes the human player's action based on their input.
