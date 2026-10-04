@@ -1,4 +1,13 @@
+"""This is the Timmy agent, which trains a Q-Network to play the game.
+Timmy plays games to have fun, so isn't as concerned with winning as with enjoying the process.
+To reflect this, Timmy will be trained against opponents who only make random moves, creating a bot
+that can play the game, but isn't very effictive at out performing other players.
+Timmy is desgined to be the first bot, and other bots will be trained based off of Timmy."""
+
+import datetime
 import math
+import os
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 
@@ -16,7 +25,7 @@ class Timmy(Agent):
         """Create a Timmy model and train it by 
         having it play against random bots."""
 
-        num_games = 50000
+        num_games = 10000
         wins = 0
         draws = 0
         win_rates = []
@@ -47,7 +56,7 @@ class Timmy(Agent):
 
                 done = result is not None
 
-                reward = self.evaluateBoard(game.board, result, valid_move)
+                reward = self.evaluate_board(game.board, result, valid_move)
                 self.train_short_memory(original_state, action, reward, next_state, done)
                 self.remember(original_state, action, reward, next_state, done)
 
@@ -67,7 +76,7 @@ class Timmy(Agent):
         self.save_graph(win_rates, num_games)
 
 
-    def evaluateBoard(self, board, result, move_valid):
+    def evaluate_board(self, board, result, move_valid):
         """Evaluate the current state of the board.
         
         Returns the evaluation of the board for the given player."""
@@ -140,5 +149,5 @@ class Timmy(Agent):
 
 if __name__ == "__main__":
     agent = Timmy()
-    agent.model.load("timmy_model_v2.pth")
+    agent.model.load("timmy_model")
     agent.train()
