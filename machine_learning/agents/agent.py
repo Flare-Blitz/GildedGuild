@@ -1,3 +1,7 @@
+"""An agent designed to play the gilded guild game train the neural network.
+Child components need to implement """
+
+from abc import abstractmethod
 from collections import deque
 import random
 
@@ -60,3 +64,12 @@ class Agent:
 
         return move
 
+    @abstractmethod
+    def train(self):
+        """Train the model."""
+
+    @abstractmethod
+    def evaluate_board(self, board, result, move_valid):
+        """Evaluate the current state of the board.
+        return a numerical evaluation of the board state.
+        """
