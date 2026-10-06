@@ -36,6 +36,10 @@ export default async function Home() {
           ))}
         </tbody>
       </table>
+      <div>
+        <p>Navigate to game page:</p>
+        <a href="/game"><button>Go to Game</button></a>
+      </div>
     </main>
   );
 }
