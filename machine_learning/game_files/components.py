@@ -589,4 +589,3 @@ class Board:
             return winner
 
         return None
-

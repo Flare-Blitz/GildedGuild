@@ -94,7 +94,7 @@ class Game:
                 all_turns_skipped = False
             if winner:
                 return winner, all_turns_skipped
-            
+
         return None, all_turns_skipped
 
     def _generate_all_actions(self):
@@ -144,11 +144,10 @@ class Game:
 
         Returns true if the action was performed, returns false if the action was skipped.
         """
-        # For now, we will assume all players are human
+        # If the current player is a human, take a human action. Otherwise, take a random action.
         if self.board.players[self.board.turn_player].is_human:
             return self.take_human_action()
-        else:
-            return self.take_random_action()
+        return self.take_random_action()
 
     # Provides input for a human to take action
     def take_human_action(self):
