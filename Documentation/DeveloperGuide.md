@@ -41,7 +41,7 @@ To view more complex errors in a file, you can run ( pylint "fileDirectory" )
 # Running Unity Build
 Borrowed from [This Tutorial](https://www.codegenes.net/blog/how-do-i-run-a-local-unity-webgl-file-url-build/#nodejs-http-server):
 1. Navigate to your Unity WebGL build folder in a terminal:
-`cd /Path/To/Your/Unity/Build  # e.g., "cd C:\Projects\MyGame\Build"` on Windows  
+`cd .../GildedGuild/frontend/public/WebGL` on Windows  
 
 2. Start the server:
 
