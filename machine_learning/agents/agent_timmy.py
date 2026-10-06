@@ -41,24 +41,8 @@ class Timmy(Agent):
             if i % 100 == 0:
                 print(f"Training game {i}: wins={wins}, draws={draws}")
             num_players = i % 3 + 2 # Cycles between 2, 3, and 4 players
-            result, _ = game.training_game(players[0:num_players])
 
-            while result is None:
-                original_state = self.get_board_state(game.board)
-                move = self.get_action(original_state)
-                result, valid_move = game.take_agent_action(move)
-
-                # Create a one-hot encoded action vector to train the model
-                action = [0] * 45
-                action[move] = 1
-
-                next_state = self.get_board_state(game.board)
-
-                done = result is not None
-
-                reward = self.evaluate_board(game.board, result, valid_move)
-                self.train_short_memory(original_state, action, reward, next_state, done)
-                self.remember(original_state, action, reward, next_state, done)
+            result = self.play_single_game(game, players[0:num_players])
 
             if result.name == 'Timmy':
                 wins += 1
@@ -74,6 +58,29 @@ class Timmy(Agent):
         print(f"Timmy drew {draws} out of {num_games} games.")
 
         self.save_graph(win_rates, num_games)
+
+    def play_single_game(self, game: Game, players: list[Player]):
+        """Play a single game and return the result."""
+        result, _ = game.training_game(players)
+
+        while result is None:
+            original_state = self.get_board_state(game.board)
+            move = self.get_action(original_state)
+            result, valid_move = game.take_agent_action(move)
+
+            # Create a one-hot encoded action vector to train the model
+            action = [0] * 45
+            action[move] = 1
+
+            next_state = self.get_board_state(game.board)
+
+            done = result is not None
+
+            reward = self.evaluate_board(game.board, result, valid_move)
+            self.train_short_memory(original_state, action, reward, next_state, done)
+            self.remember(original_state, action, reward, next_state, done)
+
+        return result
 
 
     def evaluate_board(self, board, result, move_valid):

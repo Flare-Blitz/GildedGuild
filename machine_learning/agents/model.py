@@ -52,6 +52,7 @@ class LinearQNet(nn.Module):
         onnx_program.save(f"{onnx_file_name}.onnx")
 
     def load(self, file_name):
+        """Load the model's state dictionary from a file."""
         model_folder_path = Path(__file__).parent / "model"
         file_path = model_folder_path / file_name
 
