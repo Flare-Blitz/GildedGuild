@@ -40,7 +40,7 @@ class LinearQNet(nn.Module):
         self.eval()
 
         model_file_name = os.path.join(model_folder_path, file_name)
-        torch.save(self.state_dict(), model_file_name)
+        torch.save(self.state_dict(), f"{model_file_name}.pth")
 
         onnx_folder_path = Path(__file__).parent / 'onnx_model'
         if not os.path.exists(onnx_folder_path):
