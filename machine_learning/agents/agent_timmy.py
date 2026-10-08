@@ -156,5 +156,5 @@ class Timmy(Agent):
 
 if __name__ == "__main__":
     agent = Timmy()
-    agent.model.load("timmy_model")
+    agent.model.load("timmy_model.pth")
     agent.train()
