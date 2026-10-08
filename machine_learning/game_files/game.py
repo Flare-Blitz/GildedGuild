@@ -50,7 +50,7 @@ class Game:
             success, _ = self.process_action(action)
             if not success:
                 # Action was not valid, take a random action instead and return false.
-                self.take_action()
+                return None, False
         else:
             # Otherwise, let the player take an action
             success = self.take_action()
@@ -76,7 +76,8 @@ class Game:
         self.board = Board(players)
         for player in self.board.players:
             player.reset()
-        return self.play_training_round()
+        winner, _ =  self.play_training_round()
+        return winner
 
     def play_training_round(self):
         """Plays a single round of the training game, until it is the agent's turn.
@@ -253,11 +254,11 @@ class Game:
             # Take the opponents turns
             winner, all_turns_skipped = self.play_training_round()
 
-            if all_turns_skipped and not valid_move:
+            if all_turns_skipped:
                 # Nobody provided a valid move, so return default "Nobody" winner to end the game
                 return Player("Nobody"), valid_move
 
-        return winner, valid_move
+        return winner, True
 
     def process_action(self, move: Action):
         """

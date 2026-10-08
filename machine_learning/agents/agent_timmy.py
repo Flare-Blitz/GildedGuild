@@ -62,7 +62,7 @@ class Timmy(Agent):
 
     def play_single_game(self, game: Game, players: list[Player]):
         """Play a single game and return the result."""
-        result, _ = game.training_game(players)
+        result = game.training_game(players)
 
         attempted = set()
 
