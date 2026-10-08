@@ -5,13 +5,13 @@ that can play the game, but isn't very effictive at out performing other players
 Timmy is desgined to be the first bot, and other bots will be trained based off of Timmy."""
 
 import datetime
-import math
 import os
 from pathlib import Path
+import random
 
 import matplotlib.pyplot as plt
 
-from machine_learning.agents.agent import Agent
+from machine_learning.agents.agent import ACTION_COUNT, Agent
 from machine_learning.game_files.components import Player
 from machine_learning.game_files.game import Game
 
@@ -25,7 +25,7 @@ class Timmy(Agent):
         """Create a Timmy model and train it by 
         having it play against random bots."""
 
-        num_games = 10000
+        num_games = 20000
         wins = 0
         draws = 0
         win_rates = []
@@ -50,6 +50,7 @@ class Timmy(Agent):
                 draws += 1
 
             self.n_games += 1
+            self.train_long_memory()
             win_rates.append(wins / self.n_games)
 
         self.model.save("timmy_model")
@@ -63,10 +64,26 @@ class Timmy(Agent):
         """Play a single game and return the result."""
         result, _ = game.training_game(players)
 
+        attempted = set()
+
         while result is None:
             original_state = self.get_board_state(game.board)
+
             move = self.get_action(original_state)
+
+            if len(attempted) >= ACTION_COUNT:
+                return Player("Nobody")
+
+            if move in attempted:
+                remaining = set(range(ACTION_COUNT)) - attempted
+                move = random.choice(list(remaining))
+
+            attempted.add(move)
+
             result, valid_move = game.take_agent_action(move)
+
+            if valid_move:
+                attempted.clear()
 
             # Create a one-hot encoded action vector to train the model
             action = [0] * 45
@@ -91,15 +108,15 @@ class Timmy(Agent):
         points = 0
 
         if not move_valid:
-            points -= 200 # Points for invalid move
-        elif result is not None:
-            if result.name == "Timmy":
-                points += 500 # Points for victory
-            elif result.name == "Nobody":
-                points -= 50 # Points for draw
-            else:
-                points -= 250 # Points for defeat
+            points -= 5 # Points for invalid move
         else:
+            if result is not None:
+                if result.name == "Timmy":
+                    points += 100 # Points for victory
+                elif result.name == "Nobody":
+                    points -= 20 # Points for draw
+                else:
+                    points -= 70 # Points for defeat
             player = board.players[0]
 
             # Get 1 point for each gem held
@@ -117,15 +134,12 @@ class Timmy(Agent):
                         player.cards["R"] +
                         player.cards["G"])
 
-            #Get 15 points For each score point the player has
-            points += (player.points * 15)
+            #Get 25 points For each score point the player has
+            points += (player.points * 25)
 
             # Get 1 point for each card in hand
             points += len(player.hand)
 
-        k = 0.01
-
-        points = points / math.exp(board.turn_count * k)
         return points
 
     def save_graph(self, win_rates, num_games):
