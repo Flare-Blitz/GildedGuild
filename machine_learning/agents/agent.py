@@ -53,7 +53,7 @@ class Agent:
         """Determine the action to take based on the current state."""
         # random moves: tradeoff exploration / exploitation
 
-        self.epsilon = max(0.05, 1.0 - (self.n_games / 1000))
+        self.epsilon = max(0.1, 1.0 - (self.n_games / 10000))
         # self.epsilon = 0
         if random.random() < self.epsilon:
             move = random.randint(0, ACTION_COUNT - 1)

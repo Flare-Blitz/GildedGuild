@@ -246,6 +246,9 @@ class Game:
 
         winner, valid_move = self.take_turn(action)
 
+        if not valid_move:
+            return None, False
+
         if not winner:
             # Take the opponents turns
             winner, all_turns_skipped = self.play_training_round()
