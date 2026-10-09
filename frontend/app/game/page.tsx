@@ -1,18 +1,14 @@
-'use client';
+import { redirect } from "next/navigation";
 
-import { Unity, useUnityContext } from "react-unity-webgl";
+import { readSession } from "../actions/dal";
+import GameClient from "./GameClient";
 
-export default function Game() {
-  const { unityProvider, sendMessage } = useUnityContext({
-    loaderUrl: "WebGL Build/Build/WebGL Builds.loader.js",
-    dataUrl: "WebGL Build/Build/WebGL Builds.data",
-    frameworkUrl: "WebGL Build/Build/WebGL Builds.framework.js",
-    codeUrl: "WebGL Build/Build/WebGL Builds.wasm",
-  });
+export default async function GamePage() {
+  const session = await readSession();
 
-  // Send player information to the Unity game
-  const playerInfo = "Alice,Bob,Charlie,David";
-  sendMessage("Players", "LoadPlayerInfo", playerInfo);
+  if (!session.isLoggedIn || !session.username) {
+    redirect("/login");
+  }
 
-  return <Unity unityProvider={unityProvider} />;
+  return <GameClient username={session.username} />;
 }

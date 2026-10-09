@@ -1,7 +1,12 @@
+import { logout } from "@/app/actions/login";
+import { redirect } from "next/navigation";
+import { getSession } from "./lib/session";
+
 type User = {
   id: number;
   username: string;
-  password_hash: string;
+  email: string;
+  password: string;
 };
 
 async function getUsers(): Promise<User[]> {
@@ -15,6 +20,12 @@ async function getUsers(): Promise<User[]> {
 }
 
 export default async function Home() {
+  const session = await getSession();
+
+  if (!session.isLoggedIn) {
+    redirect('/login');
+  }
+
   const users = await getUsers();
 
   return (
@@ -25,6 +36,8 @@ export default async function Home() {
           <tr>
             <th>ID</th>
             <th>Username</th>
+            <th>Email</th>
+            <th>Password</th>
           </tr>
         </thead>
         <tbody>
@@ -32,6 +45,8 @@ export default async function Home() {
             <tr key={user.id}>
               <td>{user.id}</td>
               <td>{user.username}</td>
+              <td>{user.email}</td>
+              <td>{user.password}</td>
             </tr>
           ))}
         </tbody>
@@ -39,6 +54,12 @@ export default async function Home() {
       <div>
         <p>Navigate to game page:</p>
         <a href="/game"><button>Go to Game</button></a>
+      </div>
+      <div>
+        <p>Logout:</p>
+        <form action={logout}>
+          <button>Logout</button>
+        </form>
       </div>
     </main>
   );
