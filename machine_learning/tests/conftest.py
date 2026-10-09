@@ -9,18 +9,21 @@ from pathlib import Path
 
 import pytest
 
-from machine_learning.game_files.game import (
-    Action,
-    ActionType,
-    Board,
-    Card,
+from machine_learning.game_files.components import(
     Cost,
+    Card,
     Deck,
-    Game,
-    GemPile,
-    Player,
     Tile,
     TileDeck,
+    GemPile,
+    ActionType,
+    Action,
+    Player,
+    Board
+)
+
+from machine_learning.game_files.game import (
+    Game
 )
 
 
