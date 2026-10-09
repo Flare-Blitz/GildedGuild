@@ -13,14 +13,16 @@ export default async function Login() {
         <u>Login to Gilded Guild</u>
       </p>
 
-      <div className="grid grid-cols-1 gap-4 p-10 border border-slate-500 rounded-md max-w-xl">
+      <div style={{ padding: "20px", border: "1px solid #ccc", borderRadius: "5px", margin: "20px" }}>
 
         <form action={login}>
-          <label className="block text-lg">
+          <label className="block text-lg font-medium text-gray-700">
             <span>Username</span>
-            <input id="username" name="username" placeholder="Username" />
+            <input id="username" name="username" placeholder="Username" 
+              style={{ border: "1px solid #ccc", borderRadius: "5px", padding: "5px" }} />
             <span>Password</span>
-            <input id="password" name="password" type="password" placeholder="Password" />
+            <input id="password" name="password" type="password" placeholder="Password"
+              style={{ border: "1px solid #ccc", borderRadius: "5px", padding: "5px" }} />
           </label>
           <div>
             <input type="submit" value={"Login"} />
