@@ -103,6 +103,13 @@ python -m pip install --upgrade pip
 python -m pip install pytest
 python -m machine_learning.main
 
+### Run Timmy Model
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install pytest
+python -m machine_learning.agents.agent_timmy
+
 ## Architecture Overview
 
 The repository is organized into four areas: the frontend, backend, Unity code, and machine learning.
