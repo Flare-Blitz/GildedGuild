@@ -46,6 +46,7 @@ DB_USER=root
 DB_PASSWORD=your_mysql_password
 DB_NAME=mydb
 DB_PORT=3306
+SESSION_SECRET=your_example_secret
 ```
 
 The two password values must match. Do not commit either `.env` or
