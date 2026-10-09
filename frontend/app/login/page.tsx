@@ -29,7 +29,7 @@ export default async function Login() {
           </div>
         </form>
         <div>
-          <p>Don't have an account? <a href="/register">Register</a></p>
+          <p>Don&apos;t have an account? <a href="/register">Register</a></p>
         </div>
       </div>
     </main>
