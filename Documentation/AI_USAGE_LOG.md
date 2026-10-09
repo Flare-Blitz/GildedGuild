@@ -256,7 +256,6 @@
     Prompt: what are these .pyc files? for my project?
     AI Output: Explained that `.pyc` files are Python bytecode cache files generated when a module is imported. They live in `__pycache__` folders, are specific to the Python version, and are safe to ignore in Git.
     My Modifications: I verified the project had `.pyc` files in `MachineLearning/GameFiles/__pycache__` and `MachineLearning/Tests/__pycache__`, and I added ignore rules to prevent them from being pushed.
-
 - Date: 2026-09-09
     Prompter: Jackson Keeler
     Model Used: GitHub Copilot
@@ -337,20 +336,339 @@
 - Date: 2026-09-10
     Prompter: Jackson Keeler
     Model Used: GitHub Copilot
-    Prompt: How do I run the SQL file in the database backend and connect it to the frontend Next.js application?
-    AI Output: Explained how to run the SQL initialization script with MySQL and Docker Compose, configure database environment variables, connect Next.js to MySQL using mysql2, and expose database queries through a server-side API route.
-    My Modifications: I configured Docker Compose, MySQL, mysql2, and environment files for database connectivity.
+    Prompt: Why is pytorch not installed in the model? the import torch command is throwing an error
+    AI Output: Explained that PyTorch was not installed because the repository had no Python dependency manifest or installation command for PyTorch. The README only installed pytest, while `machine_learning/agents/model.py` imported both `torch` and `numpy`. Recommended creating or activating `.venv`, installing `torch`, `numpy`, and `pytest`, and selecting `.venv/bin/python` in VS Code.
+    My Modifications: Realized my mistake and installed them
 
-- Date: 2026-09-10
+- Date: 2026-09-22
     Prompter: Jackson Keeler
     Model Used: GitHub Copilot
-    Prompt: How do I set a MySQL password, and does putting it in docker-compose create security concerns?
-    AI Output: Explained using environment variables for the MySQL password, keeping local credentials in ignored `.env` files, and avoiding committed secrets. Also recommended using a dedicated application database user instead of root.
-    My Modifications: I configured local database environment variables and added local environment files to `.gitignore`.
+    Prompt: I need to convert the board state of the game into an input for a neural network reinforcement learning model. The things that need to be considered is the resources of each player (points, gems, cards, card levels in hand), the varying number of players (between 2-4), The values of each card on the field, the number of cards in each deck, and the number of gems in each pile. Brainstorm how I can convert this data for my LinearQNet nerual network model
+    AI Output: Recommended a fixed-size observation vector using the acting player's perspective. The design included player-count metadata, relative player ordering with zero-padding for 2-4 players, bank gems, remaining deck counts, all visible market cards, noble tiles, player resources, and reserved cards. It also identified a 45-action output space and recommended legal-action masking. The initial proposed full-information vector was approximately 471 features, subject to the final opponent-hand and noble-feature policy.
+    My Modifications: I began implementing a fixed-size board encoder and continued refining the feature choices in `machine_learning/agents/state_encoder.py`.
 
-- Date: 2026-09-10
+- Date: 2026-09-22
     Prompter: Jackson Keeler
     Model Used: GitHub Copilot
-    Prompt: Update the README file to show the new SQL requirement, the connection between the frontend and backend, and how to run the updated frontend.
-    AI Output: Provided README sections documenting Docker and Docker Compose requirements, root and frontend environment files, MySQL SQL initialization, the server-side Next.js-to-MySQL connection flow, and commands for starting, stopping, and resetting the development database.
-    My Modifications: I updated `README.md` to document the new MySQL setup and corrected the environment template location and usage instructions.
+    Prompt: What would the resulting numpy array look like?
+    AI Output: Explained that the encoder should return a one-dimensional `numpy.ndarray` with a fixed shape and `float32` dtype. Illustrated global metadata, bank gems, deck counts, twelve market-card blocks, noble blocks, and four relative player blocks. Explained that empty slots and missing players should be represented by zero-filled blocks.
+    My Modifications: I used the proposed flat-array structure as the basis for the encoder implementation.
+
+- Date: 2026-09-22
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: How would I use encoder constants to calculate the input size?
+    AI Output: Recommended defining constants for each feature block, calculating `INPUT_SIZE` from those constants, and checking the final NumPy array shape at runtime. The example used card, noble, market, global, and player feature counts rather than hardcoding the network input size.
+    My Modifications: I added feature-count constants and derived `INPUT_SIZE` from them in `state_encoder.py`.
+
+- Date: 2026-09-22
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Generate an encode_board function, that processes all of the inputs of the board object and converts it into a numpy array
+    AI Output: Implemented a standalone encoder with helpers for one-hot values, cards, noble tiles, players, normalization, relative player ordering, zero-padding, and final shape validation. Updated the agent to use the encoder instead of the nonexistent `board.state`. The implementation was validated across 2-, 3-, and 4-player boards and the existing game tests passed.
+    My Modifications: I trimmed unncecessary inputs from the functions, and verified the functions properly encode the board state.
+
+- Date: 2026-09-22
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: I think some documentation detailing what each index of the encoded board represents would be helpful. Where would be a good place to include this information, should I include it in the docstring of each of the individual functions, what the output of each part represents?
+    AI Output: Recommended a dedicated documentation file for the complete schema, with concise function docstrings for local behavior. Suggested documenting top-level index ranges, nested card layouts, normalization rules, and named slices or constants to reduce documentation drift.
+    My Modifications: No modifcations yet, but was convinved to continue drafting documentation
+
+- Date: 2026-09-22
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: what are names slices, and why would they be helpful for documentation?
+    AI Output: Explained that a Python `slice(start, stop)` represents a range of array indexes and that named slices make expressions such as `state[16:196]` self-explanatory. Named slices can also support debugging, tests, and future schema changes.
+    My Modifications: No changes
+
+- Date: 2026-09-22
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Why are you using getattr instead of simply using x.y
+    AI Output: Explained that `getattr` is used because the attribute names are stored as strings in `CARD_COSTS`. It allows the same loop to access `card.white`, `card.blue`, and the other cost attributes without repeating five separate expressions. It was also explained that a dictionary-based cost model would be an alternative.
+    My Modifications: I retained `getattr` because the existing `Card` and `Cost` classes store each resource as a separate attribute.
+
+- Date: 2026-09-22
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Wouldn't the is_current value for the player always be the same, since I will only encode the board on a bot's turn, so we can always assume that they are the turn player?
+    AI Output: Confirmed that `is_current` was redundant because player blocks are rotated so relative position zero is always the acting player. Recommended removing the flag and parameter, reducing the player block by one feature and the full state from 471 to 467 features.
+    My Modifications: I removed `is_current` from `_player_features` and reduced `PLAYER_FEATURES` accordingly.
+
+- Date: 2026-09-22
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: What does the * do in the features array in the _player_features function?
+    AI Output: Explained that `*` is iterable unpacking. It inserts each generated normalized gem or card value into the surrounding list, keeping the feature array flat instead of creating nested lists.
+    My Modifications: I kept iterable unpacking in the feature lists so the resulting state remains one-dimensional.
+
+- Date: 2026-09-22
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Why are you including tile points alongside player points when rendering player features
+    AI Output: Identified that player points already include noble points because the game adds tile points to `player.points`. Recommended removing the derived noble-point total as redundant while retaining noble count or encoding other unique noble information.
+    My Modifications: I removed noble-point totals from player features. The current encoder uses 58 features per player and produces a 463-element state array.
+
+- Date: 2026-09-22
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Create a documentation markdown file showing the overall structure of the encoded array
+    AI Output: Created a schema document describing the fixed-size array, global sections, twelve market cards, five noble tiles, four relative player blocks, nested card layouts, normalization constants, and zero-padding behavior.
+    My Modifications: Verified the documentation matched the inputs
+
+- Date: 2026-10-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: I have created a function to take a random action, but it currently has a problem where if there are no legal moves, it will loop forever. Also, since moves are chosen randomly, the function may try to make the same move multiple times. I want to upgrade this function so that it will never repeat attempting to take the same illegal action twice. Divise a plan as to how I can update this function to accomodate this
+    AI Output: Proposed replacing the unbounded random retry loop with a finite action space. The plan was to generate all possible actions once, use canonical combinations for three-color gem actions, shuffle or randomly select from the remaining candidates, attempt each action at most once through the shared action-processing function, and explicitly handle the case where every candidate is illegal.
+    My Modifications: I was skeptical, and asked for further clarification
+
+- Date: 2026-09-23
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Is that too inefficient, creating a list of all legal moves, randomizing the list, and iterating through the list?
+    AI Output: Explained that the action space is small, so generating and shuffling roughly 45 candidate actions is negligible. Recommended generating all possible actions and letting `process_action` determine legality, which avoids duplicated validation logic and infinite retries.
+    My Modifications: I continued with the finite action-list design for the bot.
+
+- Date: 2026-09-23
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Design code that will generate all legal moves
+    AI Output: Proposed a `get_legal_actions` method that checks gem availability, card affordability, hand contents, and reservation limits while using `itertools.combinations` for distinct three-color gem actions.
+    My Modifications: I clarified that the implementation should generate all moves, including illegal moves, and validate them through the existing action-processing path.
+
+- Date: 2026-09-23
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Actually, we just need a list of all moves, generate all moves, legal and non-legal
+    AI Output: Recommended generating the complete finite action space without legality checks, using canonical color combinations to avoid duplicate three-gem permutations, then trying each action at most once.
+    My Modifications: I chose a cached list containing all legal and non-legal action candidates.
+
+- Date: 2026-09-23
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Because the take_random_action would likely be run a lot, we should save the list of actions as a variable, so that we can call take_random_action without generating a new list each time
+    AI Output: Recommended generating the complete action list once in `Game.__init__`, storing it as `self.all_actions`, and using a randomized copy during each bot turn.
+    My Modifications: I added cached action generation to `Game` and used the cached tuple in `take_random_action`.
+
+- Date: 2026-09-23
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Whats the general rule of thumb for starting the name of a function with an underquare?
+    AI Output: Explained that a single leading underscore conventionally marks a function as an internal implementation helper, while a double leading underscore triggers name mangling and should be reserved for uncommon class-inheritance cases.
+    My Modifications: I kept `_generate_all_actions` as an internal helper because it is an implementation detail of `Game`.
+
+- Date: 2026-09-23
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: the ci workflow needs to install the pytorch dependency. Should that be added to the ci.yml file, or to someplace else
+    AI Output: Explained that dependency declarations should live in a Python requirements file, not buried in the workflow alone. Recommended keeping project dependencies in a manifest such as `machine_learning/python_requirements.txt` and then installing that file from CI so local development and automation stay aligned.
+    My Modifications: I recognized that the project did not have a root-level Python dependency manifest, and I moved the dependency setup toward the project-specific requirements file rather than hard-coding PyTorch into only the GitHub workflow.
+
+- Date: 2026-09-23
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Can I instead place the requirements file in the machine_learning folder?
+    AI Output: Confirmed that this is a valid approach. The workflow can install from `machine_learning/python_requirements.txt` directly, or the job can `cd` into the `machine_learning` folder before running `pip install -r python_requirements.txt`.
+    My Modifications: I considered the `machine_learning` folder as the dependency home and planned to reference that path explicitly in the CI command so the project's Python dependencies are installed consistently from the repository root or from within the folder.
+
+- Date: 2026-09-23
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: the ci workflow needs to install the pytorch dependency. Should that be added to the ci.yml file, or to someplace else
+    AI Output: Explained that dependency declarations should live in a Python requirements file rather than being hard-coded only in the workflow. Recommended keeping the project’s Python dependencies in a manifest such as `machine_learning/python_requirements.txt` and installing that file in CI so local development and GitHub Actions stay consistent.
+    My Modifications: I recognized that the repo did not yet have a formal Python dependency manifest for the ML code, and I moved the dependency setup toward a project-specific requirements file instead of only relying on the CI workflow to install PyTorch inline.
+
+- Date: 2026-09-23
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Can I instead place the requirements file in the machine_learning folder?
+    AI Output: Confirmed that this is a valid approach. The workflow can install from `machine_learning/python_requirements.txt` directly, or the job can change to the `machine_learning` directory before running `pip install -r python_requirements.txt`.
+    My Modifications: I considered placing the dependency file in the `machine_learning` folder and decided that referencing that path explicitly in CI is a clean, maintainable option for the project’s Python environment setup.
+
+- Date: 2026-10-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: How can I test if python-app.yml is working, I'm getting some errors when I push
+    AI Output: Recommended reproducing the workflow locally from the repository root with Python 3.10, installing the same dependencies, running the two Flake8 commands, and running pytest. Identified that another workflow, `ci.yml`, also runs on pushes and may be the source of the reported failure.
+    My Modifications: I checked the workflow and repository configuration; no repository modifications were made.
+
+- Date: 2026-10-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: That is the error, Board annotating the Player variable. But, I can run the function just fine, so why am I getting an error here?
+    AI Output: Explained that the local Python version is likely newer than the workflow's Python 3.10 version and may defer annotation evaluation. Recommended adding `from __future__ import annotations` or quoting the forward reference so `Player` can be referenced before its class definition.
+    My Modifications: I reported the annotation error and that the code runs locally; no repository modifications were made.
+
+- Date: 2026-10-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: I'm getting a "too many arguments" warning in my train_step function. Each of my arguments feels necessary, so I don't know how I can easily simplify the function
+    AI Output: Explained that Pylint's warning concerns the number of parameters rather than whether they are necessary. Identified that the five parameters represent one coherent Q-learning transition and suggested either grouping them into an object or locally disabling the warning. Also identified that the function's keyword-only marker conflicts with the positional calls in agent.py.
+    My Modifications: No code modifications were made. I reviewed the warning and decided to supress the warning, since my code was still of acceptable practice.
+
+- Date: 2026-09-28
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: I need to design a function that will take a hot-list tuple and convert it into a specific move. The list would be of length 45
+    AI Output: Identified the 45-element hot-list as a one-hot action vector and mapped its index ordering to the canonical actions in Game.all_actions. Proposed implementing process_agent_choice with strict validation, returning the corresponding Action, and adding focused tests for representative actions and invalid vectors.
+    My Modifications: No code modifications were made. I reviewed the proposed conversion design and clarified that the input should use strict one-hot semantics.
+
+- Date: 2026-09-28
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Should I instead have the function just take an index as an arugment?
+    AI Output: Recommended that the game layer accept an integer action index and return self.all_actions[action_index]. Suggested converting a one-hot vector to an index at the agent boundary and keeping one-hot validation in a separate helper if needed.
+    My Modifications: I just made the array of actions take the index of the hot index to get the move.
+
+- Date: 2026-09-28
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Have I properly set up my ML model to train itself against 3 random bots, and learn over time? I'm not getting any noticiable increase in quality after 3000 games, do you spot any errors that explain why, or is my sample size simply too small?
+    AI Output: Reviewed the training loop and identified several learning blockers, including incorrect state transitions, terminal-state handling, action-target encoding, reward comparisons, invalid-action fallback behavior, and unused replay memory. Explained that 3,000 games was not the primary problem and recommended correcting the training pipeline before increasing the sample size.
+    My Modifications: I reviewed the training setup and updated the agent training code to capture original and next states, represent actions for training, handle terminal results, and calculate rewards from the actual result.
+
+- Date: 2026-09-28
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Getting an error when trying to debug agent_timmy.py
+    AI Output: Explained that launching agent_timmy.py directly prevented Python from finding the repository-level machine_learning package. Recommended configuring VS Code to launch machine_learning.agents.agent_timmy as a module with the repository root as the working directory, or running python -m machine_learning.agents.agent_timmy from the repository root.
+    My Modifications: I changed the debugging approach to launch agent_timmy.py as a Python module from the repository root.
+
+- Date: 2026-09-28
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Use matplotlib.pyplot to plot the average winrate of the bot over time when training agent_timmy
+    AI Output: Recommended importing matplotlib.pyplot, tracking cumulative wins after each training game, plotting the win-rate history against the game number, and installing Matplotlib in the project environment.
+    My Modifications: I requested implementation of the win-rate tracking and Matplotlib plot for agent_timmy.py.
+
+- Date: 2026-09-28
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Implement this
+    AI Output: Added cumulative win-rate tracking and a Matplotlib plot to agent_timmy.py, corrected reward comparisons to use result.name, and added Matplotlib to machine_learning/python_requirements.txt.
+    My Modifications: I verified that the functionality to add the plot functioned, and tweaked its placement in the code a bit.
+
+- Date: 2026-09-29
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: I added a Unity WebGL build to my frontend, but I'm having trouble running it. Examine my public folder files, as well as my game/page.tsx folder, and determine what problems are causing the failure to load the game
+    AI Output: Identified that page.tsx passed a div to createUnityInstance instead of an HTMLCanvasElement. Also noted missing Unity configuration options and the distinction between the standalone Unity index.html and the Next.js route.
+    My Modifications: I changed page.tsx to add a canvas ref and passed it to createUnityInstance.
+
+- Date: 2026-09-29
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: I'm no longer getting an error, but webGL still isn't running
+    AI Output: Identified that the canvas ref existed but no canvas element was rendered, so canvasRef.current remained null and Unity initialization was skipped.
+    My Modifications: I rendered a canvas element in page.tsx with the canvas ref, dimensions, tabindex, and styling.
+
+- Date: 2026-09-29
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: I'm now getting a querySelector error
+    AI Output: Explained that the standalone Unity index.html expected generated DOM elements that were not present in the React page, including the Unity canvas, loading bar, warning banner, and fullscreen button.
+    My Modifications: I reviewed the separation between the standalone Unity bootstrap and the React-based game route.
+
+- Date: 2026-09-29
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: How can I modify the code to just use index.html directly?
+    AI Output: Explained how to serve the generated Unity index.html through Next.js at /index.html, preserve the Build, StreamingAssets, and TemplateData directories, and avoid opening the file through file://.
+    My Modifications: I planned to run the Unity build through the generated public/index.html and update navigation to /index.html.
+
+- Date: 2026-09-29
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Actually, lets run it via game/page.tsx, in this case, would we need to just remove index.html and create our own instance?
+    AI Output: Confirmed that page.tsx can own the Unity instance without public/index.html, provided it renders a canvas and loads the Unity loader with the correct build configuration.
+    My Modifications: I decided to use the React /game route and treat public/index.html as an unused standalone Unity entry point.
+
+- Date: 2026-10-06
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: What connection options should I place in the createPool function?
+    AI Output: Recommended using the existing DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, and DB_PORT environment variables in mysql2's createPool options, with timezone: "Z" for consistent timestamps. Noted that connectionLimit and waitForConnections are optional pool settings and advised leaving mysql2's default FOUND_ROWS behavior enabled for Better Auth.
+    My Modifications: I ended up using a different approach to build out authentication, so no changes were made.
+
+- Date: 2026-10-06
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Why is the sendMessage function undefined? Shouldn't it be a part of react-unity-webgl?
+    AI Output: Explained that sendMessage is returned by useUnityContext and must be destructured to be in scope. Also noted that react-unity-webgl's Unity message parameter accepts a string or number, not an array, and suggested serializing the array as JSON for Unity to parse.
+    My Modifications: I asked why sendMessage was undefined; no code modifications were made in this chat.
+
+- Date: 2026-10-06
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: I am trying to determine where I need to place this function: mergeInto(LibraryManager.library, {
+  GameOver: function (userName, score) {
+    window.dispatchReactUnityEvent("GameOver", UTF8ToString(userName), score);
+  },
+});
+
+I will modify the data later, but I need to determine what directory I should place it into so it can communicate with Unity
+    AI Output: Explained that the mergeInto snippet belongs in a Unity WebGL .jslib plugin under Gilded_Guild_Alpha/Assets/Plugins/WebGL/, rather than in the Next.js frontend. Advised rebuilding the Unity WebGL player, replacing the generated frontend build files, and registering a GameOver listener in React through useUnityContext.
+    My Modifications: Placed the snipper thwere Github told me and verified the functionality.
+
+- Date: 2026-10-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: How do I insert values into my sql database from my application, like how I'm trying to do in the signup function?
+    AI Output: Explained how to insert values with mysql2 using parameterized SQL queries, identified that the existing code used Drizzle-style APIs, and showed how to hash passwords before inserting users.
+    My Modifications: Updated the signup database logic to use mysql2, bcryptjs, and the users table's username, email, and password columns.
+
+- Date: 2026-10-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Explain this error in the mysql2 node_modules: Error: Module not found: Can't resolve 'net'
+  16 | 'use strict';
+  17 |
+> 18 | const Net = require('net');
+     |             ^^^^^^^^^^^^^^
+  19 | const Tls = require('tls');
+  20 | const Timers = require('timers');
+  21 | const EventEmitter = require('events').EventEmitter;
+    AI Output: Explained that mysql2 is Node-only and was being included in the browser bundle because the signup action lacked the use server directive. Recommended keeping database code on the server.
+    My Modifications: Added the use server directive to the authentication action.
+
+- Date: 2026-10-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Why is signup-form not working when I put in a username, email and password?
+    AI Output: Traced the form submission through the signup server action and identified that returned database errors were hidden because the form did not render state.message. Also explained possible database host, password, duplicate-entry, and missing-table problems.
+    My Modifications: Reviewed the signup flow and database configuration and investigated why the form appeared not to respond.
+
+- Date: 2026-10-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Use iron session to encrpyt and decrypt user sessions
+    AI Output: Explained how to configure iron-session with a server-only session helper, encrypted cookies, session types, login persistence, session reads, and logout behavior.
+    My Modifications: Created the session.ts file and added a SESSION_SECRET environment variable for iron-session.
+
+- Date: 2026-10-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Do I need encryption and decryption of sessions for iron session? the examples don't appear to use session.ts
+    AI Output: Explained that iron-session automatically encrypts and decrypts cookies through session.save and getIronSession, and that session.ts is only an optional helper for centralizing configuration.
+    My Modifications: Reviewed the iron-session examples and confirmed that manual encryption and decryption are unnecessary.
+
+- Date: 2026-10-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: How can I redirect the user to the dashboard page when the successfully log in
+    AI Output: Added a Next.js redirect to /dashboard after the login server action saves the session, and reported that lint completed with no errors but existing warnings. Noted that the current action does not validate credentials.
+    My Modifications: Implemented the redirection code across the application.
+
+- Date: 2026-10-08
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: How can I validate the login for the game page, while also maintining the 'use client' so the page can function?
+    AI Output: Planned and implemented server-side session validation for /game, redirecting signed-out visitors to /login while moving Unity rendering into a separate Client Component that receives the authenticated username. Workspace diagnostics found no errors; lint and production build checks were denied and could not be run. The existing login credential behavior was left unchanged.
+    My Modifications: Creates a component that stores the game that I can render as a client, and use the outer component just for login authentication.
+
+## Audit Certification
+I certify as Team Lead that all entries above accurately represent AI usage within this project phase, all prompts have been recorded, and all code has been validated by human review.
+
+**Team Lead Signature:** *Jackson Keeler* — **Date:** October 8, 2026
