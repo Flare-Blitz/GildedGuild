@@ -11,7 +11,7 @@ const pool = mysql.createPool({
 
 export async function GET() {
   const [rows] = await pool.query(
-    "SELECT id, username FROM users ORDER BY id"
+    "SELECT id, username, email, password FROM users ORDER BY id"
   );
 
   return NextResponse.json(rows);
