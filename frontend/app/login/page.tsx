@@ -1,9 +1,4 @@
-import { Metadata } from "next";
 import { login } from "../actions/login";
-
-export const metadata: Metadata = {
-  title: "🛠 iron-session examples: Server components, and server actions",
-};
 
 export default async function Login() {
   return (
