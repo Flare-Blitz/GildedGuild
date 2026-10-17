@@ -54,7 +54,7 @@ class LinearQNet(nn.Module):
     def load(self, file_name):
         """Load the model's state dictionary from a file."""
         model_folder_path = Path(__file__).parent / "model"
-        file_path = model_folder_path / file_name
+        file_path = model_folder_path / (file_name + ".pth")
 
         if file_path.is_file():
             state_dict = torch.load(file_path, weights_only=True)
