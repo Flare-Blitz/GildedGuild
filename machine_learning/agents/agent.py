@@ -49,20 +49,29 @@ class Agent:
         """Train the agent on a single experience."""
         self.trainer.train_step(state, action, reward, next_state, done)
 
-    def get_action(self, state):
+    def get_training_actions(self, state):
         """Determine the action to take based on the current state."""
-        # random moves: tradeoff exploration / exploitation
 
         self.epsilon = max(0.1, 1.0 - (self.n_games / 10000))
         # self.epsilon = 0
         if random.random() < self.epsilon:
-            move = random.randint(0, ACTION_COUNT - 1)
+            moves = list(range(ACTION_COUNT))
+            random.shuffle(moves)
         else:
             state0 = torch.tensor(state, dtype=torch.float)
             prediction = self.model(state0)
-            move = torch.argmax(prediction).item()
+            moves = torch.argsort(prediction, descending=True)
 
-        return move
+        return moves
+
+    def get_evaluation(self, state):
+        """Determine the action to take based on the current state for evaluation purposes.
+        Because we are evaluating the model, there is no exploration involved. The model attempts to
+        perform purely the best move."""
+        state0 = torch.tensor(state, dtype=torch.float)
+        prediction = self.model(state0)
+        moves = torch.argsort(prediction, descending=True)
+        return moves
 
     @abstractmethod
     def train(self):
