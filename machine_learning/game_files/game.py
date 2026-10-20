@@ -243,22 +243,27 @@ class Game:
         Returns a tuple (winner: Player, valid_move: bool) 
         indicating the winner of the turn and whether the move was valid.
         """
-        action = self.all_actions[move_index]
 
-        winner, valid_move = self.take_turn(action)
+        if move_index is not None:
+            action = self.all_actions[move_index]
 
-        if not valid_move:
-            return None, False
+            winner, valid_move = self.take_turn(action)
+
+            if not valid_move:
+                return None, False
+        else:
+            winner, valid_move = self.take_turn()
 
         if not winner:
             # Take the opponents turns
             winner, all_turns_skipped = self.play_training_round()
 
-            if all_turns_skipped:
+            # nobody could find a valid move.
+            if all_turns_skipped and move_index is None:
                 # Nobody provided a valid move, so return default "Nobody" winner to end the game
                 return Player("Nobody"), valid_move
 
-        return winner, True
+        return winner, valid_move
 
     def process_action(self, move: Action):
         """
