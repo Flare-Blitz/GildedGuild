@@ -7,13 +7,13 @@ Timmy is desgined to be the first bot, and other bots will be trained based off 
 import datetime
 import os
 from pathlib import Path
-import random
 
 import matplotlib.pyplot as plt
 
-from machine_learning.agents.agent import ACTION_COUNT, Agent
+from machine_learning.agents.agent import Agent
 from machine_learning.game_files.components import Player
 from machine_learning.game_files.game import Game
+from machine_learning.model_evaluation.evaluate_timmy import EvaluateTimmy
 
 
 class Timmy(Agent):
@@ -68,34 +68,27 @@ class Timmy(Agent):
 
         while result is None:
             original_state = self.get_board_state(game.board)
+            moves = self.get_training_actions(original_state)
+            move = moves[0]
 
-            move = self.get_action(original_state)
+            valid_move = False
+            while valid_move is False:
+                result, valid_move = game.take_agent_action(move)
 
-            if len(attempted) >= ACTION_COUNT:
-                return Player("Nobody")
+                # Create a one-hot encoded action vector to train the model
+                action = [0] * 45
+                action[move] = 1
 
-            if move in attempted:
-                remaining = set(range(ACTION_COUNT)) - attempted
-                move = random.choice(list(remaining))
+                next_state = self.get_board_state(game.board)
 
-            attempted.add(move)
+                done = result is not None
 
-            result, valid_move = game.take_agent_action(move)
+                reward = self.evaluate_board(game.board, result, valid_move)
+                self.train_short_memory(original_state, action, reward, next_state, done)
+                self.remember(original_state, action, reward, next_state, done)
 
-            if valid_move:
-                attempted.clear()
-
-            # Create a one-hot encoded action vector to train the model
-            action = [0] * 45
-            action[move] = 1
-
-            next_state = self.get_board_state(game.board)
-
-            done = result is not None
-
-            reward = self.evaluate_board(game.board, result, valid_move)
-            self.train_short_memory(original_state, action, reward, next_state, done)
-            self.remember(original_state, action, reward, next_state, done)
+                if done:
+                    break
 
         return result
 
