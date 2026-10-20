@@ -18,7 +18,9 @@ ACTION_COUNT = 45
 
 class Agent:
     """This defines an agent being set up from playing a game and training a Neural Network."""
-    def __init__(self):
+    def __init__(self, total_games):
+        self.total_games = total_games
+
         self.n_games = 0
         self.epsilon = 1.0 # randomness
         self.gamma = 0.9 # discount rate
@@ -52,7 +54,7 @@ class Agent:
     def get_training_actions(self, state):
         """Determine the action to take based on the current state."""
 
-        self.epsilon = max(0.1, 1.0 - (self.n_games / 10000))
+        self.epsilon = max(0.1, 1.0 - (self.n_games / self.total_games))
         # self.epsilon = 0
         if random.random() < self.epsilon:
             moves = list(range(ACTION_COUNT))
