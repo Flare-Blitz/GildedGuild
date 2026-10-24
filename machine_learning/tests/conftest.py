@@ -18,13 +18,10 @@ from machine_learning.game_files.components import(
     GemPile,
     ActionType,
     Action,
-    Player,
-    Board
+    Player
 )
 
-from machine_learning.game_files.game import (
-    Game
-)
+from machine_learning.game_files.game import Game
 
 
 @pytest.fixture
