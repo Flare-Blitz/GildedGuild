@@ -139,16 +139,26 @@ class Game:
     def take_action(self):
         """
         This function takes an action from the current player.
-        It can be either a human player or an ML Model.
-        Currently only handles human players. If an ML model
-        is the current player, it will perform a random action.
+        Human players take interactive turns, policy-backed players use their
+        policy, and other non-human players take random actions.
 
         Returns true if the action was performed, returns false if the action was skipped.
         """
-        # If the current player is a human, take a human action. Otherwise, take a random action.
-        if self.board.players[self.board.turn_player].is_human:
+        player = self.board.players[self.board.turn_player]
+        if player.is_human:
             return self.take_human_action()
+        if player.policy is not None:
+            return self.take_policy_action(player.policy)
         return self.take_random_action()
+
+    def take_policy_action(self, policy):
+        """Try the policy's ranked actions until one is valid."""
+        for action_index in policy.rank_actions(self.board):
+            action = self.all_actions[action_index]
+            success, _ = self.process_action(action)
+            if success:
+                return True
+        return False
 
     # Provides input for a human to take action
     def take_human_action(self):

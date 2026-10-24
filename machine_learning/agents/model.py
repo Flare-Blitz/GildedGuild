@@ -51,14 +51,17 @@ class LinearQNet(nn.Module):
         onnx_program = torch.onnx.export(self, torch.randn(1, INPUT_SIZE), dynamo=True)
         onnx_program.save(f"{onnx_file_name}.onnx")
 
-    def load(self, file_name):
-        """Load the model's state dictionary from a file."""
+    def load(self, file_name, required=False):
+        """Load the model state; raise an error if required and the file is missing."""
         model_folder_path = Path(__file__).parent / "model"
         file_path = model_folder_path / (file_name + ".pth")
 
         if file_path.is_file():
             state_dict = torch.load(file_path, weights_only=True)
             self.load_state_dict(state_dict)
+            return
+        if required:
+            raise FileNotFoundError(f"Model weights not found: {file_path}")
 
 
 class QTrainer: #pylint: disable=too-few-public-methods

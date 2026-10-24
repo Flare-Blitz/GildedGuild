@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from enum import Enum
 import json
 import random
-from typing import Optional
+from typing import Optional, Protocol, Sequence
 
 @dataclass
 class Cost:
@@ -205,16 +205,27 @@ class Action:
     level: Optional[int] = None
     row: Optional[int] = None
 
+class PlayerPolicy(Protocol):
+    """Ranks actions for a player based on the current board state."""
+
+    def rank_actions(
+        self, board: "Board",
+    ) -> Sequence[int]:
+        """Return candidate actions in preferred order."""
+
 class Player: # pylint: disable=too-few-public-methods
     """
     Represents a player in the game, 
     including their name, hand, points, tiles, gems, and cards.
     """
 
-    def __init__(self, name="", is_human=True):
+    def __init__(
+        self, name="", is_human=True, policy: Optional[PlayerPolicy] = None
+    ):
 
         self.name = name
         self.is_human = is_human
+        self.policy = policy
 
         self.hand = []
         self.points = 0
