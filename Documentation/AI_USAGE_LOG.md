@@ -354,3 +354,66 @@
     Prompt: Update the README file to show the new SQL requirement, the connection between the frontend and backend, and how to run the updated frontend.
     AI Output: Provided README sections documenting Docker and Docker Compose requirements, root and frontend environment files, MySQL SQL initialization, the server-side Next.js-to-MySQL connection flow, and commands for starting, stopping, and resetting the development database.
     My Modifications: I updated `README.md` to document the new MySQL setup and corrected the environment template location and usage instructions.
+
+- Date: 2026-10-12
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: An AI playing randomly would average a winrate around 35% in my model, but my ML algrotihm is only averaging around 30%, Give me a few suggestions as to why my model's win rate is so low
+    AI Output: Identified likely causes of the low win rate, including missing replay-batch training, illegal actions being replaced by different actions, no legal-action masking, reward shaping that may encourage resource hoarding, an undetached Q-learning target, no target network, rapidly decaying exploration, and a possible model-loading path mismatch. Also recommended comparing results separately for 2-, 3-, and 4-player games.
+    My Modifications: I reduced the training run to 10,000 games, added `train_long_memory()` after each game, changed model loading to use `timmy_model.pth`, and adjusted the reward values.
+
+- Date: 2026-10-12
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: If I masked out illegal moves, wouldn't it still try to perform those moves? I wouldn't have the data to tell it that the move it just made was illegal
+    AI Output: Explained that action masking happens before selection and can be derived from the current game state, so the model does not need labeled illegal-action examples. Also explained that the current fallback behavior records one action while executing another, and recommended selecting only legal actions or rejecting invalid actions without changing the state.
+    My Modifications: I considered the distinction between action selection and game validation and continued using the game's action result to determine whether a move was valid.
+
+- Date: 2026-10-12
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: I've set it up so that the agent will be prompted again if they perform a random action, but that seems to be causing it to hate every action and be unable to determine what a good action is.
+    AI Output: Explained that retrying is acceptable for gameplay, but failed attempts should not be recorded as normal transitions when the game executes a different replacement action. Recommended separating rejected attempts from valid transitions and avoiding repeated selection of the same invalid action.
+    My Modifications: I added a retry loop in `play_single_game()`, tracked attempted actions in a set, selected an untried action when necessary, and only trained after a valid move.
+
+- Date: 2026-10-12
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: legal action masking would be too complicated, as my current game model can only tell if an action is illegal when the user tries to perform it.
+    AI Output: Recommended treating the game as a black-box legality checker: try an action, retry if it is rejected, and train only on accepted actions. Also recommended preventing replacement actions and avoiding repeated illegal selections.
+    My Modifications: I kept legality checking inside the game action attempt rather than implementing a separate legal-action generator.
+
+- Date: 2026-10-12
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: But that doesn't punish incorrect actions, so how will the bot learn not to take them? Is it purely based on positive reinforcement?
+    AI Output: Explained that without legal-action masking, rejected actions need explicit negative feedback. Recommended storing an invalid-action transition with a modest negative reward, the unchanged state as the next state, and no terminal flag, while ensuring the game does not execute a replacement action.
+    My Modifications: I made sure that each invalid action provided negative points for the model, to incentivise valid actions.
+
+- Date: 2026-10-16
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: [[PLAN]] My evaluation function is getting very different results, sometimes when I evaluate 2 player games, with 1000 test games, my model wins 600 games, and sometimes the model wins 200. Analyze the code and determine why I may be getting this inconsistent evaluation
+    AI Output: Diagnosed a likely checkpoint-loading path mismatch: the evaluator passes a path that the model loader prefixes with its model directory, so the checkpoint is not found and the model uses fresh random weights on each script launch. Also noted stochastic game setup and random opponent actions, and explained that excluding draws affects the displayed rate but not the win count.
+    My Modifications: I located the incorrect model loading, and fixed the load function to properly load the .pth file.
+
+- Date: 2026-10-20
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: [[PLAN]] I want to update my game.py file to allow me to play against bot opponents. To do this I'm planning on updating the Player model to include the option to load an ml model, and have a function to evaluate what the best move is. Is this a sound method, or would there be a simpler way to play against ML bots?
+    AI Output: Reviewed the existing game turn handling, Q-network, state encoder, and action ranking. Recommended injecting an optional policy/controller rather than loading ML code directly in Player, while keeping unconfigured non-human players random. Then connected a saved Q-network policy to the normal game turn flow, configured one console opponent to use it, made missing requested weights fail explicitly, and added tests.
+    My Modifications: I experimented with loading the model directly within the game object, but had issues with circular imports.
+
+- Date: 2026-10-24
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: [[PLAN]] I'm getting a circular import error, where Board is trying to encode the state, but the encoded state needs the board object. What is the best way to resolve this error?
+    AI Output: Explained that encoding should be a one-way operation on a board object and traced the likely cycle to game components importing ML symbols while the ML agent/model/encoder import game types. Recommended keeping game components ML-independent, injecting a policy, and using type-check-only imports when the Board type is needed only for annotations.
+    My Modifications: I chose to use the ML policy file the AI suggested, although I optimized it to not take all actions as an input, and instead return an array of indexes.
+
+- Date: 2026-10-24
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: [[PLAN]] Why are you using a protocol?
+    AI Output: Explained that Protocol describes the policy interface structurally without requiring implementations to inherit from a game class, allowing ML, heuristic, or test policies while supporting type checking. Clarified that it is optional and can be omitted if the project prefers a less typed interface.
+    My Modifications: I got a gerneral idea, and kept the included protocol.
