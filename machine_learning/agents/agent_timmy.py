@@ -157,7 +157,9 @@ class Timmy(Agent):
         #3 player winrate
         wins = 0
         for _ in range(_game_count):
-            game = Game([model, Player("Opponent #1", False), Player("Opponent #2", False)])
+            game = Game([model,
+                        Player("Opponent #1", False),
+                        Player("Opponent #2", False)])
             result = game.play()
             if result is not None and result.name == "Timmy":
                 wins += 1
@@ -167,14 +169,18 @@ class Timmy(Agent):
         #4 player winrate
         wins = 0
         for _ in range(_game_count):
-            game = Game([model, Player("Opponent #1", False), Player("Opponent #2", False), Player("Opponent #3", False)])
+            game = Game([model,
+                        Player("Opponent #1", False),
+                        Player("Opponent #2", False),
+                        Player("Opponent #3", False)])
             result = game.play()
             if result is not None and result.name == "Timmy":
                 wins += 1
             model.reset()
         winrate_4p = wins / _game_count
 
-        bars = plt.bar(["2 Players", "3 Players", "4 Players"], [winrate_2p, winrate_3p, winrate_4p])
+        bars = plt.bar(["2 Players", "3 Players", "4 Players"],
+                       [winrate_2p, winrate_3p, winrate_4p])
         plt.bar_label(bars)
         plt.xlabel("Number of Players")
         plt.ylabel("Win Rate")
