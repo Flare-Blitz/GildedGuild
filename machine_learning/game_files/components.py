@@ -205,7 +205,7 @@ class Action:
     level: Optional[int] = None
     row: Optional[int] = None
 
-class PlayerPolicy(Protocol):
+class PlayerPolicy(Protocol): # pylint: disable=too-few-public-methods
     """Ranks actions for a player based on the current board state."""
 
     def rank_actions(
@@ -213,7 +213,7 @@ class PlayerPolicy(Protocol):
     ) -> Sequence[int]:
         """Return candidate actions in preferred order."""
 
-class Player: # pylint: disable=too-few-public-methods
+class Player:
     """
     Represents a player in the game, 
     including their name, hand, points, tiles, gems, and cards.
