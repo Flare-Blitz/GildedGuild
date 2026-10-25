@@ -9,7 +9,8 @@ import numpy as np
 import torch
 from machine_learning.agents.model import LinearQNet, QTrainer
 from machine_learning.agents.state_encoder import INPUT_SIZE, encode_board
-from machine_learning.game_files.components import Board
+from machine_learning.game_files.components import Board, Player
+from machine_learning.game_files.game import Game
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 128
@@ -65,6 +66,41 @@ class Agent:
             moves = torch.argsort(prediction, descending=True)
 
         return moves
+
+    def play_single_game(self, game: Game, players: list[Player]):
+            """Play a single game and return the result."""
+            result = game.training_game(players)
+    
+            while result is None:
+                original_state = self.get_board_state(game.board)
+                moves = self.get_training_actions(original_state)
+                moves_attempted = 0
+    
+                for move in moves:
+                    result, valid_move = game.take_agent_action(move)
+    
+                    # Create a one-hot encoded action vector to train the model
+                    action = [0] * 45
+                    action[move] = 1
+    
+                    next_state = self.get_board_state(game.board)
+    
+                    reward = self.evaluate_board(game.board, result, valid_move)
+    
+                    done = result is not None
+    
+                    self.train_short_memory(original_state, action, reward, next_state, done)
+                    self.remember(original_state, action, reward, next_state, done)
+    
+                    if valid_move:
+                        break
+                    moves_attempted += 1
+    
+                if moves_attempted == len(moves):
+                    # Pass the turn after verifying there are no legal actions.
+                    result, valid_move = game.take_agent_action(None)
+    
+            return result
 
     @abstractmethod
     def train(self):
