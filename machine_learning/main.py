@@ -12,4 +12,6 @@ players = [Player(name="Average Andy", is_human=True),
            )]
 game = Game(players)
 
-game.play()
+winner = game.play()
+
+print(f"The winner is: {winner.name if winner else 'No one'}")

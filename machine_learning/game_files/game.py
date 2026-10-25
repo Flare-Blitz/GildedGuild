@@ -24,13 +24,18 @@ class Game:
         This function runs the main game loop, alternating turns between players
         until a player wins. It handles action-taking and victory checking.
         """
+        players_skipped = 0
         while True:
-            winner, _ = self.take_turn()
+            winner, success = self.take_turn()
             if winner:
-                print(f"Player {winner.name} has won the game!")
                 return winner
 
-        return None
+            if not success:
+                players_skipped += 1
+            else:
+                players_skipped = 0
+            if players_skipped == len(self.board.players):
+                return None
 
     def take_turn(self, action: Action = None):
         """
