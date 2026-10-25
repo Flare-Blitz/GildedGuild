@@ -66,15 +66,6 @@ class Agent:
 
         return moves
 
-    def get_evaluation(self, state):
-        """Determine the action to take based on the current state for evaluation purposes.
-        Because we are evaluating the model, there is no exploration involved. The model attempts to
-        perform purely the best move."""
-        state0 = torch.tensor(state, dtype=torch.float)
-        prediction = self.model(state0)
-        moves = torch.argsort(prediction, descending=True)
-        return moves
-
     @abstractmethod
     def train(self):
         """Train the model."""
