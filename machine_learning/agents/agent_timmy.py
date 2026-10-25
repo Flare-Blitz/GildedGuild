@@ -11,9 +11,9 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 from machine_learning.agents.agent import Agent
+from machine_learning.agents.ml_policy import QNetworkPolicy
 from machine_learning.game_files.components import Player
 from machine_learning.game_files.game import Game
-from machine_learning.agents.model_evaluation.evaluate_timmy import EvaluateTimmy
 
 
 class Timmy(Agent):
@@ -134,32 +134,69 @@ class Timmy(Agent):
 
         return points
 
+    def evaluate_model(self):
+        """Evaluate Timmy's performance,
+        model the win rate against 1 opponent,
+        2 opponents, and 3 opponents."""
+
+        _game_count = 1000
+
+        # Get model player policy
+        model = Player("Timmy", False, QNetworkPolicy.from_file("timmy_model"))
+
+        #2 player winrate
+        wins = 0
+        for _ in range(_game_count):
+            game = Game([model, Player("Opponent #1", False)])
+            result = game.play()
+            if result is not None and result.name == "Timmy":
+                wins += 1
+            model.reset()
+        winrate_2p = wins / _game_count
+
+        #3 player winrate
+        wins = 0
+        for _ in range(_game_count):
+            game = Game([model, Player("Opponent #1", False), Player("Opponent #2", False)])
+            result = game.play()
+            if result is not None and result.name == "Timmy":
+                wins += 1
+            model.reset()
+        winrate_3p = wins / _game_count
+
+        #4 player winrate
+        wins = 0
+        for _ in range(_game_count):
+            game = Game([model, Player("Opponent #1", False), Player("Opponent #2", False), Player("Opponent #3", False)])
+            result = game.play()
+            if result is not None and result.name == "Timmy":
+                wins += 1
+            model.reset()
+        winrate_4p = wins / _game_count
+
+        bars = plt.bar(["2 Players", "3 Players", "4 Players"], [winrate_2p, winrate_3p, winrate_4p])
+        plt.bar_label(bars)
+        plt.xlabel("Number of Players")
+        plt.ylabel("Win Rate")
+        plt.title("Timmy Win Rate vs Number of Players")
+        plt.ylim(0, 1)
+        folder_path = Path(__file__).parent / 'Graphs/Timmy'
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
+        file_name = ("timmy_eval_graph" +
+            datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") +
+            ".png")
+        file_name = os.path.join(folder_path, file_name)
+
+        plt.savefig(file_name)
+        plt.show()
+
+
 if __name__ == "__main__":
     agent = Timmy(total_games=1000)
     agent.model.load("timmy_model")
     agent.train()
 
     #Evaluate Timmy's performance.
-    print("Evaluating Timmy's performance...")
-    evaluator = EvaluateTimmy()
-    evaluator.model.load("timmy_model")
-    WINRATE_2P = evaluator.evaluate(2)
-    WINRATE_3P = evaluator.evaluate(3)
-    WINRATE_4P = evaluator.evaluate(4)
-
-    plt.bar(["2 Players", "3 Players", "4 Players"], [WINRATE_2P, WINRATE_3P, WINRATE_4P])
-    plt.xlabel("Number of Players")
-    plt.ylabel("Win Rate")
-    plt.title("Timmy Win Rate vs Number of Players")
-    plt.ylim(0, 1)
-    folder_path = Path(__file__).parent / 'Graphs/Timmy'
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-
-    file_name = ("timmy_eval_graph" +
-        datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") +
-        ".png")
-    file_name = os.path.join(folder_path, file_name)
-
-    plt.savefig(file_name)
-    plt.show()
+    agent.evaluate_model()

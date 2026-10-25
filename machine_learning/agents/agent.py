@@ -84,3 +84,10 @@ class Agent:
         """Evaluate the current state of the board.
         return a numerical evaluation of the board state.
         """
+
+    @abstractmethod
+    def evaluate_model(self):
+        """Evaluate the model's performance.
+        Generate a plot showing the model's winrate, as well
+        as any other metrics.
+        """

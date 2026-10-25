@@ -18,7 +18,8 @@ from machine_learning.game_files.components import(
     GemPile,
     ActionType,
     Action,
-    Player
+    Player,
+    Board
 )
 
 from machine_learning.game_files.game import Game
