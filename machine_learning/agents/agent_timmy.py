@@ -5,13 +5,13 @@ that can play the game, but isn't very effictive at out performing other players
 Timmy is desgined to be the first bot, and other bots will be trained based off of Timmy."""
 
 import datetime
-import math
 import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 
 from machine_learning.agents.agent import Agent
+from machine_learning.agents.ml_policy import QNetworkPolicy
 from machine_learning.game_files.components import Player
 from machine_learning.game_files.game import Game
 
@@ -24,8 +24,6 @@ class Timmy(Agent):
     def train(self):
         """Create a Timmy model and train it by 
         having it play against random bots."""
-
-        num_games = 10000
         wins = 0
         draws = 0
         win_rates = []
@@ -37,7 +35,7 @@ class Timmy(Agent):
 
         game = Game(players)
 
-        for i in range(num_games):
+        for i in range(self.total_games):
             if i % 100 == 0:
                 print(f"Training game {i}: wins={wins}, draws={draws}")
             num_players = i % 3 + 2 # Cycles between 2, 3, and 4 players
@@ -50,35 +48,46 @@ class Timmy(Agent):
                 draws += 1
 
             self.n_games += 1
+            self.train_long_memory()
             win_rates.append(wins / self.n_games)
 
         self.model.save("timmy_model")
 
-        print(f"Timmy won {wins} out of {num_games} games.")
-        print(f"Timmy drew {draws} out of {num_games} games.")
-
-        self.save_graph(win_rates, num_games)
+        print(f"Timmy won {wins} out of {self.total_games} games.")
+        print(f"Timmy drew {draws} out of {self.total_games} games.")
 
     def play_single_game(self, game: Game, players: list[Player]):
         """Play a single game and return the result."""
-        result, _ = game.training_game(players)
+        result = game.training_game(players)
 
         while result is None:
             original_state = self.get_board_state(game.board)
-            move = self.get_action(original_state)
-            result, valid_move = game.take_agent_action(move)
+            moves = self.get_training_actions(original_state)
+            moves_attempted = 0
 
-            # Create a one-hot encoded action vector to train the model
-            action = [0] * 45
-            action[move] = 1
+            for move in moves:
+                result, valid_move = game.take_agent_action(move)
 
-            next_state = self.get_board_state(game.board)
+                # Create a one-hot encoded action vector to train the model
+                action = [0] * 45
+                action[move] = 1
 
-            done = result is not None
+                next_state = self.get_board_state(game.board)
 
-            reward = self.evaluate_board(game.board, result, valid_move)
-            self.train_short_memory(original_state, action, reward, next_state, done)
-            self.remember(original_state, action, reward, next_state, done)
+                reward = self.evaluate_board(game.board, result, valid_move)
+
+                done = result is not None
+
+                self.train_short_memory(original_state, action, reward, next_state, done)
+                self.remember(original_state, action, reward, next_state, done)
+
+                if valid_move:
+                    break
+                moves_attempted += 1
+
+            if moves_attempted == len(moves):
+                # Pass the turn after verifying there are no legal actions.
+                result, valid_move = game.take_agent_action(None)
 
         return result
 
@@ -91,15 +100,15 @@ class Timmy(Agent):
         points = 0
 
         if not move_valid:
-            points -= 200 # Points for invalid move
-        elif result is not None:
-            if result.name == "Timmy":
-                points += 500 # Points for victory
-            elif result.name == "Nobody":
-                points -= 50 # Points for draw
-            else:
-                points -= 250 # Points for defeat
+            points -= 20 # Points for invalid move
         else:
+            if result is not None:
+                if result.name == "Timmy":
+                    points += 100 # Points for victory
+                elif result.name == "Nobody":
+                    points -= 20 # Points for draw
+                else:
+                    points -= 70 # Points for defeat
             player = board.players[0]
 
             # Get 1 point for each gem held
@@ -117,35 +126,71 @@ class Timmy(Agent):
                         player.cards["R"] +
                         player.cards["G"])
 
-            #Get 15 points For each score point the player has
-            points += (player.points * 15)
+            #Get 25 points For each score point the player has
+            points += (player.points * 25)
 
             # Get 1 point for each card in hand
             points += len(player.hand)
 
-        k = 0.01
-
-        points = points / math.exp(board.turn_count * k)
         return points
 
-    def save_graph(self, win_rates, num_games):
-        """Display the training results graph to the user.
-        Then save it to a timmy folder"""
-        plt.figure(figsize=(10, 5))
-        plt.plot(range(1, num_games + 1), win_rates, label="Win rate")
-        plt.xlabel("Training game")
-        plt.ylabel("Average win rate")
-        plt.title("Timmy Average Win Rate During Training")
-        plt.ylim(0, 1)
-        plt.grid(True, alpha=0.3)
-        plt.legend()
-        plt.tight_layout()
+    def evaluate_model(self):
+        """Evaluate Timmy's performance,
+        model the win rate against 1 opponent,
+        2 opponents, and 3 opponents."""
 
+        _game_count = 1000
+
+        # Get model player policy
+        model = Player("Timmy", False, QNetworkPolicy.from_file("timmy_model"))
+
+        #2 player winrate
+        wins = 0
+        for _ in range(_game_count):
+            game = Game([model, Player("Opponent #1", False)])
+            result = game.play()
+            if result is not None and result.name == "Timmy":
+                wins += 1
+            model.reset()
+        winrate_2p = wins / _game_count
+
+        #3 player winrate
+        wins = 0
+        for _ in range(_game_count):
+            game = Game([model,
+                        Player("Opponent #1", False),
+                        Player("Opponent #2", False)])
+            result = game.play()
+            if result is not None and result.name == "Timmy":
+                wins += 1
+            model.reset()
+        winrate_3p = wins / _game_count
+
+        #4 player winrate
+        wins = 0
+        for _ in range(_game_count):
+            game = Game([model,
+                        Player("Opponent #1", False),
+                        Player("Opponent #2", False),
+                        Player("Opponent #3", False)])
+            result = game.play()
+            if result is not None and result.name == "Timmy":
+                wins += 1
+            model.reset()
+        winrate_4p = wins / _game_count
+
+        bars = plt.bar(["2 Players", "3 Players", "4 Players"],
+                       [winrate_2p, winrate_3p, winrate_4p])
+        plt.bar_label(bars)
+        plt.xlabel("Number of Players")
+        plt.ylabel("Win Rate")
+        plt.title("Timmy Win Rate vs Number of Players")
+        plt.ylim(0, 1)
         folder_path = Path(__file__).parent / 'Graphs/Timmy'
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
-        file_name = ("timmy_training_graph" +
+        file_name = ("timmy_eval_graph" +
             datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") +
             ".png")
         file_name = os.path.join(folder_path, file_name)
@@ -155,6 +200,9 @@ class Timmy(Agent):
 
 
 if __name__ == "__main__":
-    agent = Timmy()
+    agent = Timmy(total_games=1000)
     agent.model.load("timmy_model")
     agent.train()
+
+    #Evaluate Timmy's performance.
+    agent.evaluate_model()
