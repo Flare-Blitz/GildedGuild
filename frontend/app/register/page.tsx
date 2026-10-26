@@ -1,4 +1,5 @@
 import SignupForm from '@/app/ui/signup-form'
+import { Heading } from '@chakra-ui/react/';
 
 export default async function Home() {
 
@@ -8,7 +9,7 @@ export default async function Home() {
           border: "1px solid #ccc", 
           borderRadius: "5px", 
           margin: "20px" }}>
-          <h1>Sign Up</h1>
+          <Heading size="xl">Sign Up</Heading>
           <SignupForm />
         </main>
     </div>

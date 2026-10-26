@@ -1,46 +1,43 @@
 'use client'
- 
+
 import { signup } from '@/app/actions/auth'
+import { Button, Field, Input } from '@chakra-ui/react/'
 import { useActionState } from 'react'
- 
+
 export default function SignupForm() {
   const [state, action, pending] = useActionState(signup, undefined)
- 
+
   return (
     <form action={action}>
+      <Field.Root invalid={!!state?.errors?.name}>
+        <Field.Label>Username</Field.Label>
+        <Input id="username" name="username" placeholder="Enter your username" />
+        {state?.errors?.name && <Field.ErrorText>{state.errors.name}</Field.ErrorText>}
+      </Field.Root>
       {state?.message && <p>{state.message}</p>}
-      <div>
-        <label htmlFor="name">Name</label>
-        <input id="name" name="name" placeholder="Name"
-          style={{ border: "1px solid #ccc", borderRadius: "5px", padding: "5px" }} />
-      </div>
-      {state?.errors?.name && <p>{state.errors.name}</p>}
- 
-      <div>
-        <label htmlFor="email">Email</label>
-        <input id="email" name="email" placeholder="Email" 
-          style={{ border: "1px solid #ccc", borderRadius: "5px", padding: "5px" }} />
-      </div>
-      {state?.errors?.email && <p>{state.errors.email}</p>}
- 
-      <div>
-        <label htmlFor="password">Password</label>
-        <input id="password" name="password" type="password" 
-          style={{ border: "1px solid #ccc", borderRadius: "5px", padding: "5px" }}/>
-      </div>
-      {state?.errors?.password && (
-        <div>
-          <p>Password must:</p>
-          <ul>
-            {state.errors.password.map((error) => (
-              <li key={error}>- {error}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <button disabled={pending} type="submit">
-        Sign Up
-      </button>
+      
+
+      <Field.Root invalid={!!state?.errors?.email}>
+        <Field.Label>Email</Field.Label>
+        <Input id="email" name="email" placeholder="Enter your email" />
+        {state?.errors?.email && <Field.ErrorText>{state.errors.email}</Field.ErrorText>}
+      </Field.Root>
+
+      <Field.Root invalid={!!state?.errors?.password}>
+        <Field.Label>Password</Field.Label>
+        <Input id="password" name="password" type="password" placeholder="Enter your password" />
+        {state?.errors?.password && (
+          <Field.ErrorText>
+            <p>Password must:</p>
+            <ul>
+              {state.errors.password.map((error) => (
+                <li key={error}>- {error}</li>
+              ))}
+            </ul>
+          </Field.ErrorText>
+        )}
+      </Field.Root>
+      <Button type="submit" disabled={pending}>Sign Up</Button>
     </form>
   )
 }
