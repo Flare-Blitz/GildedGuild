@@ -730,3 +730,24 @@ I will modify the data later, but I need to determine what directory I should pl
     Prompt: [[PLAN]] Why are you using a protocol?
     AI Output: Explained that Protocol describes the policy interface structurally without requiring implementations to inherit from a game class, allowing ML, heuristic, or test policies while supporting type checking. Clarified that it is optional and can be omitted if the project prefers a less typed interface.
     My Modifications: I got a gerneral idea, and kept the included protocol.
+
+- Date: 2026-10-27
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Why does the import of provider.jsx not work in the root layout?
+    AI Output: Explained that the import failed because the configured `@/*` alias pointed to the wrong project location and the original `provider.jsx` file was outside the frontend project. The root layout could not resolve `@/components/ui/provider` because the provider file was not under the path included by the frontend TypeScript configuration.
+    My Modifications: I removed `provider.jsx` and fixed the issue with `frontend/components/ui/provider.tsx`. I also updated the root layout to import the TypeScript provider with a relative path and adjusted the frontend path alias so the provider resolves correctly.
+
+- Date: 2026-10-27
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Why is suppressHydrationWarning not working?
+    AI Output: Explained that `suppressHydrationWarning` only suppresses limited text and attribute mismatches on the element where it is set. It does not repair structural mismatches or suppress hydration errors from descendant components. Identified `next-themes` as the likely source of theme-dependent differences and recommended using a stable client-only fallback for theme-dependent UI.
+    My Modifications: This was inconclusive, since suppressHydrationWarning was already correctly placed, so I needed a followup question.
+
+- Date: 2026-10-27
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Here's a more in depth error: Hydration failed because the server rendered HTML didn't match the client. The client/server diff showed a `next-themes` script where Chakra's Emotion style was expected, and the error pointed to `components/ui/color-mode.tsx`.
+    AI Output: Interpreted the diff as an insertion-order mismatch between the `next-themes` initialization script and Chakra/Emotion's generated style tag. Explained that `suppressHydrationWarning` cannot hide a structural child-node mismatch, and recommended placing `ColorModeProvider` outside `ChakraProvider` so the theme script and Chakra styles have a consistent server/client order.
+    My Modifications: I reviewed the provider nesting and the `next-themes` configuration, kept the root hydration suppression in the layout, and changed the provider assignment layout to resolve the issue
