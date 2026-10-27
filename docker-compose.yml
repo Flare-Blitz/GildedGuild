@@ -10,7 +10,7 @@ services:
       - ./Database Backend/test_SQL_Database.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
   
   frontend:
-    image: node:20-alpine
+    image: node:24-alpine
     working_dir: /app
     ports:
       - "3000:3000"
