@@ -70,23 +70,76 @@ class Steve(Agent):
         print(f"Steve drew {draws} out of {self.total_games} games.")
 
 
-    def evaluate_board(self, board, result, move_valid):
+    def evaluate_board(self, board, result, move_valid, prev_board_value):
         """Evaluate the current state of the board.
         
         Returns the evaluation of the board for the given player."""
 
         points = 0
 
+        # if not move_valid:
+        #     return -20, prev_board_value # Points for invalid move
+        # else:
+        #     if result is not None:
+        #         if result.name == "Steve":
+        #             points += 250 # Points for victory
+        #         elif result.name == "Nobody":
+        #             points -= 10 # Points for draw
+        #         else:
+        #             points -= 200 # Points for defeat
+        #     player = board.players[0]
+
+        #     # Get 2 points for each gem held
+        #     # Holding gems is important for stalling the game
+        #     points += (player.gems["W"] +
+        #         player.gems["U"] +
+        #         player.gems["B"] +
+        #         player.gems["R"] +
+        #         player.gems["G"] +
+        #         player.gems["Au"])
+
+        #     # Get 8 points for each card held
+        #     points += (player.cards["W"] +
+        #                 player.cards["U"] +
+        #                 player.cards["B"] +
+        #                 player.cards["R"] +
+        #                 player.cards["G"]) * 8
+
+        #     #Get 20 points For each score point the player has
+        #     points += (player.points * 25)
+
+        #     # Get 1 point for each card in hand
+        #     points += len(player.hand)
+
+        #     # Track the threat of the strongest opponent,
+        #     # Punish Steve for having stronger opponents
+        #     opponent_threat = 0
+        #     for opponent in board.players[1:]:
+        #         opponent_points = 0
+        #         opponent_points += (opponent.cards["W"] +
+        #                             opponent.cards["U"] +
+        #                             opponent.cards["B"] +
+        #                             opponent.cards["R"] +
+        #                             opponent.cards["G"]) * 3
+        #         opponent_points += (opponent.points * 10)
+
+        #         if(opponent_points > opponent_threat):
+        #             # This opponent is the strongest threat to Steve, track their points
+        #             opponent_threat = opponent_points
+
+        #     # Punish having opponents with more points and cards slightly
+        #     points -= opponent_threat
+
         if not move_valid:
             points -= 20 # Points for invalid move
         else:
             if result is not None:
-                if result.name == "Steve":
-                    points += 150 # Points for victory
+                if result.name == "Timmy":
+                    points += 100 # Points for victory
                 elif result.name == "Nobody":
-                    points -= 10 # Points for draw
+                    points -= 20 # Points for draw
                 else:
-                    points -= 60 # Points for defeat
+                    points -= 70 # Points for defeat
             player = board.players[0]
 
             # Get 1 point for each gem held
@@ -102,47 +155,23 @@ class Steve(Agent):
                         player.cards["U"] +
                         player.cards["B"] +
                         player.cards["R"] +
-                        player.cards["G"])
+                        player.cards["G"]) * 5
 
-            #Get 20 points For each score point the player has
-            points += (player.points * 20)
+            #Get 25 points For each score point the player has
+            points += (player.points * 25)
 
             # Get 1 point for each card in hand
             points += len(player.hand)
 
-            # Unlike timmy, reward long games by rewarding opponents
-            # having fewer points and cards
-            opponent_points = 0
-            for opponent in board.players[1:]:
-                opponent_points += (opponent.cards["W"] +
-                                    opponent.cards["U"] +
-                                    opponent.cards["B"] +
-                                    opponent.cards["R"] +
-                                    opponent.cards["G"]) / 2
-                opponent_points += (opponent.points * 10)
-                opponent_points += len(opponent.hand)
-
-            # Punish having opponents with more points and cards slightly
-            points -= opponent_points / len(board.players[1:])
-
-            # Points increase as game progresses, starting with 1x,
-            # Then increasing exponentially with 2x at turn 30, which
-            # is the average game turn count, rewarding longer games
-            k = 2 ** (board.turn_count / 30)
-
-            if points > 0:
-                points *= k
-            else:
-                points /= k
-
-        return points
+        # Return the net reward + 20 points to incentivice survivial
+        return points - prev_board_value, points
 
     def evaluate_model(self):
         """Evaluate Steve's performance,
         model the win rate against 1 opponent,
         2 opponents, and 3 opponents."""
 
-        _game_count = 1000
+        _game_count = 100
 
         # Get model player policy
         model = Player("Steve", False, QNetworkPolicy.from_file("steve_model"))
@@ -196,6 +225,10 @@ class Steve(Agent):
         winrate_4p = wins / _game_count
         turnrate_4p = turns / _game_count
 
+        print(f"winrate 2p: {winrate_2p}, turnrate 2p: {turnrate_2p}")
+        print(f"winrate 3p: {winrate_3p}, turnrate 3p: {turnrate_3p}")
+        print(f"winrate 4p: {winrate_4p}, turnrate 4p: {turnrate_4p}")
+
         return (winrate_2p >= 0.6 and
             winrate_3p >= 0.4 and
             winrate_4p >= 0.3 and
@@ -241,7 +274,7 @@ if __name__ == "__main__":
     #Play 10000 training games, then 3000 evaluation games.
     #repeat until desired performance is achieved
 
-    agent = Steve(total_games=10000)
+    agent = Steve(total_games=500)
     agent.model.load("steve_model")
 
     success = False

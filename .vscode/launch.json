@@ -10,6 +10,20 @@
             "request": "launch",
             "module": "machine_learning.agents.agent_timmy",
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Debug Steve",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "machine_learning.agents.agent_steve",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Debug Spike",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "machine_learning.agents.agent_spike",
+            "cwd": "${workspaceFolder}"
         }
     ]
 }

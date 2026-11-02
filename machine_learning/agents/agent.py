@@ -24,7 +24,7 @@ class Agent:
 
         self.n_games = 0
         self.epsilon = 1.0 # randomness
-        self.gamma = 0.9 # discount rate
+        self.gamma = 0.97 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)
         self.model = LinearQNet(INPUT_SIZE, 256, ACTION_COUNT)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
@@ -55,8 +55,8 @@ class Agent:
     def get_training_actions(self, state):
         """Determine the action to take based on the current state."""
 
-        self.epsilon = max(0.1, 1.0 - (self.n_games / self.total_games))
-        # self.epsilon = 0
+        self.epsilon = max(0.05, 1.0 - (self.n_games / (self.total_games/2)))
+        # self.epsilon = 0.1
         if random.random() < self.epsilon:
             moves = list(range(ACTION_COUNT))
             random.shuffle(moves)
@@ -70,6 +70,7 @@ class Agent:
     def play_single_game(self, game: Game, players: list[Player]):
         """Play a single game and return the result."""
         result = game.training_game(players)
+        prev_board_value = 0
 
         while result is None:
             original_state = self.get_board_state(game.board)
@@ -85,7 +86,7 @@ class Agent:
 
                 next_state = self.get_board_state(game.board)
 
-                reward = self.evaluate_board(game.board, result, valid_move)
+                reward, prev_board_value = self.evaluate_board(game.board, result, valid_move, prev_board_value)
 
                 done = result is not None
 
@@ -107,9 +108,10 @@ class Agent:
         """Train the model."""
 
     @abstractmethod
-    def evaluate_board(self, board, result, move_valid):
+    def evaluate_board(self, board, result, move_valid, prev_reward):
         """Evaluate the current state of the board.
-        return a numerical evaluation of the board state.
+        returns how much better this board state is than the previous state (reward)
+        returns the value of the board state (board_value)
         """
 
     @abstractmethod
