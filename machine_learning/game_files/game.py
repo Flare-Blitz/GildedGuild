@@ -24,13 +24,18 @@ class Game:
         This function runs the main game loop, alternating turns between players
         until a player wins. It handles action-taking and victory checking.
         """
+        players_skipped = 0
         while True:
-            winner, _ = self.take_turn()
+            winner, success = self.take_turn()
             if winner:
-                print(f"Player {winner.name} has won the game!")
                 return winner
 
-        return None
+            if not success:
+                players_skipped += 1
+            else:
+                players_skipped = 0
+            if players_skipped == len(self.board.players):
+                return None
 
     def take_turn(self, action: Action = None):
         """
@@ -50,7 +55,7 @@ class Game:
             success, _ = self.process_action(action)
             if not success:
                 # Action was not valid, take a random action instead and return false.
-                self.take_action()
+                return None, False
         else:
             # Otherwise, let the player take an action
             success = self.take_action()
@@ -76,7 +81,8 @@ class Game:
         self.board = Board(players)
         for player in self.board.players:
             player.reset()
-        return self.play_training_round()
+        winner, _ =  self.play_training_round()
+        return winner
 
     def play_training_round(self):
         """Plays a single round of the training game, until it is the agent's turn.
@@ -138,16 +144,26 @@ class Game:
     def take_action(self):
         """
         This function takes an action from the current player.
-        It can be either a human player or an ML Model.
-        Currently only handles human players. If an ML model
-        is the current player, it will perform a random action.
+        Human players take interactive turns, policy-backed players use their
+        policy, and other non-human players take random actions.
 
         Returns true if the action was performed, returns false if the action was skipped.
         """
-        # If the current player is a human, take a human action. Otherwise, take a random action.
-        if self.board.players[self.board.turn_player].is_human:
+        player = self.board.players[self.board.turn_player]
+        if player.is_human:
             return self.take_human_action()
+        if player.policy is not None:
+            return self.take_policy_action(player.policy)
         return self.take_random_action()
+
+    def take_policy_action(self, policy):
+        """Try the policy's ranked actions until one is valid."""
+        for action_index in policy.rank_actions(self.board):
+            action = self.all_actions[action_index]
+            success, _ = self.process_action(action)
+            if success:
+                return True
+        return False
 
     # Provides input for a human to take action
     def take_human_action(self):
@@ -242,15 +258,23 @@ class Game:
         Returns a tuple (winner: Player, valid_move: bool) 
         indicating the winner of the turn and whether the move was valid.
         """
-        action = self.all_actions[move_index]
 
-        winner, valid_move = self.take_turn(action)
+        if move_index is not None:
+            action = self.all_actions[move_index]
+
+            winner, valid_move = self.take_turn(action)
+
+            if not valid_move:
+                return None, False
+        else:
+            winner, valid_move = self.take_turn()
 
         if not winner:
             # Take the opponents turns
             winner, all_turns_skipped = self.play_training_round()
 
-            if all_turns_skipped and not valid_move:
+            # nobody could find a valid move.
+            if all_turns_skipped and move_index is None:
                 # Nobody provided a valid move, so return default "Nobody" winner to end the game
                 return Player("Nobody"), valid_move
 

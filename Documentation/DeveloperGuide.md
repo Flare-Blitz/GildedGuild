@@ -3,6 +3,8 @@
 ## frontend
 This contains the Node.js application. It will contain all frontend data, as well as any connections to the backend.
 
+It can be ran by running "Docker Compose Up" from the terminal
+
 ## Database Backend
 This will contain the data to set up the mysql backend database
 

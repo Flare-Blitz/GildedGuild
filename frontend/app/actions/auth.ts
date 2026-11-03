@@ -20,7 +20,7 @@ export async function signup(
   formData: FormData
 ): Promise<FormState> {
   const validatedFields = SignupFormSchema.safeParse({
-    name: formData.get("name"),
+    name: formData.get("username"),
     email: formData.get("email"),
     password: formData.get("password"),
   });

@@ -18,7 +18,9 @@ ACTION_COUNT = 45
 
 class Agent:
     """This defines an agent being set up from playing a game and training a Neural Network."""
-    def __init__(self):
+    def __init__(self, total_games):
+        self.total_games = total_games
+
         self.n_games = 0
         self.epsilon = 1.0 # randomness
         self.gamma = 0.9 # discount rate
@@ -49,20 +51,20 @@ class Agent:
         """Train the agent on a single experience."""
         self.trainer.train_step(state, action, reward, next_state, done)
 
-    def get_action(self, state):
+    def get_training_actions(self, state):
         """Determine the action to take based on the current state."""
-        # random moves: tradeoff exploration / exploitation
 
-        self.epsilon = max(0.05, 1.0 - (self.n_games / 1000))
+        self.epsilon = max(0.1, 1.0 - (self.n_games / self.total_games))
         # self.epsilon = 0
         if random.random() < self.epsilon:
-            move = random.randint(0, ACTION_COUNT - 1)
+            moves = list(range(ACTION_COUNT))
+            random.shuffle(moves)
         else:
             state0 = torch.tensor(state, dtype=torch.float)
             prediction = self.model(state0)
-            move = torch.argmax(prediction).item()
+            moves = torch.argsort(prediction, descending=True)
 
-        return move
+        return moves
 
     @abstractmethod
     def train(self):
@@ -72,4 +74,11 @@ class Agent:
     def evaluate_board(self, board, result, move_valid):
         """Evaluate the current state of the board.
         return a numerical evaluation of the board state.
+        """
+
+    @abstractmethod
+    def evaluate_model(self):
+        """Evaluate the model's performance.
+        Generate a plot showing the model's winrate, as well
+        as any other metrics.
         """
