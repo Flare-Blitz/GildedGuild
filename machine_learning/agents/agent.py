@@ -29,6 +29,29 @@ class Agent:
         self.model = LinearQNet(INPUT_SIZE, 256, ACTION_COUNT)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
+    def save_checkpoint(self, file_name: str) -> None:
+        """Save model weights, optimizer state, and exploration progress."""
+        self.model.save(
+            file_name,
+            optimizer=self.trainer.optimizer,
+            epsilon=self.epsilon,
+            n_games=self.n_games,
+        )
+
+    def load_checkpoint(self, file_name: str, required: bool = False) -> None:
+        """Restore model weights and any saved training state."""
+        checkpoint = self.model.load(
+            file_name,
+            required=required,
+            optimizer=self.trainer.optimizer,
+        )
+        if checkpoint is None:
+            return
+
+        self.epsilon = checkpoint.get("epsilon", self.epsilon)
+        self.n_games = checkpoint.get("n_games", self.n_games)
+        self.model.train()
+
     def get_board_state(self, board: Board) -> np.ndarray:
         """Return the current board from the acting player's perspective."""
         return encode_board(board)
@@ -52,18 +75,23 @@ class Agent:
         """Train the agent on a single experience."""
         self.trainer.train_step(state, action, reward, next_state, done)
 
-    def get_training_actions(self, state):
-        """Determine the action to take based on the current state."""
+    def get_training_actions(self, state, legal_actions: list[int]) -> list[int]:
+        """Rank only legal action indices for exploration or exploitation."""
 
-        self.epsilon = max(0.05, 1.0 - (self.n_games / (self.total_games/2)))
-        # self.epsilon = 0.1
+        self.epsilon = max(0.05, 1.0 - (self.n_games / 1000))
+        if not legal_actions:
+            return []
+
         if random.random() < self.epsilon:
-            moves = list(range(ACTION_COUNT))
+            moves = list(legal_actions)
             random.shuffle(moves)
         else:
             state0 = torch.tensor(state, dtype=torch.float)
             prediction = self.model(state0)
-            moves = torch.argsort(prediction, descending=True)
+            legal_indices = torch.as_tensor(legal_actions, dtype=torch.long)
+            legal_q_values = prediction[legal_indices]
+            ranked_legal_indices = torch.argsort(legal_q_values, descending=True)
+            moves = legal_indices[ranked_legal_indices].tolist()
 
         return moves
 
@@ -74,7 +102,8 @@ class Agent:
 
         while result is None:
             original_state = self.get_board_state(game.board)
-            moves = self.get_training_actions(original_state)
+            legal_actions = game.get_all_legal_actions()
+            moves = self.get_training_actions(original_state, legal_actions)
             moves_attempted = 0
 
             for move in moves:
@@ -86,7 +115,11 @@ class Agent:
 
                 next_state = self.get_board_state(game.board)
 
-                reward, prev_board_value = self.evaluate_board(game.board, result, valid_move, prev_board_value)
+                reward, prev_board_value = self.evaluate_board(
+                                            game.board,
+                                            result,
+                                            valid_move,
+                                            prev_board_value)
 
                 done = result is not None
 
@@ -108,7 +141,7 @@ class Agent:
         """Train the model."""
 
     @abstractmethod
-    def evaluate_board(self, board, result, move_valid, prev_reward):
+    def evaluate_board(self, board, result, move_valid, prev_board_value):
         """Evaluate the current state of the board.
         returns how much better this board state is than the previous state (reward)
         returns the value of the board state (board_value)

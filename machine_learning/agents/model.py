@@ -30,8 +30,14 @@ class LinearQNet(nn.Module):
         x = self.linear4(x)
         return x
 
-    def save(self, file_name='model'):
-        """Save the model's state dictionary to a file.
+    def save(
+        self,
+        file_name='model',
+        optimizer: optim.Optimizer | None = None,
+        epsilon: float | None = None,
+        n_games: int | None = None,
+    ):
+        """Save model weights and optional training state to a file.
         Also upload the model as an ONNX file, for use in the Unity game engine."""
         model_folder_path = Path(__file__).parent / 'model'
         if not os.path.exists(model_folder_path):
@@ -40,7 +46,14 @@ class LinearQNet(nn.Module):
         self.eval()
 
         model_file_name = os.path.join(model_folder_path, file_name)
-        torch.save(self.state_dict(), f"{model_file_name}.pth")
+        checkpoint = {"model_state_dict": self.state_dict()}
+        if optimizer is not None:
+            checkpoint["optimizer_state_dict"] = optimizer.state_dict()
+        if epsilon is not None:
+            checkpoint["epsilon"] = epsilon
+        if n_games is not None:
+            checkpoint["n_games"] = n_games
+        torch.save(checkpoint, f"{model_file_name}.pth")
 
         onnx_folder_path = Path(__file__).parent / 'onnx_model'
         if not os.path.exists(onnx_folder_path):
@@ -51,17 +64,36 @@ class LinearQNet(nn.Module):
         onnx_program = torch.onnx.export(self, torch.randn(1, INPUT_SIZE), dynamo=True)
         onnx_program.save(f"{onnx_file_name}.onnx")
 
-    def load(self, file_name, required=False):
-        """Load the model state; raise an error if required and the file is missing."""
+    def load(
+        self,
+        file_name,
+        required=False,
+        optimizer: optim.Optimizer | None = None,
+    ) -> dict[str, int | float] | None:
+        """Load model weights and any available optimizer and training state."""
         model_folder_path = Path(__file__).parent / "model"
         file_path = model_folder_path / (file_name + ".pth")
 
         if file_path.is_file():
-            state_dict = torch.load(file_path, weights_only=True)
-            self.load_state_dict(state_dict)
-            return
+            checkpoint = torch.load(file_path, weights_only=True)
+            if "model_state_dict" in checkpoint:
+                self.load_state_dict(checkpoint["model_state_dict"])
+                if optimizer is not None and "optimizer_state_dict" in checkpoint:
+                    optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+                metadata = {
+                    key: checkpoint[key]
+                    for key in ("epsilon", "n_games")
+                    if key in checkpoint
+                }
+            else:
+                # Continue to support model files saved before checkpoint bundles.
+                self.load_state_dict(checkpoint)
+                metadata = {}
+            self.eval()
+            return metadata
         if required:
             raise FileNotFoundError(f"Model weights not found: {file_path}")
+        return None
 
 
 class QTrainer: #pylint: disable=too-few-public-methods
