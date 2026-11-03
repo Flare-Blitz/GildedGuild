@@ -3,12 +3,6 @@ Johnny loves a big flashy turn, so he gets rewarded for getting lots of points
 on the final turn when he wins.
 """
 
-import datetime
-import os
-from pathlib import Path
-
-import matplotlib.pyplot as plt
-
 from machine_learning.agents.agent import Agent
 from machine_learning.agents.ml_policy import QNetworkPolicy
 from machine_learning.game_files.components import Player
@@ -126,7 +120,7 @@ class Johnny(Agent):
         model the win rate against 1 opponent,
         2 opponents, and 3 opponents."""
 
-        _game_count = 1000
+        _game_count = 3000
 
         # Get model player policy
         model = Player("Johnny", False, QNetworkPolicy.from_file("johnny_model"))
@@ -163,39 +157,6 @@ class Johnny(Agent):
             final_turn_points_avg_3p >= 4 and
             final_turn_points_avg_4p >= 4)
 
-        # _, ax = plt.subplots(1, 2, figsize=(12, 6))
-
-        # ax[0].bar(["2 Players", "3 Players", "4 Players"],
-        #           [winrate_2p, winrate_3p, winrate_4p])
-
-        # bars = ax[0].bar(["2 Players", "3 Players", "4 Players"],
-        #                  [winrate_2p, winrate_3p, winrate_4p])
-        # ax[0].bar_label(bars)
-        # ax[0].set_xlabel("Number of Players")
-        # ax[0].set_ylabel("Win Rate")
-        # ax[0].set_title("Johnny Win Rate vs Number of Players")
-        # ax[0].set_ylim(0, 1)
-
-        # Turn rate plot
-        # bars = ax[1].bar(["2 Players", "3 Players", "4 Players"],
-        #                  [final_turn_points_avg_2p, final_turn_points_avg_3p, final_turn_points_avg_4p])
-        # ax[1].bar_label(bars)
-        # ax[1].set_xlabel("Number of Players")
-        # ax[1].set_ylabel("Average Turn Count")
-        # ax[1].set_title("Johnny Turn Count vs Number of Players")
-        # ax[1].set_ylim(0, max(final_turn_points_avg_2p, final_turn_points_avg_3p, final_turn_points_avg_4p) * 1.1)
-        # folder_path = Path(__file__).parent / 'Graphs/Johnny'
-        # if not os.path.exists(folder_path):
-        #     os.makedirs(folder_path)
-
-        # file_name = ("johnny_eval_graph" +
-        #     datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") +
-        #     ".png")
-        # file_name = os.path.join(folder_path, file_name)
-
-        # plt.savefig(file_name)
-        # plt.show()
-
     def evaluate_x_players(self, players: list[Player], _game_count: int = 1000):
         """Play _game_count games with the attached players and evaluate the win rate and 
         turn count averageof Johnny.
@@ -217,13 +178,13 @@ class Johnny(Agent):
 
 
 if __name__ == "__main__":
-    #Play 10000 training games, then 3000 evaluation games.
+    #Play 10000 training games, then 9000 evaluation games.
 
-    agent = Johnny(total_games=1)
+    agent = Johnny(total_games=10000)
     agent.load_checkpoint("johnny_model")
 
     success = False
 
-    # agent.train()
+    agent.train()
     success = agent.evaluate_model()
     print(f"Evaluation success: {success}")
