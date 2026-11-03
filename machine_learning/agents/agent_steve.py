@@ -186,9 +186,9 @@ class Steve(Agent):
         return (winrate_2p >= 0.6 and
             winrate_3p >= 0.4 and
             winrate_4p >= 0.3 and
-            turnrate_2p >= 40 and
-            turnrate_3p >= 35 and
-            turnrate_4p >= 33)
+            turnrate_2p >= 38 and
+            turnrate_3p >= 33 and
+            turnrate_4p >= 31)
 
         # _, ax = plt.subplots(1, 2, figsize=(12, 6))
 
