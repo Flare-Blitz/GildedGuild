@@ -66,12 +66,6 @@ class Spike(Agent):
 
         self.save_checkpoint("spike_model")
 
-        # plt.plot(win_rates)
-        # plt.xlabel("Games")
-        # plt.ylabel("Win Rate")
-        # plt.title("Spike Win Rate Over Time")
-        # plt.show()
-
         print(f"Spike won {wins} out of {self.total_games} games.")
         print(f"Spike drew {draws} out of {self.total_games} games.")
 
