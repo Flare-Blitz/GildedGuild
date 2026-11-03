@@ -248,6 +248,9 @@ class Player:
             "G" : 0
         }
 
+        # In order to train specifically Johnny, track points earned THIS TURN
+        self.points_this_turn = 0
+
     def reset(self):
         """Reset the player's state for a new game."""
         self.hand = []
@@ -361,6 +364,8 @@ class Board:
         """This function advances the turn to the next 
         player in a round-robin fashion."""
         self.turn_player = (self.turn_player + 1) % self.player_count
+        #Reset points earned this turn
+        self.players[self.turn_player].points_this_turn = 0
 
     def take_2_gems(self, gem_color):
         """ gem_color: str
@@ -463,6 +468,7 @@ class Board:
         # Add the card to the player
         player.cards[card.color] += 1
         player.points += card.points
+        player.points_this_turn += card.points
 
         return True, ""
 
@@ -577,6 +583,7 @@ class Board:
                 player.cards["G"] >= tile.cost.green):
 
                 player.points += tile.points
+                player.points_this_turn += tile.points
                 player.tiles.append(tile)
                 self.tiles.tiles.remove(tile)
 
