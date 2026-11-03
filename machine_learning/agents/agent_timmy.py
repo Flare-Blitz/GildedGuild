@@ -26,7 +26,8 @@ class Timmy(Agent):
         having it play against random bots."""
         wins = 0
         draws = 0
-        win_rates = []
+        relative_wins = 0
+        relative_draws = 0
 
         players = [Player("Timmy", False),
                 Player("Random1", False),
@@ -36,28 +37,32 @@ class Timmy(Agent):
         game = Game(players)
 
         for i in range(self.total_games):
-            if i % 100 == 0:
-                print(f"Training game {i}: wins={wins}, draws={draws}")
+            if i % 500 == 0:
+                print(f"Training game {i}: wins={wins}, draws={draws}, "
+                    + f"relative_winrate: {relative_wins / (500 - relative_draws)}, ")
+                relative_wins = 0
+                relative_draws = 0
+
             num_players = i % 3 + 2 # Cycles between 2, 3, and 4 players
 
             result = self.play_single_game(game, players[0:num_players])
 
             if result.name == 'Timmy':
                 wins += 1
+                relative_wins += 1
             if result.name == 'Nobody':
                 draws += 1
+                relative_draws += 1
 
             self.n_games += 1
             self.train_long_memory()
-            win_rates.append(wins / self.n_games)
 
-        self.model.save("timmy_model")
+        self.save_checkpoint("timmy_model")
 
         print(f"Timmy won {wins} out of {self.total_games} games.")
         print(f"Timmy drew {draws} out of {self.total_games} games.")
 
-
-    def evaluate_board(self, board, result, move_valid):
+    def evaluate_board(self, board, result, move_valid, prev_board_value):
         """Evaluate the current state of the board.
         
         Returns the evaluation of the board for the given player."""
@@ -69,7 +74,7 @@ class Timmy(Agent):
         else:
             if result is not None:
                 if result.name == "Timmy":
-                    points += 100 # Points for victory
+                    points += 150 # Points for victory
                 elif result.name == "Nobody":
                     points -= 20 # Points for draw
                 else:
@@ -89,7 +94,7 @@ class Timmy(Agent):
                         player.cards["U"] +
                         player.cards["B"] +
                         player.cards["R"] +
-                        player.cards["G"])
+                        player.cards["G"]) * 5
 
             #Get 25 points For each score point the player has
             points += (player.points * 25)
@@ -97,7 +102,7 @@ class Timmy(Agent):
             # Get 1 point for each card in hand
             points += len(player.hand)
 
-        return points
+        return points - prev_board_value, points
 
     def evaluate_model(self):
         """Evaluate Timmy's performance,
@@ -144,29 +149,37 @@ class Timmy(Agent):
             model.reset()
         winrate_4p = wins / _game_count
 
-        bars = plt.bar(["2 Players", "3 Players", "4 Players"],
-                       [winrate_2p, winrate_3p, winrate_4p])
-        plt.bar_label(bars)
-        plt.xlabel("Number of Players")
-        plt.ylabel("Win Rate")
-        plt.title("Timmy Win Rate vs Number of Players")
-        plt.ylim(0, 1)
-        folder_path = Path(__file__).parent / 'Graphs/Timmy'
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
+        print(f"winrate 2p: {winrate_2p}")
+        print(f"winrate 3p: {winrate_3p}")
+        print(f"winrate 4p: {winrate_4p}")
 
-        file_name = ("timmy_eval_graph" +
-            datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") +
-            ".png")
-        file_name = os.path.join(folder_path, file_name)
+        return (winrate_2p >= 0.6
+            and winrate_3p >= 0.4
+            and winrate_4p >= 0.3)
 
-        plt.savefig(file_name)
-        plt.show()
+        # bars = plt.bar(["2 Players", "3 Players", "4 Players"],
+        #                 [winrate_2p, winrate_3p, winrate_4p])
+        # plt.bar_label(bars)
+        # plt.xlabel("Number of Players")
+        # plt.ylabel("Win Rate")
+        # plt.title("Timmy Win Rate vs Number of Players")
+        # plt.ylim(0, 1)
+        # folder_path = Path(__file__).parent / 'Graphs/Timmy'
+        # if not os.path.exists(folder_path):
+        #     os.makedirs(folder_path)
+
+        # file_name = ("timmy_eval_graph" +
+        #     datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") +
+        #     ".png")
+        # file_name = os.path.join(folder_path, file_name)
+
+        # plt.savefig(file_name)
+        # plt.show()
 
 
 if __name__ == "__main__":
-    agent = Timmy(total_games=1000)
-    agent.model.load("timmy_model")
+    agent = Timmy(total_games=10000)
+    agent.load_checkpoint("timmy_model")
     agent.train()
 
     #Evaluate Timmy's performance.
