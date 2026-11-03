@@ -1,3 +1,6 @@
+CREATE DATABASE IF NOT EXISTS GildedGuildDatabase;
+
+USE GildedGuildDatabase;
 CREATE TABLE IF NOT EXISTS parents (
     parent_id INT PRIMARY KEY AUTO_INCREMENT,
     parent_email VARCHAR(255) NOT NULL UNIQUE
