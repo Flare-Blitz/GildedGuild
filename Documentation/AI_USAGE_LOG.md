@@ -667,3 +667,59 @@ I will modify the data later, but I need to determine what directory I should pl
     Prompt: How can I validate the login for the game page, while also maintining the 'use client' so the page can function?
     AI Output: Planned and implemented server-side session validation for /game, redirecting signed-out visitors to /login while moving Unity rendering into a separate Client Component that receives the authenticated username. Workspace diagnostics found no errors; lint and production build checks were denied and could not be run. The existing login credential behavior was left unchanged.
     My Modifications: Creates a component that stores the game that I can render as a client, and use the outer component just for login authentication.
+
+- Date: 2026-11-02
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: No matter how many times I run my spike agent training algorithm, the model has a worse winrate than my timmy models, despite me training it agianst the timmy models to win. Observe my training algorithm for agent_spike and propose any ways I can improve the potential winrate
+    AI Output: Reviewed Spike's reward function, shared Q-learning loop, opponent setup, and evaluation methodology. Recommended prioritizing terminal win/loss outcomes, improving reward shaping, diversifying the Timmy opponent pool, using a larger held-out evaluation set, and stabilizing training. After clarification, prioritized win rate over making games longer.
+    My Modifications: I decided that among the things suggested, the reward function was mostly fine, but I should update the actions to mask out illegal actions, and should save the model data when saving and reloading
+
+- Date: 2026-11-02
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Update my model function to save and load the models while restoring the optimizer and not restarting epsilon
+    AI Output: Updated model checkpointing to persist network weights, optimizer state, epsilon, and game count; added Agent checkpoint helpers and wired the Spike, Timmy, and Steve training entry points to resume and save checkpoints. Kept loading compatible with older weight-only files and verified a checkpoint round trip plus the game tests.
+    My Modifications: I verified that the theory matched official pytorch documentation and verified the increased winrate
+
+- Date: 2026-11-02
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: How would you upgrade the evaluate_board function in order to prioritize and maximize winrate?
+    AI Output: Recommended making terminal outcomes decisive and using small, bounded potential-based shaping for intermediate progress. Also pointed out that Spike already returns directly for terminal results, and advised initializing the previous potential from the starting board and avoiding training on each invalid action attempt.
+    My Modifications: I didn't really undertand how that would improve my code, so not changes were made yet.
+
+- Date: 2026-11-02
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: So you propose only rewarding wins and losses, and nothing to reward in between?
+    AI Output: Clarified that intermediate progress can be rewarded through potential-based shaping, while terminal win/draw/loss remains the primary signal and resource hoarding should not receive fixed bonuses.
+    My Modifications: I clarified that I wanted to understand the role of intermediate rewards. No code change was made for this prompt.
+
+- Date: 2026-11-02
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: should potential be a value ranged from -1 to 1 then?
+    AI Output: Explained that a potential may use [-1, 1] for position relative to opponents or [0, 1] for Spike's own win progress. Emphasized bounded, consistent scaling and tuning a separate shaping coefficient rather than changing the optimizer learning rate.
+    My Modifications: I considered a normalized bounded potential for reward shaping. No code change was made for this prompt.
+
+- Date: 2026-11-02
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: So should I just use my existing evalutate board logic and bound it between 0 and 1, according to the learning rate?
+    AI Output: Recommended against clipping the existing mixed-scale heuristic or scaling it by the learning rate. Suggested defining a new normalized potential that reflects progress toward winning and tuning a separate shaping coefficient.
+    My Modifications: I decided to take no actions to implement how they said, my current code should work fine enough, and I was skeptical that the change in board evaluation would actually help.
+
+- Date: 2026-11-02
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: How can I mask out illegal moves? Currently I can only determine if a move is illegal by performing it, hence punishing illegal moves
+    AI Output: Recommended adding read-only legality checks that share preconditions with action execution, using their results to build a legal-action mask, and masking next-state Q-values during training as well as action selection.
+    My Modifications: I implemented Game.get_all_legal_actions() in game.py to return legal action indices without applying actions.
+
+- Date: 2026-11-02
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: I have designed a function to fetch the index of each legal action, now update the get_training_actions function to mask out illegal actions
+    AI Output: Updated Agent.get_training_actions to explore only legal action indices and rank only the legal actions' Q-values during greedy selection. Added empty-list handling so the existing pass behavior can handle a state with no legal actions. Verified both selection branches and the empty-list case.
+    My Modifications: I integrated the legal-action index list from game.py into the training loop in agent.py, so attempted training actions are restricted to legal moves.
