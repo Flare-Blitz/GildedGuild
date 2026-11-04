@@ -115,11 +115,13 @@ class Spike(Agent):
         #Get 30 points For each score point the player has
         points += (player.points * 30)
 
-        # Get 1 point for each card in hand
-        points += len(player.hand)
+        # Lose 1 point for the level of the card reserved
+        # Spamming card reservations when you can't afford them later is penalized
+        for card in player.hand:
+            points -= card.level
 
         # Track the threat of the strongest opponent,
-        # Punish Steve for having stronger opponents
+        # Punish Spike for having stronger opponents
         opponent_points = 0
         for opponent in board.players[1:]:
             opponent_threat = 0
