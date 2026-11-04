@@ -24,6 +24,20 @@
             "request": "launch",
             "module": "machine_learning.agents.agent_spike",
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Debug Johnny",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "machine_learning.agents.agent_johnny",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Debug Quentin",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "machine_learning.agents.agent_quentin",
+            "cwd": "${workspaceFolder}"
         }
     ]
 }
