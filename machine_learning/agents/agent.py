@@ -19,7 +19,7 @@ ACTION_COUNT = 45
 
 class Agent:
     """This defines an agent being set up from playing a game and training a Neural Network."""
-    def __init__(self, total_games):
+    def __init__(self, total_games = 1000):
         self.total_games = total_games
 
         self.n_games = 0
