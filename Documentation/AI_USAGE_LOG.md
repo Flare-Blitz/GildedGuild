@@ -723,3 +723,10 @@ I will modify the data later, but I need to determine what directory I should pl
     Prompt: I have designed a function to fetch the index of each legal action, now update the get_training_actions function to mask out illegal actions
     AI Output: Updated Agent.get_training_actions to explore only legal action indices and rank only the legal actions' Q-values during greedy selection. Added empty-list handling so the existing pass behavior can handle a state with no legal actions. Verified both selection branches and the empty-list case.
     My Modifications: I integrated the legal-action index list from game.py into the training loop in agent.py, so attempted training actions are restricted to legal moves.
+
+- Date: 2026-11-03
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: why doesn't pytest --cov=. --cov-report=xml:coverage.xml --cov-report=term see my agents file? when run from my machine learning directory?
+    AI Output: Reproduced the command from machine_learning/ and confirmed all 14 tests passed, while the coverage report listed main.py, game_files/, and tests/ but no agents/ modules. Explained that the agents directory had no __init__.py, so its files were not included by coverage's source discovery, and that tests must still import and execute agent code for it to have executed-line coverage.
+    My Modifications: I added an empty __init__.py file to the agents folder, making it a regular Python package so coverage can discover its modules.
