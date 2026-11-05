@@ -28,11 +28,18 @@ public class CardUpdate : MonoBehaviour
     int redCost = 0;
     int greenCost = 0;
     int blueCost = 0;
+    int pointValue = 0;
+
+    public int getLevel() { return Level; }
+    public int getPointValue() { return pointValue; }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         changeCard();
+        GameObject targetObject = GameObject.Find("PointCount");
+        TMP_Text rb = targetObject.GetComponent<TMP_Text>();
+        rb.text = "0";
     }
 
     public void changeCard() {
@@ -73,6 +80,25 @@ public class CardUpdate : MonoBehaviour
             else if (colorNum == 5) { blueCost++; }
             MaxCardPrice--;
         }
+        totalPrice = whiteCost + blackCost + redCost + greenCost + blueCost;
+        TMP_Text pointText = GetComponentInChildren<TMP_Text>(true);
+        pointValue = (totalPrice - 2) / 2;
+        pointText.text = pointValue.ToString();
+
+        GameObject targetObject = GameObject.Find("PointCount");
+        TMP_Text rb = targetObject.GetComponent<TMP_Text>();
+
+        int score = int.Parse(rb.text);
+        score += pointValue;
+
+        rb.text = score.ToString();
+
+        string deckName = "Level " + Level + " Deck";
+        targetObject = GameObject.Find(deckName);
+
+        CardCount cc = targetObject.GetComponent<CardCount>();
+        cc.setCardCount(cc.getCardCount() - 1);
+
         PriceWhite.text = whiteCost.ToString();
         PriceBlack.text = blackCost.ToString();
         PriceRed.text = redCost.ToString();
