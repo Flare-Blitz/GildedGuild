@@ -1,7 +1,9 @@
 """This is the Quentin agent, which trains a Q-Network to play the game.
 Quentin is impatient, and will try to win as quickly as possible. He
 will generally ignore his opponents, and focus entirely on winning in the
-fewest number of turns. The goal is 2 turns less than Timmy's average:
+fewest number of turns. He is going to be taking risky plays, so we 
+aren't counting the average turn count when he loses, only when he wins
+The goal is 2 turns less than Timmy's average:
 - Timmy 2p: ~35 turns, Quentin Target: ~33 turns
 - Timmy 3p: ~30 turns, Quentin Target: ~28 turns
 - Timmy 4p: ~28 turns, Quentin Target: ~26 turns
@@ -44,7 +46,7 @@ class Quentin(Agent):
             if i % 500 == 0:
                 print(f"Training game {i}: wins={wins}, draws={draws}, "
                     + f"relative_winrate: {relative_wins / (500 - relative_draws)}, "
-                    + f"relative_turn_count: {relative_turn_count / 500}")
+                    + f"relative_turn_count: {relative_turn_count / (relative_wins or 1)}")
                 relative_wins = 0
                 relative_draws = 0
                 relative_turn_count=0
@@ -56,12 +58,12 @@ class Quentin(Agent):
             if result.name == 'Quentin':
                 wins += 1
                 relative_wins += 1
+                relative_turn_count += game.board.turn_count
             if result.name == 'Nobody':
                 draws += 1
                 relative_draws += 1
 
             self.n_games += 1
-            relative_turn_count += game.board.turn_count
             self.train_long_memory()
             win_rates.append(wins / self.n_games)
 
@@ -83,15 +85,15 @@ class Quentin(Agent):
 
         if result is not None:
             if result.name == "Quentin":
-                return 200, prev_board_value # Points for victory
+                return 300, prev_board_value # Points for victory
             if result.name == "Nobody":
                 return 50, prev_board_value # Points for draw
-            return -100, prev_board_value # Points for defeat
+            return -150, prev_board_value # Points for defeat
 
         #Model is always in the first position
         player = board.players[0]
 
-        # For each gem you have, get 0.1 points for each card on the board that
+        # For each gem you have, get 0.05 points for each card on the board that
         # matches that gem, for each matching gem on the card
         for deck in board.decks:
             for card in deck.field:
@@ -104,23 +106,18 @@ class Quentin(Agent):
                 points += 0.1 * player.gems["G"] * card.green
 
         #Get flat 1 point per gold
-        points += player.gems["Au"] * 1
+        points += player.gems["Au"] * 0.5
 
-        # Get 6 points for each card held
+        # Get 3 points for each card held
         points += (player.cards["W"] +
                     player.cards["U"] +
                     player.cards["B"] +
                     player.cards["R"] +
                     player.cards["G"]) * 6
 
-        #Get 30 points For each score point the player has
+        #Get 35 points For each score point the player has
         #Quentin needs points quickly, so greatly reward them
         points += (player.points * 35)
-
-        # Get 1 point for each card in hand
-        points += len(player.hand)
-
-        # Quentin doesn't have the time to consider opponents, so he ignores them
 
         # Return the net reward, with a slight punish to survival to incentivize aggressive play
         return (points - prev_board_value) - 2, points
@@ -181,12 +178,12 @@ class Quentin(Agent):
             result = game.play()
             if result is not None and result.name == "Quentin":
                 wins += 1
-            turns += game.board.turn_count
+                turns += game.board.turn_count
 
             for player in players:
                 player.reset()
 
-        return wins / _game_count, turns / _game_count
+        return wins / _game_count, turns / wins
 
 
 if __name__ == "__main__":

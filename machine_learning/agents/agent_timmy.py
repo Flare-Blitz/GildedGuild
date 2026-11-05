@@ -157,26 +157,6 @@ class Timmy(Agent):
             and winrate_3p >= 0.4
             and winrate_4p >= 0.3)
 
-        # bars = plt.bar(["2 Players", "3 Players", "4 Players"],
-        #                 [winrate_2p, winrate_3p, winrate_4p])
-        # plt.bar_label(bars)
-        # plt.xlabel("Number of Players")
-        # plt.ylabel("Win Rate")
-        # plt.title("Timmy Win Rate vs Number of Players")
-        # plt.ylim(0, 1)
-        # folder_path = Path(__file__).parent / 'Graphs/Timmy'
-        # if not os.path.exists(folder_path):
-        #     os.makedirs(folder_path)
-
-        # file_name = ("timmy_eval_graph" +
-        #     datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") +
-        #     ".png")
-        # file_name = os.path.join(folder_path, file_name)
-
-        # plt.savefig(file_name)
-        # plt.show()
-
-
 if __name__ == "__main__":
     agent = Timmy(total_games=10000)
     agent.load_checkpoint("timmy_model")

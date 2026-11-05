@@ -179,32 +179,6 @@ class Spike(Agent):
         print(f"winrate 3p: {winrate_3p}")
         print(f"winrate 4p: {winrate_4p}")
 
-        _, ax = plt.subplots(1, 1, figsize=(6, 6))
-
-        ax.bar(["2 Players", "3 Players", "4 Players"],
-                [winrate_2p, winrate_3p, winrate_4p])
-
-        bars = ax.bar(["2 Players", "3 Players", "4 Players"],
-                        [winrate_2p, winrate_3p, winrate_4p])
-        ax.bar_label(bars)
-        ax.set_xlabel("Number of Players")
-        ax.set_ylabel("Win Rate")
-        ax.set_title("Spike Win Rate vs Number of Players")
-        ax.set_ylim(0, 1)
-
-        folder_path = Path(__file__).parent / 'Graphs/Spike'
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-
-        file_name = ("spike_eval_graph" +
-            datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") +
-            ".png")
-        file_name = os.path.join(folder_path, file_name)
-
-        plt.savefig(file_name)
-        plt.show()
-
-
         return (winrate_2p >= 0.6 and
             winrate_3p >= 0.5 and
             winrate_4p >= 0.4 )
