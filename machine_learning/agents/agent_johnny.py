@@ -84,33 +84,25 @@ class Johnny(Agent):
                 #Return number of points earned THIS TURN times 15 squared
                 return (player.points_this_turn * 15) ** 2, prev_board_value # Points for victory
             if result.name == "Nobody":
-                return -10, prev_board_value # Points for draw
-            return -50, prev_board_value # Points for defeat
+                return -5, prev_board_value # Points for draw
+            return -75, prev_board_value # Points for defeat
 
-        # For each gem you have, get 0.1 points for each card on the board that
-        # matches that gem, for each matching gem on the card
-        for deck in board.decks:
-            for card in deck.field:
-                if card is None:
-                    continue
-                points += 0.1 * player.gems["W"] * card.white
-                points += 0.1 * player.gems["U"] * card.blue
-                points += 0.1 * player.gems["B"] * card.black
-                points += 0.1 * player.gems["R"] * card.red
-                points += 0.1 * player.gems["G"] * card.green
+        points += (player.gems["W"] +
+                        player.gems["U"] +
+                        player.gems["B"] +
+                        player.gems["R"] +
+                        player.gems["G"] +
+                        player.gems["Au"])
 
-        #Get flat 1 point per gold
-        points += player.gems["Au"] * 1
-
-        # Get 10 points for each card held
+        # Get 5 points for each card bought
         points += (player.cards["W"] +
                     player.cards["U"] +
                     player.cards["B"] +
                     player.cards["R"] +
-                    player.cards["G"]) * 10
+                    player.cards["G"]) * 5
 
-        # Get 20 points for each point earned
-        points = player.points_this_turn * 20
+        # Get 15 points for each point earned
+        points += player.points * 20
 
         # Return the net reward, and scored points earned this turn
         return points - prev_board_value, points
@@ -155,7 +147,11 @@ class Johnny(Agent):
         return (
             final_turn_points_avg_2p >= 4 and
             final_turn_points_avg_3p >= 4 and
-            final_turn_points_avg_4p >= 4)
+            final_turn_points_avg_4p >= 4 and
+            winrate_2p >= 0.4 and
+            winrate_3p >= 0.3 and
+            winrate_4p >= 0.2
+            )
 
     def evaluate_x_players(self, players: list[Player], _game_count: int = 1000):
         """Play _game_count games with the attached players and evaluate the win rate and 
@@ -185,6 +181,7 @@ if __name__ == "__main__":
 
     success = False
 
-    agent.train()
-    success = agent.evaluate_model()
-    print(f"Evaluation success: {success}")
+    while not success:
+        agent.train()
+        success = agent.evaluate_model()
+        print(f"Evaluation success: {success}")
