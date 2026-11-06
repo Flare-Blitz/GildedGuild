@@ -38,6 +38,13 @@
             "request": "launch",
             "module": "machine_learning.agents.agent_quentin",
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Debug Model Evaluation",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "machine_learning.agents.model_evaluation.model_evaluation",
+            "cwd": "${workspaceFolder}"
         }
     ]
 }
