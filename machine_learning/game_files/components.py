@@ -248,6 +248,9 @@ class Player:
             "G" : 0
         }
 
+        # In order to train specifically Johnny, track points earned THIS TURN
+        self.points_this_turn = 0
+
     def reset(self):
         """Reset the player's state for a new game."""
         self.hand = []
@@ -270,6 +273,8 @@ class Player:
             "R" : 0,
             "G" : 0
         }
+
+        self.points_this_turn = 0
 
     def render_hand(self, is_current_player=False):
         """Renders the player's hand of cards.
@@ -463,6 +468,7 @@ class Board:
         # Add the card to the player
         player.cards[card.color] += 1
         player.points += card.points
+        player.points_this_turn += card.points
 
         return True, ""
 
@@ -577,6 +583,7 @@ class Board:
                 player.cards["G"] >= tile.cost.green):
 
                 player.points += tile.points
+                player.points_this_turn += tile.points
                 player.tiles.append(tile)
                 self.tiles.tiles.remove(tile)
 
