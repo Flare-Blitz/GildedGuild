@@ -30,6 +30,45 @@ public class buyingScript : MonoBehaviour {
 
     //update
     public CardUpdate CardUpdate;
+    public void update() { CardUpdate.changeCard(); }
+
+    public float[] getInfo() {
+        float[] info = new float[15];
+        // get the color
+        float red = CardColor.color.r;
+        float green = CardColor.color.g;
+        float blue = CardColor.color.b;
+        string color = red + green + blue == 3 ? "white"
+                    : red + green + blue == 0 ? "black"
+                    : red == 1 ? "red"
+                    : green == 1 ? "green"
+                    : blue == 1 ? "blue"
+                    : "null or something I don't plan on using this";
+        //get the price
+        int whitePrice = int.Parse(PriceWhite.text);
+        int blackPrice = int.Parse(PriceBlack.text);
+        int redPrice = int.Parse(PriceRed.text);
+        int greenPrice = int.Parse(PriceGreen.text);
+        int bluePrice = int.Parse(PriceBlue.text);
+        if (gameObject.activeSelf) { info[0] = 1f; } // may be auto set to 1 then set to 0 onDisable
+        // card level 3 bit
+        info[CardUpdate.getLevel()] = 1f;
+        // card color W U B R G 5 bit
+        if (color == "white") { info[4] = 1f; }
+        else if (color == "black") { info[5] = 1f; }
+        else if (color == "red") { info[6] = 1f; }
+        else if (color == "green") { info[7] = 1f; }
+        else if (color == "blue") { info[8] = 1f; }
+        // points 1 bit / 5
+        info[9] = CardUpdate.getPointValue() / 5f;
+        // costs  W B U R G 5 bit
+        info[10] = whitePrice / 7f;
+        info[11] = bluePrice / 7f;
+        info[12] = blackPrice / 7f;
+        info[13] = redPrice / 7f;
+        info[14] = greenPrice / 7f;
+        return info;
+    }
 
     public void buy() { 
         // get the color
@@ -67,6 +106,7 @@ public class buyingScript : MonoBehaviour {
         bool g = false;
         bool u = false;
         
+        // TODO: add the check for gold
         if (whitePurse + wc >= whitePrice)    { w = true; }
         if (blackPurse +bc >= blackPrice)    { b = true; }
         if (redPurse + rc >= redPrice)        { r = true; } 
@@ -75,6 +115,7 @@ public class buyingScript : MonoBehaviour {
 
         // buy it
         if (w && b && r && g && u) {
+            // TODO: add removal of gold bars 
             whitePurse -= Math.Max(0, whitePrice - wc);
             blackPurse -= Math.Max(0, blackPrice - bc);
             redPurse -= Math.Max(0, redPrice - rc);
