@@ -50,6 +50,9 @@ class Game:
 
         success = True
 
+        # Person is strating their turn, reset points earned this turn to 0
+        self.board.players[self.board.turn_player].points_this_turn = 0
+
         # First, turn player takes an action
         if action:
             # If action is provided, process it

@@ -274,6 +274,8 @@ class Player:
             "G" : 0
         }
 
+        self.points_this_turn = 0
+
     def render_hand(self, is_current_player=False):
         """Renders the player's hand of cards.
         If is_current_player is True, it renders the full card details.
@@ -364,8 +366,6 @@ class Board:
         """This function advances the turn to the next 
         player in a round-robin fashion."""
         self.turn_player = (self.turn_player + 1) % self.player_count
-        #Reset points earned this turn
-        self.players[self.turn_player].points_this_turn = 0
 
     def take_2_gems(self, gem_color):
         """ gem_color: str
