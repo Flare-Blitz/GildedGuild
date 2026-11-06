@@ -1,5 +1,5 @@
 import { Field, Input, Box, Button, Link, Heading } from "@chakra-ui/react";
-import { login } from "../actions/login";
+import { login, guestLogin } from "../actions/login";
 
 export default async function Login({
   searchParams,
@@ -35,6 +35,7 @@ export default async function Login({
         <div>
           <p>Don&apos;t have an account? <Link href="/register" color="teal.500">Register</Link></p>
         </div>
+        <Box>Don&apos;t want to log in? <Button onClick={guestLogin}>Login as guest</Button></Box>
       </div>
     </main>
   );

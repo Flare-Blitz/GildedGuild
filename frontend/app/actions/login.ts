@@ -85,3 +85,16 @@ export async function login(formData: FormData) {
   revalidatePath("/");
   redirect("/");
 }
+
+export async function guestLogin() {
+  "use server";
+
+  const session = await getSession();
+  session.id = defaultSession.id;
+  session.username = defaultSession.username;
+  session.email = defaultSession.email;
+  session.isLoggedIn = true;
+  await session.save();
+  revalidatePath("/");
+  redirect("/");
+}

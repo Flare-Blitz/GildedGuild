@@ -11,8 +11,8 @@ export type SessionData = {
 
 export const defaultSession: SessionData = {
   id: 0,
-  username: "",
-  email: "",
+  username: "Guest",
+  email: "Guest@domain.org",
   isLoggedIn: false,
 };
 
