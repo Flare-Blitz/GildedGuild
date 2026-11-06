@@ -35,7 +35,9 @@ export default async function Login({
         <div>
           <p>Don&apos;t have an account? <Link href="/register" color="teal.500">Register</Link></p>
         </div>
-        <Box>Don&apos;t want to log in? <Button onClick={guestLogin}>Login as guest</Button></Box>
+        <form action={guestLogin}>
+          <Box>Don&apos;t want to log in? <Button id="guest-login" type="submit">Login as guest</Button></Box>
+        </form>
       </div>
     </main>
   );

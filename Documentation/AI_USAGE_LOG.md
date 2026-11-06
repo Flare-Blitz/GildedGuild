@@ -824,3 +824,31 @@ I will modify the data later, but I need to determine what directory I should pl
     Prompt: Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client ...
     AI Output: fixed color-mode.tsx and fixed the import
     My Modifications: I thought I already fixed this, but I verified that the error I'm recieving no longer shows up.
+
+- Date: 2026-11-05
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Update load_game.cy.ts to click the dashboard button that redirects to the game, and verify that the game page was loaded
+    AI Output: Updated the Cypress test to click the dashboard's Go to Game button, verify navigation to /game, and assert that the game canvas exists.
+    My Modifications: Tested the code and realized it didn't fix the error I was encountering.
+
+- Date: 2026-11-05
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: There's an error: at getRedirectError (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js:4448:19) at createRedirectErrorForAction (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js:7687:58) at <unknown> (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_1wygxxh5rwq0t._.js:7608:39) - get#go-to-game0 - (uncaught exception)Error: NEXT_REDIRECT
+    AI Output: Fixed the guest-login NEXT_REDIRECT error by wiring the server action as a form action rather than invoking it in a client-side onClick handler. Confirmed the game-loading Cypress test passed.
+    My Modifications: Verified the fix
+
+- Date: 2026-11-05
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Add cypress to the CI/CD pipeline. There should already be functions in package.json to be used
+    AI Output: Added a CI step that runs the existing e2e:headless script and declared the missing start-server-and-test dependency required by that script. Confirmed lint and the Cypress E2E test passed locally.
+    My Modifications: I added functions to the package.json, based on next.js documentation
+
+- Date: 2026-11-05
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: I deleted some files necesary to use cypress, because I thought they were example files, can you look fo rthe errors I have and add the required files?
+    AI Output: Diagnosed the missing Cypress commands module and restored the commands support file, along with component support and its HTML template. Verified lint, TypeScript, and the E2E test; component mode compiled but had no component specs to run.
+    My Modifications: I verified the testing still worked
