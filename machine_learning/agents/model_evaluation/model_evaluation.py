@@ -10,27 +10,22 @@ Here is a compiled list of graphs being generated:
 - """
 
 import os
+from dataclasses import dataclass
 from pathlib import Path
+import matplotlib.pyplot as plt
 
 from machine_learning.agents.ml_policy import QNetworkPolicy
 from machine_learning.game_files.components import Player
 from machine_learning.game_files.game import Game
-import matplotlib.pyplot as plt
 
+@dataclass
 class ModelResults:
     """Stores the results of a model evaluation."""
-
-    def __init__(self,
-        evaluation_label,
-        winrate,
-        drawrate,
-        avg_turn_count,
-        final_turn_points):
-        self.evaluation_label = evaluation_label
-        self.winrate = winrate
-        self.drawrate = drawrate
-        self.avg_turn_count = avg_turn_count
-        self.final_turn_points = final_turn_points
+    evaluation_label: str
+    winrate: float
+    drawrate: float
+    avg_turn_count: float
+    final_turn_points: float
 
 class ModelEvaluation:
     """Creates plots for the overall evaluations of the models."""
@@ -176,7 +171,9 @@ class ModelEvaluation:
             four_p_final_turn_points_avg.append(result_list["4p_vs_timmy"].final_turn_points)
 
         self.generate_final_turn_points_avg_chart(self.model_names,
-            two_p_final_turn_points_avg, three_p_final_turn_points_avg, four_p_final_turn_points_avg)
+            two_p_final_turn_points_avg,
+            three_p_final_turn_points_avg,
+            four_p_final_turn_points_avg)
 
     def generate_winrate_chart(self,
         title,
