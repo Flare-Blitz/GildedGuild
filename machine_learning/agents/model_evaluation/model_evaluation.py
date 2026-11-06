@@ -32,15 +32,15 @@ class ModelEvaluation:
 
     # A list of all models being trained, to be evaluea
     model_names = ["timmy_model", "quentin_model", "steve_model", "johnny_model", "spike_model"]
-    _game_count = 5000
     # _game_count = 100
 
-    def __init__(self):
+    def __init__(self, game_count: int = 5000):
         self.folder_path = Path(__file__).parent / 'Graphs'
         if not os.path.exists(self.folder_path):
             os.makedirs(self.folder_path)
 
-        self.result_dictionary = dict()
+        self._game_count = game_count
+        self.result_dictionary = {}
 
     def run(self):
         """Run the evaluation of all models and generate the plots."""
@@ -49,7 +49,9 @@ class ModelEvaluation:
         self.generate_plots()
 
     def evaluate_all_models(self):
-        """Evaluate all models by running a series of games"""
+        """Evaluate all models by running a series of games
+        Return a result dictionary that stores the evaluation results of each
+        evaluation for each of the 5 models."""
 
         timmy_policy = QNetworkPolicy.from_file("timmy_model")
         result_dict = {}

@@ -154,54 +154,35 @@ class Steve(Agent):
 
         #2 player winrate
         print("Evaluating 2-player win rate...")
-        winrate_2p, turnrate_2p = self.evaluate_x_players([model,
+        result_2p = self.evaluate_x_players([model,
                                     Player("Timmy #1", False, policy=timmy_policy)],
                                     _game_count)
 
         #3 player winrate
         print("Evaluating 3-player win rate...")
-        winrate_3p, turnrate_3p = self.evaluate_x_players([model,
+        result_3p = self.evaluate_x_players([model,
                                     Player("Timmy #1", False, policy=timmy_policy),
                                     Player("Timmy #2", False, policy=timmy_policy)],
                                     _game_count)
 
         #4 player winrate
         print("Evaluating 4-player win rate...")
-        winrate_4p, turnrate_4p = self.evaluate_x_players([model,
+        result_4p = self.evaluate_x_players([model,
                                     Player("Timmy #1", False, policy=timmy_policy),
                                     Player("Timmy #2", False, policy=timmy_policy),
                                     Player("Timmy #3", False, policy=timmy_policy)],
                                     _game_count)
 
-        print(f"winrate 2p: {winrate_2p}, turnrate 2p: {turnrate_2p}")
-        print(f"winrate 3p: {winrate_3p}, turnrate 3p: {turnrate_3p}")
-        print(f"winrate 4p: {winrate_4p}, turnrate 4p: {turnrate_4p}")
+        print(f"winrate 2p: {result_2p.winrate}, turnrate 2p: {result_2p.avg_turn_count}")
+        print(f"winrate 3p: {result_3p.winrate}, turnrate 3p: {result_3p.avg_turn_count}")
+        print(f"winrate 4p: {result_4p.winrate}, turnrate 4p: {result_4p.avg_turn_count}")
 
-        return (winrate_2p >= 0.6 and
-            winrate_3p >= 0.4 and
-            winrate_4p >= 0.3 and
-            turnrate_2p >= 38 and
-            turnrate_3p >= 33 and
-            turnrate_4p >= 31)
-
-    def evaluate_x_players(self, players: list[Player], _game_count: int = 1000):
-        """Play _game_count games with the attached players and evaluate the win rate and 
-        turn count averageof Steve.
-        Used to evaluate the model for a specific number of players."""
-
-        wins = 0
-        turns = 0
-        for _ in range(_game_count):
-            game = Game(players)
-            result = game.play()
-            if result is not None and result.name == "Steve":
-                wins += 1
-            turns += game.board.turn_count
-
-            for player in players:
-                player.reset()
-
-        return wins / _game_count, turns / _game_count
+        return (result_2p.winrate >= 0.6 and
+            result_3p.winrate >= 0.4 and
+            result_4p.winrate >= 0.3 and
+            result_2p.avg_turn_count >= 38 and
+            result_3p.avg_turn_count >= 33 and
+            result_4p.avg_turn_count >= 31)
 
 
 if __name__ == "__main__":

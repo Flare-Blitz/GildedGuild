@@ -150,48 +150,32 @@ class Spike(Agent):
 
         #2 player winrate
         print("Evaluating 2-player win rate...")
-        winrate_2p = self.evaluate_x_players([model,
+        results_2p = self.evaluate_x_players([model,
                                     Player("Timmy #1", False, policy=timmy_policy)],
                                     _game_count)
 
         #3 player winrate
         print("Evaluating 3-player win rate...")
-        winrate_3p = self.evaluate_x_players([model,
+        results_3p = self.evaluate_x_players([model,
                                     Player("Timmy #1", False, policy=timmy_policy),
                                     Player("Timmy #2", False, policy=timmy_policy)],
                                     _game_count)
 
         #4 player winrate
         print("Evaluating 4-player win rate...")
-        winrate_4p = self.evaluate_x_players([model,
+        results_4p = self.evaluate_x_players([model,
                                     Player("Timmy #1", False, policy=timmy_policy),
                                     Player("Timmy #2", False, policy=timmy_policy),
                                     Player("Timmy #3", False, policy=timmy_policy)],
                                     _game_count)
 
-        print(f"winrate 2p: {winrate_2p}")
-        print(f"winrate 3p: {winrate_3p}")
-        print(f"winrate 4p: {winrate_4p}")
+        print(f"winrate 2p: {results_2p.winrate}")
+        print(f"winrate 3p: {results_3p.winrate}")
+        print(f"winrate 4p: {results_4p.winrate}")
 
-        return (winrate_2p >= 0.6 and
-            winrate_3p >= 0.5 and
-            winrate_4p >= 0.4 )
-
-    def evaluate_x_players(self, players: list[Player], _game_count: int = 1000):
-        """Play _game_count games with the attached players and evaluate the win rate of Spike.
-        Used to evaluate the model for a specific number of players."""
-
-        wins = 0
-        for _ in range(_game_count):
-            game = Game(players)
-            result = game.play()
-            if result is not None and result.name == "Spike":
-                wins += 1
-
-            for player in players:
-                player.reset()
-
-        return wins / _game_count
+        return (results_2p.winrate >= 0.6 and
+            results_3p.winrate >= 0.5 and
+            results_4p.winrate >= 0.4 )
 
 
 if __name__ == "__main__":

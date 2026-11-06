@@ -108,48 +108,28 @@ class Timmy(Agent):
         # Get model player policy
         model = Player("Timmy", False, QNetworkPolicy.from_file("timmy_model"))
 
-        #2 player winrate
-        wins = 0
-        for _ in range(_game_count):
-            game = Game([model, Player("Opponent #1", False)])
-            result = game.play()
-            if result is not None and result.name == "Timmy":
-                wins += 1
-            model.reset()
-        winrate_2p = wins / _game_count
+        results_2p = self.evaluate_x_players([model,
+                                    Player("Opponent #1", False)],
+                                    _game_count)
 
-        #3 player winrate
-        wins = 0
-        for _ in range(_game_count):
-            game = Game([model,
-                        Player("Opponent #1", False),
-                        Player("Opponent #2", False)])
-            result = game.play()
-            if result is not None and result.name == "Timmy":
-                wins += 1
-            model.reset()
-        winrate_3p = wins / _game_count
+        results_3p = self.evaluate_x_players([model,
+                                    Player("Opponent #1", False),
+                                    Player("Opponent #2", False)],
+                                    _game_count)
 
-        #4 player winrate
-        wins = 0
-        for _ in range(_game_count):
-            game = Game([model,
-                        Player("Opponent #1", False),
-                        Player("Opponent #2", False),
-                        Player("Opponent #3", False)])
-            result = game.play()
-            if result is not None and result.name == "Timmy":
-                wins += 1
-            model.reset()
-        winrate_4p = wins / _game_count
+        results_4p = self.evaluate_x_players([model,
+                                    Player("Opponent #1", False),
+                                    Player("Opponent #2", False),
+                                    Player("Opponent #3", False)],
+                                    _game_count)
 
-        print(f"winrate 2p: {winrate_2p}")
-        print(f"winrate 3p: {winrate_3p}")
-        print(f"winrate 4p: {winrate_4p}")
+        print(f"winrate 2p: {results_2p.winrate}")
+        print(f"winrate 3p: {results_3p.winrate}")
+        print(f"winrate 4p: {results_4p.winrate}")
 
-        return (winrate_2p >= 0.6
-            and winrate_3p >= 0.4
-            and winrate_4p >= 0.3)
+        return (results_2p.winrate >= 0.6
+            and results_3p.winrate >= 0.4
+            and results_4p.winrate >= 0.3)
 
 if __name__ == "__main__":
     agent = Timmy(total_games=10000)

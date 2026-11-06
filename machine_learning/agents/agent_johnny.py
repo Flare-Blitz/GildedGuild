@@ -121,56 +121,40 @@ class Johnny(Agent):
 
         #2 player winrate
         print("Evaluating 2-player win rate...")
-        winrate_2p, final_turn_points_avg_2p = self.evaluate_x_players([model,
+        results_2p = self.evaluate_x_players([model,
                                     Player("Timmy #1", False, policy=timmy_policy)],
                                     _game_count)
 
         #3 player winrate
         print("Evaluating 3-player win rate...")
-        winrate_3p, final_turn_points_avg_3p = self.evaluate_x_players([model,
+        results_3p = self.evaluate_x_players([model,
                                     Player("Timmy #1", False, policy=timmy_policy),
                                     Player("Timmy #2", False, policy=timmy_policy)],
                                     _game_count)
 
         #4 player winrate
         print("Evaluating 4-player win rate...")
-        winrate_4p, final_turn_points_avg_4p = self.evaluate_x_players([model,
+        results_4p = self.evaluate_x_players([model,
                                     Player("Timmy #1", False, policy=timmy_policy),
                                     Player("Timmy #2", False, policy=timmy_policy),
                                     Player("Timmy #3", False, policy=timmy_policy)],
                                     _game_count)
 
-        print(f"winrate 2p: {winrate_2p}, final_turn_points_avg 2p: {final_turn_points_avg_2p}")
-        print(f"winrate 3p: {winrate_3p}, final_turn_points_avg 3p: {final_turn_points_avg_3p}")
-        print(f"winrate 4p: {winrate_4p}, final_turn_points_avg 4p: {final_turn_points_avg_4p}")
+        print(f"winrate 2p: {results_2p.winrate}, " +
+            f"final_turn_points_avg 2p: {results_2p.final_turn_points}")
+        print(f"winrate 3p: {results_3p.winrate}, " +
+            f"final_turn_points_avg 3p: {results_3p.final_turn_points}")
+        print(f"winrate 4p: {results_4p.winrate}, " +
+            f"final_turn_points_avg 4p: {results_4p.final_turn_points}")
 
         return (
-            final_turn_points_avg_2p >= 4 and
-            final_turn_points_avg_3p >= 4 and
-            final_turn_points_avg_4p >= 4 and
-            winrate_2p >= 0.4 and
-            winrate_3p >= 0.3 and
-            winrate_4p >= 0.2
+            results_2p.final_turn_points >= 4 and
+            results_3p.final_turn_points >= 4 and
+            results_4p.final_turn_points >= 4 and
+            results_2p.winrate >= 0.4 and
+            results_3p.winrate >= 0.3 and
+            results_4p.winrate >= 0.2
             )
-
-    def evaluate_x_players(self, players: list[Player], _game_count: int = 1000):
-        """Play _game_count games with the attached players and evaluate the win rate and 
-        turn count averageof Johnny.
-        Used to evaluate the model for a specific number of players."""
-
-        wins = 0
-        final_turn_points = 0
-        for _ in range(_game_count):
-            game = Game(players)
-            result = game.play()
-            if result is not None and result.name == "Johnny":
-                wins += 1
-                final_turn_points += game.board.players[0].points_this_turn
-
-            for player in players:
-                player.reset()
-
-        return wins / _game_count, final_turn_points / (wins or 1)
 
 
 if __name__ == "__main__":
