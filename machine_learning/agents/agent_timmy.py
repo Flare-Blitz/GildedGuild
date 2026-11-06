@@ -4,12 +4,6 @@ To reflect this, Timmy will be trained against opponents who only make random mo
 that can play the game, but isn't very effictive at out performing other players.
 Timmy is desgined to be the first bot, and other bots will be trained based off of Timmy."""
 
-import datetime
-import os
-from pathlib import Path
-
-import matplotlib.pyplot as plt
-
 from machine_learning.agents.agent import Agent
 from machine_learning.agents.ml_policy import QNetworkPolicy
 from machine_learning.game_files.components import Player

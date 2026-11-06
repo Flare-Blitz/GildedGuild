@@ -6,12 +6,6 @@ winrate 3p: 50%
 winrate 4p: 40%
 """
 
-import datetime
-import os
-from pathlib import Path
-
-import matplotlib.pyplot as plt
-
 from machine_learning.agents.agent import Agent
 from machine_learning.agents.ml_policy import QNetworkPolicy
 from machine_learning.game_files.components import Player
