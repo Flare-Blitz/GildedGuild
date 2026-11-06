@@ -751,3 +751,10 @@ I will modify the data later, but I need to determine what directory I should pl
     Prompt: Here's a more in depth error: Hydration failed because the server rendered HTML didn't match the client. The client/server diff showed a `next-themes` script where Chakra's Emotion style was expected, and the error pointed to `components/ui/color-mode.tsx`.
     AI Output: Interpreted the diff as an insertion-order mismatch between the `next-themes` initialization script and Chakra/Emotion's generated style tag. Explained that `suppressHydrationWarning` cannot hide a structural child-node mismatch, and recommended placing `ColorModeProvider` outside `ChakraProvider` so the theme script and Chakra styles have a consistent server/client order.
     My Modifications: I reviewed the provider nesting and the `next-themes` configuration, kept the root hydration suppression in the layout, and changed the provider assignment layout to resolve the issue
+
+- Date: 2026-11-05
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client ...
+    AI Output: fixed color-mode.tsx and fixed the import
+    My Modifications: I thought I already fixed this, but I verified that the error I'm recieving no longer shows up.
