@@ -852,3 +852,17 @@ I will modify the data later, but I need to determine what directory I should pl
     Prompt: I deleted some files necesary to use cypress, because I thought they were example files, can you look fo rthe errors I have and add the required files?
     AI Output: Diagnosed the missing Cypress commands module and restored the commands support file, along with component support and its HTML template. Verified lint, TypeScript, and the E2E test; component mode compiled but had no component specs to run.
     My Modifications: I verified the testing still worked
+
+- Date: 2026-11-05
+    Prompter: Jackson Keeler
+    Model Used: GitHub Copilot
+    Prompt: Update the README with any additional requirements, then update the architecture overview to reflect the updated frontend, database creation in the backend, and machine-learning folder structure. Do not change the Gilded_Guild_Alpha section.
+    AI Output: Updated the README requirements using the checked-in project configuration, then revised the frontend, database backend, and machine-learning architecture descriptions based on the current source and folder structure. Left the Gilded_Guild_Alpha section unchanged.
+    My Modifications: I simplified some of the README changes, added more detail to the Machine Learning section, and added a Documentation section.
+
+---
+
+## Audit Certification
+I certify as Team Lead that all entries above accurately represent AI usage within this project phase, all prompts have been recorded, and all code has been validated by human review and automated testing.
+
+**Team Lead Signature:** *Jackson Keeler* — **Date:** November 5, 2026
