@@ -50,8 +50,6 @@ export async function signup(
     session.isLoggedIn = true;
 
     await session.save();
-
-    redirect("/login");
   } 
   catch (error) 
   {
@@ -61,4 +59,6 @@ export async function signup(
       message: "An error occurred while creating your account.",
     };
   }
+
+    redirect("/");
 }
