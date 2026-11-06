@@ -67,7 +67,7 @@ The two password values must match. Do not commit either `.env` or
 
 #### SQL Database Initialization
 
-The file `Database Backend/test_SQL_Database.sql` creates the `mydb` database,
+The file `Database Backend/GildedGuildDatabase.sql` creates the `GildedGuildDatabase` database,
 creates the `users` table, and inserts sample users using MySQL-compatible
 `SHA2` hashing. Docker mounts this file into MySQL's initialization directory,
 so it runs automatically when the MySQL volume is created for the first time.

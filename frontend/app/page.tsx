@@ -4,7 +4,7 @@ import { getSession } from "./lib/session";
 import { HStack, Link, Table, Button } from "@chakra-ui/react/";
 
 type User = {
-  id: number;
+  user_id: number;
   username: string;
   email: string;
   password: string;
@@ -13,6 +13,7 @@ type User = {
 async function getUsers(): Promise<User[]> {
   const response = await fetch("http://localhost:3000/mysql/users");
 
+  console.log(response);
   if (!response.ok) {
     throw new Error("Failed to fetch users");
   }
@@ -44,8 +45,8 @@ export default async function Home() {
         </Table.Header>
         <Table.Body>
           {users.map((user) => (
-            <Table.Row key={user.id}>
-              <Table.Cell>{user.id}</Table.Cell>
+            <Table.Row key={user.user_id}>
+              <Table.Cell>{user.user_id}</Table.Cell>
               <Table.Cell>{user.username}</Table.Cell>
               <Table.Cell>{user.email}</Table.Cell>
               <Table.Cell>{user.password}</Table.Cell>
