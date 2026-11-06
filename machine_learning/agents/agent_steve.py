@@ -190,39 +190,6 @@ class Steve(Agent):
             turnrate_3p >= 33 and
             turnrate_4p >= 31)
 
-        # _, ax = plt.subplots(1, 2, figsize=(12, 6))
-
-        # ax[0].bar(["2 Players", "3 Players", "4 Players"],
-        #           [winrate_2p, winrate_3p, winrate_4p])
-
-        # bars = ax[0].bar(["2 Players", "3 Players", "4 Players"],
-        #                  [winrate_2p, winrate_3p, winrate_4p])
-        # ax[0].bar_label(bars)
-        # ax[0].set_xlabel("Number of Players")
-        # ax[0].set_ylabel("Win Rate")
-        # ax[0].set_title("Steve Win Rate vs Number of Players")
-        # ax[0].set_ylim(0, 1)
-
-        # Turn rate plot
-        # bars = ax[1].bar(["2 Players", "3 Players", "4 Players"],
-        #                  [turnrate_2p, turnrate_3p, turnrate_4p])
-        # ax[1].bar_label(bars)
-        # ax[1].set_xlabel("Number of Players")
-        # ax[1].set_ylabel("Average Turn Count")
-        # ax[1].set_title("Steve Turn Count vs Number of Players")
-        # ax[1].set_ylim(0, max(turnrate_2p, turnrate_3p, turnrate_4p) * 1.1)
-        # folder_path = Path(__file__).parent / 'Graphs/Steve'
-        # if not os.path.exists(folder_path):
-        #     os.makedirs(folder_path)
-
-        # file_name = ("steve_eval_graph" +
-        #     datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") +
-        #     ".png")
-        # file_name = os.path.join(folder_path, file_name)
-
-        # plt.savefig(file_name)
-        # plt.show()
-
     def evaluate_x_players(self, players: list[Player], _game_count: int = 1000):
         """Play _game_count games with the attached players and evaluate the win rate and 
         turn count averageof Steve.
