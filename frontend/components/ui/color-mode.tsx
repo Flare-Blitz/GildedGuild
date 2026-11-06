@@ -7,9 +7,20 @@ import type { ThemeProviderProps } from "next-themes"
 import * as React from "react"
 import { LuMoon, LuSun } from "react-icons/lu"
 
+export type ColorModeProviderProps = ThemeProviderProps
+
 export function ColorModeProvider(props: ThemeProviderProps) {
   return (
-    <ThemeProvider attribute="class" disableTransitionOnChange {...props} />
+    <ThemeProvider
+      attribute="class"
+      disableTransitionOnChange
+      {...props}
+      scriptProps={{
+        ...props.scriptProps,
+        // Keep the server-rendered no-flash script executable, but avoid React 19.2 warnings on client remounts.
+        type: typeof window === "undefined" ? undefined : "application/json",
+      }}
+    />
   )
 }
 
