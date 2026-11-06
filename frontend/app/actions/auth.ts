@@ -37,8 +37,8 @@ export async function signup(
   try 
   {
     const [result] = await pool.execute<ResultSetHeader>(
-    `INSERT INTO users (username, email, password)
-    VALUES (?, ?, ?)`,
+    `INSERT INTO users (username, email, password, date_of_birth)
+    VALUES (?, ?, ?, '2000-01-01')`,
     [name, email, hashedPassword]
     );
 
@@ -50,8 +50,6 @@ export async function signup(
     session.isLoggedIn = true;
 
     await session.save();
-
-    redirect('/');
   } 
   catch (error) 
   {
@@ -61,4 +59,6 @@ export async function signup(
       message: "An error occurred while creating your account.",
     };
   }
+
+    redirect("/");
 }

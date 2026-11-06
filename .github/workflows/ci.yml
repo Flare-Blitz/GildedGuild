@@ -36,3 +36,8 @@ jobs:
       working-directory: frontend
       run: |
         npm run lint
+    - name: Run Cypress end-to-end tests
+      working-directory: frontend
+      env:
+        SESSION_SECRET: ci-only-session-secret-long-enough-for-iron-session
+      run: npm run e2e:headless
