@@ -6,6 +6,7 @@ Timmy is desgined to be the first bot, and other bots will be trained based off 
 
 from machine_learning.agents.agent import Agent
 from machine_learning.agents.ml_policy import QNetworkPolicy
+from machine_learning.agents.model_evaluation.model_evaluation import ModelEvaluation
 from machine_learning.game_files.components import Player
 from machine_learning.game_files.game import Game
 
@@ -108,20 +109,22 @@ class Timmy(Agent):
         # Get model player policy
         model = Player("Timmy", False, QNetworkPolicy.from_file("timmy_model"))
 
-        results_2p = self.evaluate_x_players([model,
-                                    Player("Opponent #1", False)],
-                                    _game_count)
+        model_evaluator = ModelEvaluation(_game_count)
 
-        results_3p = self.evaluate_x_players([model,
+        results_2p = model_evaluator.evaluate_model([model,
+                                    Player("Opponent #1", False)],
+                                    "Timmy vs 1 Random")
+
+        results_3p = model_evaluator.evaluate_model([model,
                                     Player("Opponent #1", False),
                                     Player("Opponent #2", False)],
-                                    _game_count)
+                                    "Timmy vs 2 Random")
 
-        results_4p = self.evaluate_x_players([model,
+        results_4p = model_evaluator.evaluate_model([model,
                                     Player("Opponent #1", False),
                                     Player("Opponent #2", False),
                                     Player("Opponent #3", False)],
-                                    _game_count)
+                                    "Timmy vs 3 Random")
 
         print(f"winrate 2p: {results_2p.winrate}")
         print(f"winrate 3p: {results_3p.winrate}")
@@ -132,7 +135,7 @@ class Timmy(Agent):
             and results_4p.winrate >= 0.3)
 
 if __name__ == "__main__":
-    agent = Timmy(total_games=10000)
+    agent = Timmy(total_games=100)
     agent.load_checkpoint("timmy_model")
     agent.train()
 

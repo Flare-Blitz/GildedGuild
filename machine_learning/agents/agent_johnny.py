@@ -5,6 +5,7 @@ on the final turn when he wins.
 
 from machine_learning.agents.agent import Agent
 from machine_learning.agents.ml_policy import QNetworkPolicy
+from machine_learning.agents.model_evaluation.model_evaluation import ModelEvaluation
 from machine_learning.game_files.components import Player
 from machine_learning.game_files.game import Game
 
@@ -119,26 +120,28 @@ class Johnny(Agent):
 
         timmy_policy = QNetworkPolicy.from_file("timmy_model")
 
+        model_evaluator = ModelEvaluation(_game_count)
+
         #2 player winrate
         print("Evaluating 2-player win rate...")
-        results_2p = self.evaluate_x_players([model,
+        results_2p = model_evaluator.evaluate_model([model,
                                     Player("Timmy #1", False, policy=timmy_policy)],
-                                    _game_count)
+                                    "Johnny vs 1 Timmy")
 
         #3 player winrate
         print("Evaluating 3-player win rate...")
-        results_3p = self.evaluate_x_players([model,
+        results_3p = model_evaluator.evaluate_model([model,
                                     Player("Timmy #1", False, policy=timmy_policy),
                                     Player("Timmy #2", False, policy=timmy_policy)],
-                                    _game_count)
+                                    "Johnny vs 2 Timmys")
 
         #4 player winrate
         print("Evaluating 4-player win rate...")
-        results_4p = self.evaluate_x_players([model,
+        results_4p = model_evaluator.evaluate_model([model,
                                     Player("Timmy #1", False, policy=timmy_policy),
                                     Player("Timmy #2", False, policy=timmy_policy),
                                     Player("Timmy #3", False, policy=timmy_policy)],
-                                    _game_count)
+                                    "Johnny vs 3 Timmys")
 
         print(f"winrate 2p: {results_2p.winrate}, " +
             f"final_turn_points_avg 2p: {results_2p.final_turn_points}")

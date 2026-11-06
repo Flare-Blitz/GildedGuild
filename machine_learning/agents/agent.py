@@ -8,7 +8,6 @@ import random
 import numpy as np
 import torch
 from machine_learning.agents.model import LinearQNet, QTrainer
-from machine_learning.agents.model_evaluation.model_evaluation import ModelResults
 from machine_learning.agents.state_encoder import INPUT_SIZE, encode_board
 from machine_learning.game_files.components import Board, Player
 from machine_learning.game_files.game import Game
@@ -136,33 +135,6 @@ class Agent:
                 result, valid_move = game.take_agent_action(None)
 
         return result
-
-    def evaluate_x_players(self, players: list[Player], _game_count: int = 1000):
-        """Play _game_count games with the attached players and evaluate the win rate and 
-        turn count average of the first player.
-        Used to evaluate the model for a specific number of players."""
-
-        wins = 0
-        draws = 0
-        turns = 0
-        for _ in range(_game_count):
-            game = Game(players)
-            result = game.play()
-            if result is not None and result.name == players[0].name:
-                wins += 1
-                turns += game.board.turn_count
-            elif result is not None and result.name == "Nobody":
-                draws += 1
-
-            for player in players:
-                player.reset()
-
-        return ModelResults(
-            evaluation_label=players[0].name,
-            drawrate=draws / _game_count,
-            winrate=wins / _game_count,
-            avg_turn_count=turns / wins,
-            final_turn_points=0)
 
     @abstractmethod
     def train(self):
