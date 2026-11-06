@@ -7,6 +7,7 @@ import random
 from machine_learning.game_files.components import(
     ActionType,
     Action,
+    Card,
     Player,
     Board
 )
@@ -48,6 +49,9 @@ class Game:
         """
 
         success = True
+
+        # Person is strating their turn, reset points earned this turn to 0
+        self.board.players[self.board.turn_player].points_this_turn = 0
 
         # First, turn player takes an action
         if action:
@@ -335,6 +339,39 @@ class Game:
             return False, "Level and row must be specified for reserving a card"
         return self.board.reserve_card(move.level, move.row)
 
+    def _can_take_gems(self, colors: tuple[str]):
+        """Check if the given gem-taking action is valid."""
+        if len(colors) == 2:
+            return (colors[0] == colors[1]
+                and self.board.gem_pile.gems[colors[0]] >= 4)
+        if len(colors) == 3:
+            valid_colors = all(color in {'W', 'U', 'B', 'R', 'G'}
+                            for color in colors)
+            return (len(set(colors)) == 3
+                and valid_colors
+                and all(self.board.gem_pile.gems[color] >= 1 for color in colors))
+        return False
+
+    def _can_buy_card(self, turn_player: Player, card: Card):
+        """Check if the given board-card purchase action is valid."""
+        white_value = turn_player.cards["W"] + turn_player.gems["W"]
+        blue_value = turn_player.cards["U"] + turn_player.gems["U"]
+        black_value = turn_player.cards["B"] + turn_player.gems["B"]
+        red_value = turn_player.cards["R"] + turn_player.gems["R"]
+        green_value = turn_player.cards["G"] + turn_player.gems["G"]
+
+        #Calculates how short the player is to affording the card, to see if they have enough gold
+        cost_defecit = ( max(card.white - white_value, 0) +
+            max(card.blue - blue_value, 0) +
+            max(card.black - black_value, 0) +
+            max(card.red - red_value, 0) +
+            max(card.green - green_value, 0) )
+
+        if cost_defecit > turn_player.gems["Au"]:
+            return False
+
+        return True
+
 
 
     def execute_action(self, action: Action):
@@ -368,3 +405,32 @@ class Game:
             error = "Level and row must be specified for reserving a card"
 
         return False, error
+
+    def get_all_legal_actions(self) -> list[int]:
+        """
+        Returns a list of all legal action indices that the turn player can perform.
+        """
+        legal_action_index = []
+        turn_player = self.board.players[self.board.turn_player]
+        for i, action in enumerate(self.all_actions):
+            match action.action_type:
+                case ActionType.TAKE_GEMS:
+                    if self._can_take_gems(action.colors):
+                        legal_action_index.append(i)
+                case ActionType.BUY_BOARD_CARD:
+                    card = self.board.decks[action.level-1].field[action.row-1]
+                    if card is not None and self._can_buy_card(turn_player, card):
+                        legal_action_index.append(i)
+                case ActionType.BUY_HAND_CARD:
+                    if len(turn_player.hand) < action.row:
+                        continue
+                    card = turn_player.hand[action.row-1]
+                    if card is not None and self._can_buy_card(turn_player, card):
+                        legal_action_index.append(i)
+                case ActionType.RESERVE_CARD:
+                    if (action.level is not None
+                        and action.row is not None
+                        and len(turn_player.hand) < 3):
+                        legal_action_index.append(i)
+
+        return legal_action_index

@@ -4,14 +4,9 @@ To reflect this, Timmy will be trained against opponents who only make random mo
 that can play the game, but isn't very effictive at out performing other players.
 Timmy is desgined to be the first bot, and other bots will be trained based off of Timmy."""
 
-import datetime
-import os
-from pathlib import Path
-
-import matplotlib.pyplot as plt
-
 from machine_learning.agents.agent import Agent
 from machine_learning.agents.ml_policy import QNetworkPolicy
+from machine_learning.agents.model_evaluation.model_evaluation import ModelEvaluation
 from machine_learning.game_files.components import Player
 from machine_learning.game_files.game import Game
 
@@ -26,7 +21,8 @@ class Timmy(Agent):
         having it play against random bots."""
         wins = 0
         draws = 0
-        win_rates = []
+        relative_wins = 0
+        relative_draws = 0
 
         players = [Player("Timmy", False),
                 Player("Random1", False),
@@ -36,63 +32,32 @@ class Timmy(Agent):
         game = Game(players)
 
         for i in range(self.total_games):
-            if i % 100 == 0:
-                print(f"Training game {i}: wins={wins}, draws={draws}")
+            if i % 500 == 0:
+                print(f"Training game {i}: wins={wins}, draws={draws}, "
+                    + f"relative_winrate: {relative_wins / (500 - relative_draws)}, ")
+                relative_wins = 0
+                relative_draws = 0
+
             num_players = i % 3 + 2 # Cycles between 2, 3, and 4 players
 
             result = self.play_single_game(game, players[0:num_players])
 
             if result.name == 'Timmy':
                 wins += 1
+                relative_wins += 1
             if result.name == 'Nobody':
                 draws += 1
+                relative_draws += 1
 
             self.n_games += 1
             self.train_long_memory()
-            win_rates.append(wins / self.n_games)
 
-        self.model.save("timmy_model")
+        self.save_checkpoint("timmy_model")
 
         print(f"Timmy won {wins} out of {self.total_games} games.")
         print(f"Timmy drew {draws} out of {self.total_games} games.")
 
-    def play_single_game(self, game: Game, players: list[Player]):
-        """Play a single game and return the result."""
-        result = game.training_game(players)
-
-        while result is None:
-            original_state = self.get_board_state(game.board)
-            moves = self.get_training_actions(original_state)
-            moves_attempted = 0
-
-            for move in moves:
-                result, valid_move = game.take_agent_action(move)
-
-                # Create a one-hot encoded action vector to train the model
-                action = [0] * 45
-                action[move] = 1
-
-                next_state = self.get_board_state(game.board)
-
-                reward = self.evaluate_board(game.board, result, valid_move)
-
-                done = result is not None
-
-                self.train_short_memory(original_state, action, reward, next_state, done)
-                self.remember(original_state, action, reward, next_state, done)
-
-                if valid_move:
-                    break
-                moves_attempted += 1
-
-            if moves_attempted == len(moves):
-                # Pass the turn after verifying there are no legal actions.
-                result, valid_move = game.take_agent_action(None)
-
-        return result
-
-
-    def evaluate_board(self, board, result, move_valid):
+    def evaluate_board(self, board, result, move_valid, prev_board_value):
         """Evaluate the current state of the board.
         
         Returns the evaluation of the board for the given player."""
@@ -104,7 +69,7 @@ class Timmy(Agent):
         else:
             if result is not None:
                 if result.name == "Timmy":
-                    points += 100 # Points for victory
+                    points += 150 # Points for victory
                 elif result.name == "Nobody":
                     points -= 20 # Points for draw
                 else:
@@ -124,7 +89,7 @@ class Timmy(Agent):
                         player.cards["U"] +
                         player.cards["B"] +
                         player.cards["R"] +
-                        player.cards["G"])
+                        player.cards["G"]) * 5
 
             #Get 25 points For each score point the player has
             points += (player.points * 25)
@@ -132,7 +97,7 @@ class Timmy(Agent):
             # Get 1 point for each card in hand
             points += len(player.hand)
 
-        return points
+        return points - prev_board_value, points
 
     def evaluate_model(self):
         """Evaluate Timmy's performance,
@@ -144,64 +109,34 @@ class Timmy(Agent):
         # Get model player policy
         model = Player("Timmy", False, QNetworkPolicy.from_file("timmy_model"))
 
-        #2 player winrate
-        wins = 0
-        for _ in range(_game_count):
-            game = Game([model, Player("Opponent #1", False)])
-            result = game.play()
-            if result is not None and result.name == "Timmy":
-                wins += 1
-            model.reset()
-        winrate_2p = wins / _game_count
+        model_evaluator = ModelEvaluation(_game_count)
 
-        #3 player winrate
-        wins = 0
-        for _ in range(_game_count):
-            game = Game([model,
-                        Player("Opponent #1", False),
-                        Player("Opponent #2", False)])
-            result = game.play()
-            if result is not None and result.name == "Timmy":
-                wins += 1
-            model.reset()
-        winrate_3p = wins / _game_count
+        results_2p = model_evaluator.evaluate_model([model,
+                                    Player("Opponent #1", False)],
+                                    "Timmy vs 1 Random")
 
-        #4 player winrate
-        wins = 0
-        for _ in range(_game_count):
-            game = Game([model,
-                        Player("Opponent #1", False),
-                        Player("Opponent #2", False),
-                        Player("Opponent #3", False)])
-            result = game.play()
-            if result is not None and result.name == "Timmy":
-                wins += 1
-            model.reset()
-        winrate_4p = wins / _game_count
+        results_3p = model_evaluator.evaluate_model([model,
+                                    Player("Opponent #1", False),
+                                    Player("Opponent #2", False)],
+                                    "Timmy vs 2 Random")
 
-        bars = plt.bar(["2 Players", "3 Players", "4 Players"],
-                       [winrate_2p, winrate_3p, winrate_4p])
-        plt.bar_label(bars)
-        plt.xlabel("Number of Players")
-        plt.ylabel("Win Rate")
-        plt.title("Timmy Win Rate vs Number of Players")
-        plt.ylim(0, 1)
-        folder_path = Path(__file__).parent / 'Graphs/Timmy'
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
+        results_4p = model_evaluator.evaluate_model([model,
+                                    Player("Opponent #1", False),
+                                    Player("Opponent #2", False),
+                                    Player("Opponent #3", False)],
+                                    "Timmy vs 3 Random")
 
-        file_name = ("timmy_eval_graph" +
-            datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") +
-            ".png")
-        file_name = os.path.join(folder_path, file_name)
+        print(f"winrate 2p: {results_2p.winrate}")
+        print(f"winrate 3p: {results_3p.winrate}")
+        print(f"winrate 4p: {results_4p.winrate}")
 
-        plt.savefig(file_name)
-        plt.show()
-
+        return (results_2p.winrate >= 0.6
+            and results_3p.winrate >= 0.4
+            and results_4p.winrate >= 0.3)
 
 if __name__ == "__main__":
-    agent = Timmy(total_games=1000)
-    agent.model.load("timmy_model")
+    agent = Timmy(total_games=100)
+    agent.load_checkpoint("timmy_model")
     agent.train()
 
     #Evaluate Timmy's performance.
