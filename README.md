@@ -57,7 +57,7 @@ Verify `frontend/.env.local` contains:
 DB_HOST=mysql
 DB_USER=root
 DB_PASSWORD=your_mysql_password
-DB_NAME=mydb
+DB_NAME=GildedGuildDatabase
 DB_PORT=3306
 SESSION_SECRET=your_example_secret
 ```
