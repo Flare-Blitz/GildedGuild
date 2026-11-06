@@ -1,6 +1,7 @@
 import { logout } from "@/app/actions/login";
 import { redirect } from "next/navigation";
 import { getSession } from "./lib/session";
+import { HStack, Link, Table, Button } from "@chakra-ui/react/";
 
 type User = {
   id: number;
@@ -31,36 +32,36 @@ export default async function Home() {
   return (
     <main>
       <h1>Users</h1>
-      <table style={{ borderCollapse: "collapse", width: "100%", border: "1px solid black" }}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Password</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table.Root style={{ borderCollapse: "collapse", width: "100%", border: "1px solid black" }}>
+        <Table.Caption />
+        <Table.Header>
+          <Table.Row>
+            <Table.ColumnHeader>ID</Table.ColumnHeader>
+            <Table.ColumnHeader>Username</Table.ColumnHeader>
+            <Table.ColumnHeader>Email</Table.ColumnHeader>
+            <Table.ColumnHeader>Password Hash</Table.ColumnHeader>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
           {users.map((user) => (
-            <tr key={user.id}>
-              <td>{user.id}</td>
-              <td>{user.username}</td>
-              <td>{user.email}</td>
-              <td>{user.password}</td>
-            </tr>
+            <Table.Row key={user.id}>
+              <Table.Cell>{user.id}</Table.Cell>
+              <Table.Cell>{user.username}</Table.Cell>
+              <Table.Cell>{user.email}</Table.Cell>
+              <Table.Cell>{user.password}</Table.Cell>
+            </Table.Row>
           ))}
-        </tbody>
-      </table>
-      <div>
-        <p>Navigate to game page:</p>
-        <a href="/game"><button>Go to Game</button></a>
-      </div>
-      <div>
-        <p>Logout:</p>
-        <form action={logout}>
-          <button>Logout</button>
-        </form>
-      </div>
+        </Table.Body>
+        <Table.Footer>
+          <Table.Row>
+            <Table.Cell />
+          </Table.Row>
+        </Table.Footer>
+      </Table.Root>
+      <HStack>
+        <Link href="/game"><Button>Go to Game</Button></Link>
+        <Link onClick={logout}><Button>Logout</Button></Link>
+      </HStack>
     </main>
   );
 }
