@@ -3,3 +3,12 @@
 # Maximum number of instance attributes allowed in a class
 max-attributes=10
 max-returns=8
+max-args=6
+max-positional-arguments=6
+
+# The evaluate board methods are designed to be similar
+# Sometimes repeated code is used because it works well
+# I would rather not abstarct the code because it is 
+# constantly tweaked per model while training.
+# Therefore, limit increased to avoid the warning.
+min-similarity-lines=25

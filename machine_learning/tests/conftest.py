@@ -9,19 +9,20 @@ from pathlib import Path
 
 import pytest
 
-from machine_learning.game_files.game import (
-    Action,
-    ActionType,
-    Board,
-    Card,
+from machine_learning.game_files.components import(
     Cost,
+    Card,
     Deck,
-    Game,
-    GemPile,
-    Player,
     Tile,
     TileDeck,
+    GemPile,
+    ActionType,
+    Action,
+    Player,
+    Board
 )
+
+from machine_learning.game_files.game import Game
 
 
 @pytest.fixture
@@ -112,13 +113,21 @@ def tile_deck(game_files_cwd, deterministic_random):
 @pytest.fixture
 def board(game_files_cwd, deterministic_random):
     """Provide a deterministic four-player board with loaded game data."""
-    return Board(player_count=4)
+    players = [Player(name="Arnold"),
+               Player(name="Benjamin"),
+               Player(name="Catherine"),
+               Player(name="David")]
+    return Board(players=players)
 
 
 @pytest.fixture
 def game(game_files_cwd, deterministic_random):
     """Provide a game without entering its interactive play loop."""
-    return Game(player_count=4)
+    players = [Player(name="Arnold"),
+                   Player(name="Benjamin"),
+                   Player(name="Catherine"),
+                   Player(name="David")]
+    return Game(players=players)
 
 
 @pytest.fixture

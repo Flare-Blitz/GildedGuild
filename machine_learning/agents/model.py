@@ -1,0 +1,144 @@
+"""
+Q-Neural Network for Deep Q-Learning
+"""
+
+import os
+from pathlib import Path
+import torch
+from torch import nn
+from torch import optim
+import torch.nn.functional as F
+import numpy as np
+
+from machine_learning.agents.state_encoder import INPUT_SIZE
+
+class LinearQNet(nn.Module):
+    """Simple feedforward neural network for Q-learning."""
+
+    def __init__(self, input_size, hidden_size, output_size):
+        super().__init__()
+        self.linear1 = nn.Linear(input_size, hidden_size)
+        self.linear2 = nn.Linear(hidden_size, hidden_size)
+        self.linear3 = nn.Linear(hidden_size, hidden_size)
+        self.linear4 = nn.Linear(hidden_size, output_size)
+
+    def forward(self, x):
+        """Forward pass through the network."""
+        x = F.relu(self.linear1(x))
+        x = F.relu(self.linear2(x))
+        x = F.relu(self.linear3(x))
+        x = self.linear4(x)
+        return x
+
+    def save(
+        self,
+        file_name='model',
+        optimizer: optim.Optimizer | None = None,
+        epsilon: float | None = None,
+        n_games: int | None = None,
+    ):
+        """Save model weights and optional training state to a file.
+        Also upload the model as an ONNX file, for use in the Unity game engine."""
+        model_folder_path = Path(__file__).parent / 'model'
+        if not os.path.exists(model_folder_path):
+            os.makedirs(model_folder_path)
+
+        self.eval()
+
+        model_file_name = os.path.join(model_folder_path, file_name)
+        checkpoint = {"model_state_dict": self.state_dict()}
+        if optimizer is not None:
+            checkpoint["optimizer_state_dict"] = optimizer.state_dict()
+        if epsilon is not None:
+            checkpoint["epsilon"] = epsilon
+        if n_games is not None:
+            checkpoint["n_games"] = n_games
+        torch.save(checkpoint, f"{model_file_name}.pth")
+
+        onnx_folder_path = Path(__file__).parent / 'onnx_model'
+        if not os.path.exists(onnx_folder_path):
+            os.makedirs(onnx_folder_path)
+
+        onnx_file_name = os.path.join(onnx_folder_path, file_name)
+
+        onnx_program = torch.onnx.export(self, torch.randn(1, INPUT_SIZE), dynamo=True)
+        onnx_program.save(f"{onnx_file_name}.onnx")
+
+    def load(
+        self,
+        file_name,
+        required=False,
+        optimizer: optim.Optimizer | None = None,
+    ) -> dict[str, int | float] | None:
+        """Load model weights and any available optimizer and training state."""
+        model_folder_path = Path(__file__).parent / "model"
+        file_path = model_folder_path / (file_name + ".pth")
+
+        if file_path.is_file():
+            checkpoint = torch.load(file_path, weights_only=True)
+            if "model_state_dict" in checkpoint:
+                self.load_state_dict(checkpoint["model_state_dict"])
+                if optimizer is not None and "optimizer_state_dict" in checkpoint:
+                    optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+                metadata = {
+                    key: checkpoint[key]
+                    for key in ("epsilon", "n_games")
+                    if key in checkpoint
+                }
+            else:
+                # Continue to support model files saved before checkpoint bundles.
+                self.load_state_dict(checkpoint)
+                metadata = {}
+            self.eval()
+            return metadata
+        if required:
+            raise FileNotFoundError(f"Model weights not found: {file_path}")
+        return None
+
+
+class QTrainer: #pylint: disable=too-few-public-methods
+    """Trainer for the Q-Network."""
+
+    def __init__(self, model, lr, gamma):
+        self.lr = lr #Learning rate
+        self.gamma = gamma #Discount factor
+        self.model = model #Model to be trained
+        self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
+        self.criterion = nn.MSELoss()
+
+    def train_step(self, state, action, reward, next_state, done):
+        """Perform a single training step."""
+        state = np.array(state)
+        next_state = np.array(next_state)
+        state = torch.tensor(state, dtype=torch.float)
+        next_state = torch.tensor(next_state, dtype=torch.float)
+        action = torch.tensor(action, dtype=torch.long)
+        reward = torch.tensor(reward, dtype=torch.float)
+        # (n, x)
+
+        if len(state.shape) == 1:
+            # (1, x)
+            state = torch.unsqueeze(state, 0)
+            next_state = torch.unsqueeze(next_state, 0)
+            action = torch.unsqueeze(action, 0)
+            reward = torch.unsqueeze(reward, 0)
+            done = (done, )
+
+        # 1: predicted Q values with current state
+        pred = self.model(state)
+
+        target = pred.clone()
+
+        for i, d in enumerate(done):
+            q_new = reward[i]
+            if not d:
+                q_new = reward[i] + self.gamma * torch.max(self.model(next_state[i]))
+
+            target[i][torch.argmax(action[i]).item()] = q_new
+
+        # 2: Q_new = r + y * max(next_predicted Q value) -> only do this if not done
+        self.optimizer.zero_grad()
+        loss = self.criterion(target, pred)
+        loss.backward()
+
+        self.optimizer.step()
