@@ -39,5 +39,5 @@ jobs:
     - name: Run Cypress end-to-end tests
       working-directory: frontend
       env:
-        SESSION_SECRET: ci-only-session-secret-long-enough-for-iron-session
+        SESSION_SECRET: vI+ljRUkQGEsO7co2S2hrcs3HAaFhUk32v2mwBx1Mck=
       run: npm run e2e:headless
